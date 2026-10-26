@@ -11,6 +11,7 @@ using Tartarus.Solver;
 //   tartarus-sim instruments [--runs N] [--out file]                  each instrument's worth: runs that take it at the start
 //   tartarus-sim tune [--runs N] [--passes K] [--out file]            the evaluation weights, by paired runs
 //   tartarus-sim selfplay [--runs N] [--policy mc:32] [--seed S] [--out file]   value network training data
+//   tartarus-sim policydata [--runs N] [--policy vn:64:3] [--seed S] [--out file]   playout policy network training data
 //   tartarus-sim compare --a P --b P [--net-a file] [--net-b file] [--runs N] [--seed S]   two policies on the same seeds
 // Policies P: random, greedy, heuristic, mc:N (Monte Carlo search with N playouts per action at every decision).
 // --weights file: evaluation weights (default models/solver/weights.txt when it exists).
@@ -35,6 +36,7 @@ var engine = new Engine();
 var weights = LoadWeights();
 var globalWeights = weights;
 var valueNet = Opt("--net") is { } netPath ? ValueNet.Load(netPath) : ValueNet.Find() is { } found ? ValueNet.Load(found) : null;
+var policyNet = Opt("--policy-net") is { } policyPath ? ValueNet.Load(policyPath) : ValueNet.FindPolicy() is { } foundPolicy ? ValueNet.Load(foundPolicy) : null;
 return args[0] switch
 {
     "trace" => Trace(),
@@ -44,6 +46,7 @@ return args[0] switch
     "instruments" => Instruments(),
     "tune" => Tune(),
     "selfplay" => SelfPlayCommand(),
+    "policydata" => PolicyDataCommand(),
     "compare" => Compare(),
     "latency" => Latency(),
     "levels" => Levels(),
@@ -59,27 +62,34 @@ int Fail(string message)
 string? Opt(string name) => Array.IndexOf(args, name) is int i and >= 0 && i + 1 < args.Length ? args[i + 1] : null;
 int IntOpt(string name, int fallback) => int.TryParse(Opt(name), out int v) ? v : fallback;
 
-IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWeights? w = null)
+IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWeights? w = null, ValueNet? policy = null)
 {
     string p = spec ?? Opt("--policy") ?? "random";
     net ??= valueNet;
     var weights = w ?? globalWeights;
     if (p.StartsWith("mc:", StringComparison.Ordinal)) return new SearchPolicy(engine, int.Parse(p[3..]), weights, threads: 1);
     // vn:N[:D[:R]]: the search with the value network at the leaves, D days on (default 3, the best of 1-6); R the
-    // playouts' own moves by the network too (0 never, 1 the morning's Destination, 2 every decision).
+    // playouts' own moves by the network too (0 never, 1 the morning's Destination, 2 every decision), or p: by the
+    // policy network (--policy-net).
     if (p.StartsWith("vn:", StringComparison.Ordinal))
     {
         var parts = p.Split(':');
+        bool byPolicy = parts.Length > 3 && parts[3] == "p";
         return new SearchPolicy(engine, int.Parse(parts[1]), weights, threads: 1, net: net ?? throw new InvalidOperationException("no value network (models/solver/value.bin, --net)"),
-            leafDays: parts.Length > 2 ? int.Parse(parts[2]) : 3, rolloutNet: parts.Length > 3 ? int.Parse(parts[3]) : 0);
+            leafDays: parts.Length > 2 ? int.Parse(parts[2]) : 3, rolloutNet: parts.Length > 3 && !byPolicy ? int.Parse(parts[3]) : 0,
+            policy: byPolicy ? PolicyNet(policy) : null);
     }
     return p switch
     {
         "greedy" => new GreedyPolicy(seed: seed),
         "heuristic" => new HeuristicPolicy(engine, weights, seed),
+        // pn: the playouts' policy network alone, no search.
+        "pn" => new HeuristicPolicy(engine, weights, seed, PolicyNet(policy)),
         _ => new RandomPolicy(seed),
     };
 }
+
+ValueNet PolicyNet(ValueNet? policy = null) => policy ?? policyNet ?? throw new InvalidOperationException("no policy network (models/solver/policy.bin, --policy-net)");
 
 EvalWeights LoadWeights()
 {
@@ -102,7 +112,7 @@ int Levels()
     int runs = IntOpt("--runs", 400), threads = Math.Max(2, Environment.ProcessorCount / 2);
     var net = valueNet ?? throw new InvalidOperationException("no value network (models/solver/value.bin)");
     var states = SampleStates(120);
-    var search = new MonteCarloSearch(engine, weights) { Threads = threads, Net = net };
+    var search = new MonteCarloSearch(engine, weights) { Threads = threads, Net = net, Policy = policyNet };
     search.Search(states[0], 256, seed: 1);
     var levels = new List<HintLevel>();
     foreach (int n in new[] { 32, 64, 128, 256, 512, 1024, 2048 })
@@ -113,7 +123,7 @@ int Levels()
         {
             ulong seed = 9 * 1_000_003UL + (ulong)r;
             var s = engine.NewRun(seed);
-            Runs.PlayOut(engine, ref s, new SearchPolicy(engine, n, weights, threads: 1, net: net));
+            Runs.PlayOut(engine, ref s, new SearchPolicy(engine, n, weights, threads: 1, net: net, policy: policyNet));
             chroma[r] = RunScore.Of(s).Chromatic;
         });
         var level = new HintLevel(n, ms[ms.Length / 2], chroma.Average());
@@ -147,7 +157,7 @@ List<GameState> SampleStates(int count)
 
 int Latency()
 {
-    // latency [--states N] [--threads T]: how long a hint takes for each budget (playouts per action), as the app searches.
+    // latency [--states N] [--threads T] [--leaf-days D]: how long a hint takes for each budget (playouts per action), as the app searches.
     int count = IntOpt("--states", 120), threads = IntOpt("--threads", Math.Max(2, Environment.ProcessorCount / 2));
     var states = new List<GameState>();
     var policy = new HeuristicPolicy(engine, weights, 5);
@@ -163,9 +173,9 @@ int Latency()
             engine.Apply(ref s, policy.Choose(engine, s, legal[..k]));
         }
     }
-    var search = new MonteCarloSearch(engine, weights) { Threads = threads, Net = valueNet };
+    var search = new MonteCarloSearch(engine, weights) { Threads = threads, Net = valueNet, Policy = policyNet, LeafDays = IntOpt("--leaf-days", 3) };
     search.Search(states[0], 256, seed: 1); // warm up
-    Console.WriteLine($"{states.Count} positions, {threads} threads, value network {(valueNet != null ? "on" : "off")}");
+    Console.WriteLine($"{states.Count} positions, {threads} threads, value network {(valueNet != null ? "on" : "off")}, policy network {(policyNet != null ? "on" : "off")}");
     foreach (int n in new[] { 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 })
     {
         var ms = states.Select(s => search.Search(s, n, seed: 7).Elapsed.TotalMilliseconds).OrderBy(x => x).ToArray();
@@ -176,13 +186,15 @@ int Latency()
 
 int Compare()
 {
-    // compare --a P --b P [--net-a f] [--net-b f] [--weights-a f] [--weights-b f] [--runs N] [--seed S]: both
+    // compare --a P --b P [--net-a f] [--net-b f] [--policy-net-a f] [--policy-net-b f] [--weights-a f] [--weights-b f] [--runs N] [--seed S]: both
     // policies play the same seeds; the paired difference.
     int runs = IntOpt("--runs", 400);
     ulong seed0 = (ulong)IntOpt("--seed", 9);
     string a = Opt("--a") ?? "mc:64", b = Opt("--b") ?? "vn:64";
     var netA = Opt("--net-a") is { } fa ? ValueNet.Load(fa) : valueNet;
     var netB = Opt("--net-b") is { } fb ? ValueNet.Load(fb) : valueNet;
+    var policyA = Opt("--policy-net-a") is { } pa ? ValueNet.Load(pa) : null;
+    var policyB = Opt("--policy-net-b") is { } pb ? ValueNet.Load(pb) : null;
     var wA = Opt("--weights-a") is { } wa ? WeightsFile.Read(File.ReadAllText(wa)) : weights;
     var wB = Opt("--weights-b") is { } wb ? WeightsFile.Read(File.ReadAllText(wb)) : weights;
     var ua = new double[runs];
@@ -194,10 +206,10 @@ int Compare()
     {
         ulong seed = seed0 * 1_000_003 + (ulong)r;
         var s = engine.NewRun(seed);
-        Runs.PlayOut(engine, ref s, MakePolicy(seed, a, netA, wA));
+        Runs.PlayOut(engine, ref s, MakePolicy(seed, a, netA, wA, policyA));
         (ua[r], ca[r]) = (RunScore.Of(s).Utility, RunScore.Of(s).Chromatic);
         s = engine.NewRun(seed);
-        Runs.PlayOut(engine, ref s, MakePolicy(seed, b, netB, wB));
+        Runs.PlayOut(engine, ref s, MakePolicy(seed, b, netB, wB, policyB));
         (ub[r], cb[r]) = (RunScore.Of(s).Utility, RunScore.Of(s).Chromatic);
     });
     var (mean, se) = Tuning.Paired(ub, ua);
@@ -215,6 +227,16 @@ int SelfPlayCommand()
     string policy = Opt("--policy") ?? "mc:32";
     SelfPlay.Run(engine, seed => MakePolicy(seed, policy),
         IntOpt("--runs", 1000), (ulong)IntOpt("--seed", 1), Opt("--out") ?? Path.Combine("dataset", "selfplay", "values.bin"));
+    return 0;
+}
+
+int PolicyDataCommand()
+{
+    // policydata [--runs N] [--policy vn:64:3] [--seed S] [--out file]: every decision of runs the search plays, each
+    // action's after-state with the search's mean for it.
+    string policy = Opt("--policy") ?? "vn:64:3";
+    PolicyData.Run(engine, seed => (SearchPolicy)MakePolicy(seed, policy), weights,
+        IntOpt("--runs", 1000), (ulong)IntOpt("--seed", 1), Opt("--out") ?? Path.Combine("dataset", "policy", "actions.bin"));
     return 0;
 }
 

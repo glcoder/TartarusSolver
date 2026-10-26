@@ -48,7 +48,9 @@ public sealed class HintService : IDisposable
         var weights = WeightsPath != null ? WeightsFile.Read(File.ReadAllText(WeightsPath)) : EvalWeights.Default;
         // The value network when trained (models/solver/value.bin): playouts to the next morning, then its estimate.
         Net = ValueNet.Find() is { } net ? ValueNet.Load(net) : null;
-        _search = new MonteCarloSearch(_engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = Net };
+        // The playouts' policy network when trained (models/solver/policy.bin): their moves as the search would make them.
+        Policy = ValueNet.FindPolicy() is { } policy ? ValueNet.Load(policy) : null;
+        _search = new MonteCarloSearch(_engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = Net, Policy = Policy };
         // Warm up (the JIT's optimized code, the thread pool) so the first real hint is as quick as the rest.
         _ = Task.Run(() =>
         {
@@ -63,6 +65,7 @@ public sealed class HintService : IDisposable
     public double Seconds { get; set; }
     public string? WeightsPath { get; }
     public ValueNet? Net { get; }
+    public ValueNet? Policy { get; }
 
     /// <summary>Raised on a thread-pool thread with the final ranking of a position.</summary>
     public event Action<Hint>? Ready;

@@ -17,11 +17,19 @@ public sealed class ValueNet
     private readonly float[][] _b;
     private readonly int[] _in, _out;
 
+    // The first layer by input (inputs x outputs): the features are mostly zeros (one-hot cells), so it adds up the
+    // columns of the non-zero ones instead of multiplying every row by the whole input.
+    private readonly float[] _first;
+
     private ValueNet(float[][] w, float[][] b, int[] inputs, int[] outputs)
     {
         (_w, _b, _in, _out) = (w, b, inputs, outputs);
         if (_in[0] != Features.Count) throw new InvalidDataException($"value network reads {_in[0]} features, the encoder writes {Features.Count}");
         MaxWidth = Math.Max(_in.Max(), _out.Max());
+        _first = new float[_in[0] * _out[0]];
+        for (int j = 0; j < _out[0]; j++)
+            for (int i = 0; i < _in[0]; i++)
+                _first[i * _out[0] + j] = _w[0][j * _in[0] + i];
     }
 
     public int MaxWidth { get; }
@@ -50,6 +58,9 @@ public sealed class ValueNet
     }
 
     public static string? Find() => AppFiles.Find("models", "solver", "value.bin");
+
+    /// <summary>The playouts' policy network, models/solver/policy.bin (tools/train/policynet.py); null if there is none.</summary>
+    public static string? FindPolicy() => AppFiles.Find("models", "solver", "policy.bin");
 
     /// <summary>The predicted utility of a state (<see cref="Utility"/> of its outputs).</summary>
     public double Value(in GameState s)
@@ -87,8 +98,15 @@ public sealed class ValueNet
     {
         Span<float> a = stackalloc float[MaxWidth];
         Span<float> b = stackalloc float[MaxWidth];
-        input.CopyTo(a);
-        for (int l = 0; l < _w.Length; l++)
+        int m0 = _out[0];
+        var sum = a[..m0];
+        _b[0].CopyTo(sum);
+        for (int i = 0; i < _in[0]; i++)
+            if (input[i] != 0) AddScaled(sum, _first.AsSpan(i * m0, m0), input[i]);
+        bool only = _w.Length == 1;
+        for (int j = 0; j < m0; j++)
+            if (!only && sum[j] < 0) sum[j] = 0;
+        for (int l = 1; l < _w.Length; l++)
         {
             int n = _in[l], m = _out[l];
             var w = _w[l].AsSpan();
@@ -104,6 +122,16 @@ public sealed class ValueNet
             b = t;
         }
         a[..output.Length].CopyTo(output);
+    }
+
+    private static void AddScaled(Span<float> sum, ReadOnlySpan<float> column, float scale)
+    {
+        int i = 0;
+        int width = Vector<float>.Count;
+        var k = new Vector<float>(scale);
+        for (; i <= sum.Length - width; i += width)
+            (new Vector<float>(sum.Slice(i, width)) + k * new Vector<float>(column.Slice(i, width))).CopyTo(sum.Slice(i, width));
+        for (; i < sum.Length; i++) sum[i] += scale * column[i];
     }
 
     private static float Dot(ReadOnlySpan<float> x, ReadOnlySpan<float> y)

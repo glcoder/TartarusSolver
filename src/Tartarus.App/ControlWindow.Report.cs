@@ -142,6 +142,7 @@ public partial class ControlWindow
                 hintsOnly = _settings.HintsOnly,
                 hintPlayouts = _hints.Playouts,
                 valueNet = _hints.Net != null,
+                policyNet = _hints.Policy != null,
             },
         };
     }

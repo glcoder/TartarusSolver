@@ -17,7 +17,7 @@ MODELS = [
     "cells/cellnet.onnx", "cells/cellnet.json", "cells/arrownet.onnx", "cells/arrownet.json",
     "slots/*.onnx", "slots/*.json",
     "sandbox/template.bin",
-    "solver/value.bin", "solver/weights.txt", "solver/levels.txt",
+    "solver/value.bin", "solver/policy.bin", "solver/weights.txt", "solver/levels.txt",
     "cards/*.png",
     "instruments/*.png", "instruments/pick/*.png", "instruments/pick/pick.json",
     "treasures/*.png",

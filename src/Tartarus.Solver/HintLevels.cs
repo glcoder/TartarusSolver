@@ -48,6 +48,6 @@ public static class HintLevels
 
     public static string Write(IEnumerable<HintLevel> levels) =>
         "# Move hint quality levels: playouts per action, median time of a hint (this PC, half the cores), Chromatic per run\n"
-        + "# (runs on the same seeds, search with the value network). Remeasure: tartarus-sim levels\n"
+        + "# (runs on the same seeds, search with the value and policy networks). Remeasure: tartarus-sim levels\n"
         + string.Concat(levels.Select(l => string.Create(CultureInfo.InvariantCulture, $"playouts={l.Playouts} ms={l.Milliseconds:0.0} chromatic={l.Chromatic:0.00}\n")));
 }

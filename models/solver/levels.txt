@@ -1,9 +1,9 @@
 # Move hint quality levels: playouts per action, median time of a hint (this PC, half the cores), Chromatic per run
-# (runs on the same seeds, search with the value network). Remeasure: tartarus-sim levels
-playouts=32 ms=0.9 chromatic=6.94
-playouts=64 ms=0.6 chromatic=7.32
-playouts=128 ms=1.2 chromatic=7.47
-playouts=256 ms=2.3 chromatic=7.64
-playouts=512 ms=4.3 chromatic=7.68
-playouts=1024 ms=7.7 chromatic=7.79
-playouts=2048 ms=14.4 chromatic=7.82
+# (runs on the same seeds, search with the value and policy networks). Remeasure: tartarus-sim levels
+playouts=32 ms=0.8 chromatic=7.09
+playouts=64 ms=0.8 chromatic=7.51
+playouts=128 ms=1.7 chromatic=7.76
+playouts=256 ms=2.8 chromatic=7.85
+playouts=512 ms=5.1 chromatic=7.92
+playouts=1024 ms=8.7 chromatic=7.98
+playouts=2048 ms=19.4 chromatic=7.99

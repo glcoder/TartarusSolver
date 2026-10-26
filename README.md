@@ -20,7 +20,8 @@ chests).
 - **The game's rules:** all 31 Torture Instruments, the 17 Prison Incidents, the Objectives, the run themes (Tyranny,
   Opulence, Iron Law, Cage Fight), Rat Nests, Tusk and Prey marks, Scratch Marks.
 - **The solver:** a determinized Monte Carlo search (what's hidden behind doors is drawn again for every playout:
-  no peeking), with a heuristic policy and a small value network at the playouts' horizon.
+  no peeking): the playouts' moves by a small policy network trained on the search's own choices, a small value
+  network at their horizon.
 - **Reading the screen:** a convolutional network for the cells (Code, rarity, marks), small networks for the
   Torture Instrument and Chromatic slots, card and pick screens told by their pictures, and OCR (PaddleOCR, ONNX)
   for the text. Works in any of the game's languages: English and Russian OCR ship, others are downloaded on asking.
@@ -86,13 +87,13 @@ Bug reports go to Sentry when the build is given a DSN: set `TARTARUS_SENTRY_DSN
 | | |
 |---|---|
 | `src/Tartarus.Rules` | the game's rules: state, legal moves, every instrument and incident, scoring |
-| `src/Tartarus.Solver` | the Monte Carlo search, the heuristic policy, the value network |
+| `src/Tartarus.Solver` | the Monte Carlo search, the heuristic policy, the value and policy networks |
 | `src/Tartarus.Vision` | screen layout, OCR, the cell and slot networks, card and pick pictures, the game's log, the dataset |
 | `src/Tartarus.Capture` | window capture (Windows.Graphics.Capture) |
 | `src/Tartarus.App` | the WPF overlay and control window, hints, bug reports |
 | `tests/Tartarus.Rules.Tests` | rules, solver and screen-text tests |
 | `tools/Tartarus.ScanCli` | `tartarus-scan`: scan frames, export training crops, label review pages, log analysis |
-| `tools/Tartarus.SimCli` | `tartarus-sim`: simulate runs, measure strength, self-play data for the value network |
+| `tools/Tartarus.SimCli` | `tartarus-sim`: simulate runs, measure strength, self-play data for the networks |
 | `tools/train` | PyTorch training of the networks (`requirements.txt`) |
 | `models` | the trained networks and the pictures and texts the app reads |
 
@@ -107,6 +108,8 @@ python tools/train/cellnet.py dataset/train       # cells and the Warden's arrow
 python tools/train/slotnet.py dataset/train       # Torture Instrument and Chromatic slots -> models/slots
 tartarus-sim selfplay --runs 20000 --out values-1.bin
 python tools/train/valuenet.py values-*.bin       # the value network -> models/solver/value.bin
+tartarus-sim policydata --runs 20000 --policy vn:64:3 --out actions-1.bin
+python tools/train/policynet.py actions-*.bin     # the playouts' policy network -> models/solver/policy.bin
 ```
 
 ## Disclaimer

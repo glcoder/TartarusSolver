@@ -4,6 +4,17 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.0 — 2026-10-26
+
+- The search's playouts make their moves by a policy network (`models/solver/policy.bin`) trained on the search's
+  own choices, instead of the static evaluation: at the app's 1024 playouts per move the hints end runs with
+  +0.26 Chromatic against the old search at 2048 (the same time), 8.02 Chromatic per run on 4000 paired runs.
+- The hint quality levels remeasured with it (4000 runs): 7.51 Chromatic per run at 64 playouts per move, 7.98 at
+  1024 (were 7.32 and 7.79).
+- The value network's first layer adds up only the features that are set: the search is about 17% quicker.
+- The control window is wider: every caption fits.
+- `tartarus-sim policydata`, `tools/train/policynet.py`: the policy network's training data and training.
+
 ## 0.6.1 — 2026-10-26
 
 - The hint quality levels (playouts per move: time and Chromatic per run) remeasured on 4000 runs under the

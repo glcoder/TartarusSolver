@@ -32,6 +32,12 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
     public int LeafDays { get; init; } = 3;
     /// <summary>The playouts' own moves by the value network too: 0 never, 1 the morning's Destination, 2 every decision.</summary>
     public int RolloutNet { get; init; }
+    /// <summary>
+    /// The playouts' policy network: when set, every decision of a playout (but the instrument picks) goes to the
+    /// action whose after-state it scores highest, instead of the static evaluation's. Trained on the search's own
+    /// choices (tools/train/policynet.py).
+    /// </summary>
+    public ValueNet? Policy { get; init; }
 
     /// <summary>Plays on from <paramref name="s"/> and returns the run's (predicted) utility, Chromatic, Ultimate and Legendary counts.</summary>
     private (double Utility, double Chromatic, double Ultimate, double Legendary) Playout(ref GameState s, IPolicy policy)
@@ -91,7 +97,7 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
                 ulong sampleSeed = Rng.Mix(seed * 0x9E3779B97F4A7C15UL + (ulong)(baseSample + j));
                 var det = start;
                 engine.Determinize(ref det, sampleSeed, fillHidden: true);
-                var policy = new HeuristicPolicy(engine, _w, sampleSeed ^ 0x5DEECE66DUL, RolloutNet > 0 ? Net : null, movesOnly: RolloutNet == 1);
+                var policy = new HeuristicPolicy(engine, _w, sampleSeed ^ 0x5DEECE66DUL, Policy ?? (RolloutNet > 0 ? Net : null), movesOnly: Policy == null && RolloutNet == 1);
                 foreach (int i in live)
                 {
                     var s = det;
@@ -142,20 +148,21 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
 }
 
 /// <summary>A policy that searches at every decision: for measuring how well the search plays.</summary>
-public sealed class SearchPolicy(Engine engine, int playouts, EvalWeights? weights = null, int threads = 1, ValueNet? net = null, int leafDays = 3, int rolloutNet = 0) : IPolicy
+public sealed class SearchPolicy(Engine engine, int playouts, EvalWeights? weights = null, int threads = 1, ValueNet? net = null, int leafDays = 3, int rolloutNet = 0, ValueNet? policy = null) : IPolicy
 {
-    private readonly MonteCarloSearch _search = new(engine, weights) { Threads = threads, Net = net, LeafDays = leafDays, RolloutNet = rolloutNet };
+    private readonly MonteCarloSearch _search = new(engine, weights) { Threads = threads, Net = net, LeafDays = leafDays, RolloutNet = rolloutNet, Policy = policy };
     private ulong _seed = 1;
 
     /// <summary>The last search's value of its position (the best action's mean utility); null when there was nothing to choose.</summary>
-    public double? LastValue { get; private set; }
+    public double? LastValue => LastResult?.Best!.Mean;
+    /// <summary>The last search, every action's mean; null when there was nothing to choose.</summary>
+    public SearchResult? LastResult { get; private set; }
 
     public GameAction Choose(Engine _, in GameState s, ReadOnlySpan<GameAction> legal)
     {
-        LastValue = null;
+        LastResult = null;
         if (legal.Length == 1) return legal[0];
-        var result = _search.Search(s, playouts, seed: _seed++);
-        LastValue = result.Best!.Mean;
-        return result.Best!.Action;
+        LastResult = _search.Search(s, playouts, seed: _seed++);
+        return LastResult.Best!.Action;
     }
 }
