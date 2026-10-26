@@ -805,7 +805,11 @@ public partial class ControlWindow : Window
                         under = under.Clone();
                         under.Chromatic = counted.ChromaticAtLeast;
                     }
-                    if (_hints.Request(Tartarus.Vision.GameObservation.FromPick(pick, under, text), consumeOnly: false)) ClearHint();
+                    // Re-rolls left as worked out above: the counter shows a moment after the cards (until then the log
+                    // tells), and a Warden's Treasure pick has none of its own (the run's go to later offers).
+                    var observation = Tartarus.Vision.GameObservation.FromPick(pick, under, text);
+                    if (_rerolls is { } left) observation.Rerolls = left;
+                    if (_hints.Request(observation, consumeOnly: false)) ClearHint();
                 }
             }
             else
