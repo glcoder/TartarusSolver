@@ -13,7 +13,10 @@ public partial class App : Application
         System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
         DispatcherUnhandledException += OnUnhandled;
         var settings = AppSettings.Load();
+        // --debug: the whole window (overlay views, hint quality, labels, dataset collecting, the log); else the player's.
+        settings.Debug = e.Args.Any(a => a.Equals("--debug", StringComparison.OrdinalIgnoreCase) || a.Equals("/debug", StringComparison.OrdinalIgnoreCase));
         settings.Save(); // so settings.json exists to edit (hotkeys etc.)
+        if (!settings.Debug) settings.PlayerView();
         BugReports.Init(settings);
         Tartarus.Rules.RunScore.SetWorth(settings.CacheWorth);
         // The app is going down: only the stack and the version go, there's no asking.

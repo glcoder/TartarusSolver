@@ -24,7 +24,8 @@ public partial class ControlWindow : Window
     private readonly OverlayWindow _overlay = new();
     private readonly ScanService _scans;
     private readonly DispatcherTimer _placeTimer = new() { Interval = TimeSpan.FromMilliseconds(200) };
-    private readonly DispatcherTimer _scanTimer = new();
+    // The auto scan loop running (a new one bumps it: the old one stops).
+    private int _autoScanLoop;
     private readonly DispatcherTimer _attachTimer = new() { Interval = TimeSpan.FromSeconds(2) };
     private HotkeyManager? _hotkeys;
     private Dataset _dataset;
@@ -83,19 +84,22 @@ public partial class ControlWindow : Window
         SaveButton.Content = "Save frame" + Hk("save");
         AutoScanCheck.Content = "Auto" + Hk("auto") + ", every";
         ReportButton.Content = "Report a bug" + Hk("report");
-        Title = $"Tartarus Solver {AppVersion.Number}";
+        Title = $"Tartarus Solver {AppVersion.Number}" + (settings.Debug ? " (debug)" : "");
+        // The player's window: the game window, scanning, the game's log, the version and bug reports.
+        if (!settings.Debug)
+            foreach (var panel in new FrameworkElement[] { ViewPanel, HintsPanel, DebugPanel }) panel.Visibility = Visibility.Collapsed;
         VersionText.Text = "Version " + AppVersion.Short;
         VersionText.ToolTip = AppVersion.Full;
         Log("Version " + AppVersion.Short + (BugReports.Enabled ? "" : " · bug reports not set up"));
 
+        settings.AutoScanSeconds = Math.Clamp(Math.Round(settings.AutoScanSeconds, 1), 0, 1);
+        IntervalSlider.Value = settings.AutoScanSeconds;
+        ShowInterval();
         AutoScanCheck.IsChecked = settings.AutoScan;
-        IntervalBox.Text = settings.AutoScanSeconds.ToString("0.0#", CultureInfo.InvariantCulture);
         OverlayCheck.IsChecked = settings.OverlayVisible;
         BoxesCheck.IsChecked = settings.ShowRegions;
         TextCheck.IsChecked = settings.ShowTextBoxes;
         AutoCollectCheck.IsChecked = settings.AutoCollect;
-        _scanTimer.Interval = TimeSpan.FromSeconds(Math.Max(0.1, settings.AutoScanSeconds));
-        _scanTimer.Tick += async (_, _) => await ScanAsync(manual: false);
         _placeTimer.Tick += (_, _) => PlaceOverlay();
         _attachTimer.Tick += (_, _) => TryAutoAttach();
 
@@ -119,8 +123,11 @@ public partial class ControlWindow : Window
         }
         Hotkey("scan", () => _ = ScanAsync(manual: true));
         Hotkey("overlay", () => OverlayCheck.IsChecked = OverlayCheck.IsChecked != true);
-        Hotkey("edit", () => EditCheck.IsChecked = EditCheck.IsChecked != true);
-        Hotkey("save", () => _ = SaveSampleAsync());
+        if (_settings.Debug)
+        {
+            Hotkey("edit", () => EditCheck.IsChecked = EditCheck.IsChecked != true);
+            Hotkey("save", () => _ = SaveSampleAsync());
+        }
         Hotkey("auto", () => AutoScanCheck.IsChecked = AutoScanCheck.IsChecked != true);
         Hotkey("report", () => Report());
         if (failed.Count > 0)
@@ -128,7 +135,6 @@ public partial class ControlWindow : Window
 
         _placeTimer.Start();
         _attachTimer.Start();
-        if (_settings.AutoScan) _scanTimer.Start();
         TryAutoAttach();
         _ = WarmUpAsync();
     }
@@ -153,7 +159,7 @@ public partial class ControlWindow : Window
         _settings.ControlTop = Top;
         _settings.Save();
         _placeTimer.Stop();
-        _scanTimer.Stop();
+        _autoScanLoop++;
         _attachTimer.Stop();
         _hotkeys?.Dispose();
         StopCapture();
@@ -382,20 +388,20 @@ public partial class ControlWindow : Window
 
     // ---------- Scanning ----------
 
-    private async Task ScanAsync(bool manual)
+    private async Task<bool> ScanAsync(bool manual)
     {
         if (_capture == null)
         {
             if (manual) ScanStatus.Text = "Not capturing a window";
-            return;
+            return false;
         }
-        if (_scans.Busy || (_editMode && !manual)) return;
-        if (_target is { } t && Win32Windows.IsMinimized(t.Hwnd)) return;
+        if (_scans.Busy || (_editMode && !manual)) return false;
+        if (_target is { } t && Win32Windows.IsMinimized(t.Hwnd)) return false;
         var frame = _capture.Grab();
         if (frame == null)
         {
             if (manual) ScanStatus.Text = "No frames yet (is the window minimized?)";
-            return;
+            return false;
         }
         ScanResult r;
         try
@@ -405,9 +411,9 @@ public partial class ControlWindow : Window
         catch (Exception ex)
         {
             Log("Scan error: " + ex.Message);
-            return;
+            return false;
         }
-        if (_editMode && !manual) return;
+        if (_editMode && !manual) return false;
         if (manual && _sandbox?.AnyEdited == true && !_savedSinceScan) Log("Unsaved edits replaced by a new scan");
 
         // Cells a tooltip covers keep what the last scan of the same Sandbox read there. Only a Sandbox read whole is
@@ -471,6 +477,7 @@ public partial class ControlWindow : Window
         _lastAutoDescription = reading;
         if (!manual) AutoCollect(frame, r);
         RequestHint(r);
+        return true;
     }
 
     // ---------- Hint quality ----------
@@ -889,19 +896,49 @@ public partial class ControlWindow : Window
     private void AutoScanCheck_Changed(object sender, RoutedEventArgs e)
     {
         _settings.AutoScan = AutoScanCheck.IsChecked == true;
-        if (_settings.AutoScan) _scanTimer.Start();
-        else _scanTimer.Stop();
+        if (_settings.AutoScan) _ = AutoScanLoopAsync();
+        else _autoScanLoop++;
     }
 
-    private void IntervalBox_LostFocus(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Auto scan: a frame every <see cref="AppSettings.AutoScanSeconds"/> from the last one's start, never before the last
+    /// one's reading and hint are done (at 0, as soon as they are).
+    /// </summary>
+    private async Task AutoScanLoopAsync()
     {
-        if (double.TryParse(IntervalBox.Text.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out var s))
+        int loop = ++_autoScanLoop;
+        while (loop == _autoScanLoop)
         {
-            _settings.AutoScanSeconds = Math.Clamp(s, 0.1, 60);
-            _scanTimer.Interval = TimeSpan.FromSeconds(_settings.AutoScanSeconds);
+            var started = Stopwatch.StartNew();
+            bool scanned;
+            try
+            {
+                scanned = await ScanAsync(manual: false);
+                await _hints.Searching;
+            }
+            catch (Exception ex)
+            {
+                // As the app's own errors: logged, offered as a report; the loop stops (no error a frame).
+                Log("Auto scan stopped: " + ex);
+                AutoScanCheck.IsChecked = false;
+                if (BugReports.Enabled) Report(ex);
+                return;
+            }
+            // Nothing to scan (no window, minimized, editing): no spinning at 0.
+            double wait = Math.Max(_settings.AutoScanSeconds, scanned ? 0 : 0.2) - started.Elapsed.TotalSeconds;
+            await Task.Delay(TimeSpan.FromSeconds(Math.Max(wait, 0.001)));
         }
-        IntervalBox.Text = _settings.AutoScanSeconds.ToString("0.0#", CultureInfo.InvariantCulture);
     }
+
+    private void IntervalSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_settings == null) return;
+        _settings.AutoScanSeconds = Math.Round(IntervalSlider.Value, 1);
+        ShowInterval();
+    }
+
+    private void ShowInterval() =>
+        IntervalText.Text = _settings.AutoScanSeconds > 0 ? $"{_settings.AutoScanSeconds:0.0} s" : "0 s (as soon as done)";
 
     private void OverlayCheck_Changed(object sender, RoutedEventArgs e)
     {

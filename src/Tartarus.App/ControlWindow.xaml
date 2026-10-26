@@ -45,10 +45,11 @@
     <StackPanel Orientation="Horizontal">
       <Button x:Name="ScanButton" Content="Scan" Click="ScanButton_Click" />
       <CheckBox x:Name="AutoScanCheck" Content="Auto" Margin="0,0,4,0" Checked="AutoScanCheck_Changed" Unchecked="AutoScanCheck_Changed" />
-      <TextBox x:Name="IntervalBox" Width="36" Text="0.5" LostFocus="IntervalBox_LostFocus" />
-      <TextBlock Text=" s" />
+      <Slider x:Name="IntervalSlider" Width="140" Minimum="0" Maximum="1" SmallChange="0.1" LargeChange="0.1" IsSnapToTickEnabled="True" TickFrequency="0.1" TickPlacement="BottomRight"
+              ValueChanged="IntervalSlider_ValueChanged" ToolTip="Seconds from one frame to the next; 0: the next frame as soon as the last one's reading and hint are done" />
+      <TextBlock x:Name="IntervalText" Margin="6,0,0,0" Text="0.5 s" />
     </StackPanel>
-    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+    <StackPanel x:Name="ViewPanel" Orientation="Horizontal" Margin="0,6,0,0">
       <CheckBox x:Name="OverlayCheck" Content="Overlay" Checked="OverlayCheck_Changed" Unchecked="OverlayCheck_Changed" />
       <CheckBox x:Name="BoxesCheck" Content="Interactable regions" ToolTip="Frame everything clickable: cells, cards, buttons, Torture Instrument and Chromatic slots, pick cards" Checked="BoxesCheck_Changed" Unchecked="BoxesCheck_Changed" />
       <CheckBox x:Name="TextCheck" Content="Text" ToolTip="OCR regions and the lines read, on the overlay" Checked="TextCheck_Changed" Unchecked="TextCheck_Changed" />
@@ -56,18 +57,20 @@
     <TextBlock x:Name="ScanStatus" Margin="0,4,0,0" Foreground="#9AA0AC" TextWrapping="Wrap" Text="—" />
 
     <!-- Move hints -->
-    <TextBlock Style="{StaticResource Section}" Text="Hints" />
-    <StackPanel Orientation="Horizontal">
-      <CheckBox x:Name="HintsCheck" Content="Move hints" Checked="HintsCheck_Changed" Unchecked="HintsCheck_Changed" />
-      <CheckBox x:Name="HintsOnlyCheck" Content="Hints only" Margin="12,0,0,0" Checked="HintsOnlyCheck_Changed" Unchecked="HintsOnlyCheck_Changed" ToolTip="The overlay shows only the move frames and the hint line: no cells, Torture Instruments or Chromatic" />
+    <StackPanel x:Name="HintsPanel">
+      <TextBlock Style="{StaticResource Section}" Text="Hints" />
+      <StackPanel Orientation="Horizontal">
+        <CheckBox x:Name="HintsCheck" Content="Move hints" Checked="HintsCheck_Changed" Unchecked="HintsCheck_Changed" />
+        <CheckBox x:Name="HintsOnlyCheck" Content="Hints only" Margin="12,0,0,0" Checked="HintsOnlyCheck_Changed" Unchecked="HintsOnlyCheck_Changed" ToolTip="The overlay shows only the move frames and the hint line: no cells, Torture Instruments or Chromatic" />
+      </StackPanel>
+      <DockPanel Margin="0,6,0,0">
+        <TextBlock DockPanel.Dock="Left" Text="Faster" Foreground="#9AA0AC" Margin="0,0,6,0" />
+        <TextBlock DockPanel.Dock="Right" Text="Stronger" Foreground="#9AA0AC" Margin="6,0,0,0" />
+        <Slider x:Name="HintSlider" Minimum="0" Maximum="6" IsSnapToTickEnabled="True" TickFrequency="1" TickPlacement="BottomRight" ValueChanged="HintSlider_ValueChanged" ToolTip="Playouts per move: longer to compute, stronger hint" />
+      </DockPanel>
+      <TextBlock x:Name="HintLevelText" Margin="0,2,0,0" TextWrapping="Wrap" Text="—" />
+      <TextBlock x:Name="HintStatus" Margin="0,2,0,0" Foreground="#9AA0AC" TextWrapping="Wrap" Text="—" />
     </StackPanel>
-    <DockPanel Margin="0,6,0,0">
-      <TextBlock DockPanel.Dock="Left" Text="Faster" Foreground="#9AA0AC" Margin="0,0,6,0" />
-      <TextBlock DockPanel.Dock="Right" Text="Stronger" Foreground="#9AA0AC" Margin="6,0,0,0" />
-      <Slider x:Name="HintSlider" Minimum="0" Maximum="6" IsSnapToTickEnabled="True" TickFrequency="1" TickPlacement="BottomRight" ValueChanged="HintSlider_ValueChanged" ToolTip="Playouts per move: longer to compute, stronger hint" />
-    </DockPanel>
-    <TextBlock x:Name="HintLevelText" Margin="0,2,0,0" TextWrapping="Wrap" Text="—" />
-    <TextBlock x:Name="HintStatus" Margin="0,2,0,0" Foreground="#9AA0AC" TextWrapping="Wrap" Text="—" />
 
     <!-- The game's log -->
     <TextBlock Style="{StaticResource Section}" Text="Game log" />
@@ -77,58 +80,60 @@
     </StackPanel>
     <TextBlock x:Name="LogStatus" Margin="0,2,0,0" Foreground="#9AA0AC" TextWrapping="Wrap" Text="—" />
 
-    <!-- Labels / dataset -->
-    <TextBlock Style="{StaticResource Section}" Text="Labels and dataset" />
-    <StackPanel Orientation="Horizontal">
-      <CheckBox x:Name="EditCheck" Content="Edit mode" Checked="EditCheck_Changed" Unchecked="EditCheck_Changed" />
-      <Button x:Name="SaveButton" Content="Save frame" Click="SaveButton_Click" />
-      <CheckBox x:Name="AutoCollectCheck" Content="Auto-collect" Margin="6,0,0,0" ToolTip="Save a frame to the dataset whenever the Sandbox read changes (with auto scan)" Checked="AutoCollectCheck_Changed" Unchecked="AutoCollectCheck_Changed" />
-    </StackPanel>
-    <Grid Margin="0,6,0,0">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto" />
-        <ColumnDefinition Width="*" />
-        <ColumnDefinition Width="Auto" />
-        <ColumnDefinition Width="*" />
-      </Grid.ColumnDefinitions>
-      <Grid.RowDefinitions>
-        <RowDefinition />
-        <RowDefinition />
-        <RowDefinition />
-      </Grid.RowDefinitions>
-      <TextBlock Grid.Row="0" Grid.Column="0" Text="Warden" />
-      <TextBox Grid.Row="0" Grid.Column="1" x:Name="WardenBox" Style="{StaticResource LabelBox}" ToolTip="The Warden's cell, 1-16" />
-      <TextBlock Grid.Row="0" Grid.Column="2" Text="Remaining Days" />
-      <TextBox Grid.Row="0" Grid.Column="3" x:Name="DaysBox" Style="{StaticResource LabelBox}" />
-      <TextBlock Grid.Row="1" Grid.Column="0" Text="Destinations" />
-      <TextBox Grid.Row="1" Grid.Column="1" x:Name="DestinationsBox" Style="{StaticResource LabelBox}" ToolTip="Cells on the Destination cards, left to right: 9,11,12" />
-      <TextBlock Grid.Row="1" Grid.Column="2" Text="Chromatic" />
-      <TextBox Grid.Row="1" Grid.Column="3" x:Name="ChromaticBox" Style="{StaticResource LabelBox}" />
-      <TextBlock Grid.Row="2" Grid.Column="0" Text="Torture Instruments" />
-      <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" x:Name="InstrumentsBox" Style="{StaticResource LabelBox}" ToolTip="ids, comma-separated: ironbox,muzzle" />
-    </Grid>
-    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-      <Button x:Name="ApplyLabelsButton" Content="Apply fields" Click="ApplyLabelsButton_Click" />
-      <Button x:Name="ResetLabelsButton" Content="Reset edits" Click="ResetLabelsButton_Click" />
-      <Button x:Name="OpenDatasetButton" Content="Dataset folder" Click="OpenDatasetButton_Click" />
-    </StackPanel>
-    <TextBlock x:Name="DatasetStatus" Margin="0,4,0,0" Foreground="#9AA0AC" TextWrapping="Wrap" />
-    <TextBlock Margin="0,4,0,0" Foreground="#6F7580" TextWrapping="Wrap"
-               Text="In edit mode click a cell on the overlay: a menu of Code, rarity and flags. Auto scan pauses while editing." />
+    <!-- Debugging (the command line's debug flag): labels, dataset, what was read, the log -->
+    <StackPanel x:Name="DebugPanel">
+      <TextBlock Style="{StaticResource Section}" Text="Labels and dataset" />
+      <StackPanel Orientation="Horizontal">
+        <CheckBox x:Name="EditCheck" Content="Edit mode" Checked="EditCheck_Changed" Unchecked="EditCheck_Changed" />
+        <Button x:Name="SaveButton" Content="Save frame" Click="SaveButton_Click" />
+        <CheckBox x:Name="AutoCollectCheck" Content="Auto-collect" Margin="6,0,0,0" ToolTip="Save a frame to the dataset whenever the Sandbox read changes (with auto scan)" Checked="AutoCollectCheck_Changed" Unchecked="AutoCollectCheck_Changed" />
+      </StackPanel>
+      <Grid Margin="0,6,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition />
+          <RowDefinition />
+          <RowDefinition />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Warden" />
+        <TextBox Grid.Row="0" Grid.Column="1" x:Name="WardenBox" Style="{StaticResource LabelBox}" ToolTip="The Warden's cell, 1-16" />
+        <TextBlock Grid.Row="0" Grid.Column="2" Text="Remaining Days" />
+        <TextBox Grid.Row="0" Grid.Column="3" x:Name="DaysBox" Style="{StaticResource LabelBox}" />
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Destinations" />
+        <TextBox Grid.Row="1" Grid.Column="1" x:Name="DestinationsBox" Style="{StaticResource LabelBox}" ToolTip="Cells on the Destination cards, left to right: 9,11,12" />
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="Chromatic" />
+        <TextBox Grid.Row="1" Grid.Column="3" x:Name="ChromaticBox" Style="{StaticResource LabelBox}" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Torture Instruments" />
+        <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" x:Name="InstrumentsBox" Style="{StaticResource LabelBox}" ToolTip="ids, comma-separated: ironbox,muzzle" />
+      </Grid>
+      <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+        <Button x:Name="ApplyLabelsButton" Content="Apply fields" Click="ApplyLabelsButton_Click" />
+        <Button x:Name="ResetLabelsButton" Content="Reset edits" Click="ResetLabelsButton_Click" />
+        <Button x:Name="OpenDatasetButton" Content="Dataset folder" Click="OpenDatasetButton_Click" />
+      </StackPanel>
+      <TextBlock x:Name="DatasetStatus" Margin="0,4,0,0" Foreground="#9AA0AC" TextWrapping="Wrap" />
+      <TextBlock Margin="0,4,0,0" Foreground="#6F7580" TextWrapping="Wrap"
+                 Text="In edit mode click a cell on the overlay: a menu of Code, rarity and flags. Auto scan pauses while editing." />
 
-    <!-- Sandbox summary and log -->
-    <TextBlock Style="{StaticResource Section}" Text="Sandbox" />
-    <TextBox x:Name="SandboxSummary" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11"
-             Background="#15161A" Foreground="#D8D8DC" BorderThickness="0" MinHeight="48" />
-    <TextBlock Style="{StaticResource Section}" Text="Log" />
-    <ListBox x:Name="LogList" Height="120" FontFamily="Consolas" FontSize="11" Background="#15161A" Foreground="#C8C8CC" BorderThickness="0"
-             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-      <ListBox.ItemTemplate>
-        <DataTemplate>
-          <TextBlock Text="{Binding}" TextWrapping="Wrap" />
-        </DataTemplate>
-      </ListBox.ItemTemplate>
-    </ListBox>
+      <!-- Sandbox summary and log -->
+      <TextBlock Style="{StaticResource Section}" Text="Sandbox" />
+      <TextBox x:Name="SandboxSummary" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11"
+               Background="#15161A" Foreground="#D8D8DC" BorderThickness="0" MinHeight="48" />
+      <TextBlock Style="{StaticResource Section}" Text="Log" />
+      <ListBox x:Name="LogList" Height="120" FontFamily="Consolas" FontSize="11" Background="#15161A" Foreground="#C8C8CC" BorderThickness="0"
+               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </StackPanel>
     <DockPanel Margin="0,8,0,0">
       <Button x:Name="ReportButton" DockPanel.Dock="Right" Margin="6,0,0,0" Content="Report a bug" ToolTip="Send the developer a screenshot, the app's log and the current run's log with your comment" Click="ReportButton_Click" />
       <TextBlock x:Name="VersionText" Foreground="#6F7580" TextWrapping="Wrap" Text="Version" />

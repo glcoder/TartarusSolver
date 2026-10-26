@@ -34,6 +34,9 @@ public sealed class HintService : IDisposable
     private string? _lastText;
     private Hint? _shown;
 
+    /// <summary>The last search started: done once its hint is out (or it was cancelled).</summary>
+    public Task Searching { get; private set; } = Task.CompletedTask;
+
     /// <summary>A shown move stays while still legal and no more than this behind the new best (worth, in Chromatics): flicker between near-equal moves helps nobody.</summary>
     public double KeepWithin { get; set; } = 0.15;
 
@@ -89,7 +92,7 @@ public sealed class HintService : IDisposable
         _cts?.Cancel();
         var cts = _cts = new CancellationTokenSource();
         var limit = TimeSpan.FromSeconds(Seconds);
-        _ = Task.Run(() =>
+        Searching = Task.Run(() =>
         {
             try
             {

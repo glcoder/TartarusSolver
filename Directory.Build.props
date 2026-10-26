@@ -2,7 +2,7 @@
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <!-- The app's version (shown in its window and sent with bug reports): bump it for every build given to testers. -->
-    <Version>0.7.2</Version>
+    <Version>0.7.3</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>

@@ -9,8 +9,15 @@ public sealed class AppSettings
     /// <summary>Regex for the target window's title; the game by default.</summary>
     public string WindowTitle { get; set; } = @"^Torchlight: Infinite\s*$";
     public string DatasetDir { get; set; } = DefaultDatasetDir();
-    public bool AutoScan { get; set; }
+    public bool AutoScan { get; set; } = true;
+    /// <summary>From one frame to the next, 0 .. 1 s; 0: the next as soon as the last one's reading and hint are done.</summary>
     public double AutoScanSeconds { get; set; } = 0.5;
+    /// <summary>
+    /// Started with --debug: everything in the window. Without it the player's settings only (window, scanning, the
+    /// game's log, bug reports): the overlay shows the hints alone and nothing goes to the dataset.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool Debug { get; set; }
     public bool OverlayVisible { get; set; } = true;
     /// <summary>Hide the overlay while neither the game nor this app is in front.</summary>
     public bool HideWhenGameInactive { get; set; } = true;
@@ -104,12 +111,30 @@ public sealed class AppSettings
         SettingsVersion = CurrentVersion;
     }
 
+    /// <summary>
+    /// Without --debug: the overlay shows the hints alone, nothing is collected. Only for this session: <see cref="Save"/>
+    /// keeps the file's own values of these.
+    /// </summary>
+    public void PlayerView()
+    {
+        (OverlayVisible, ShowRegions, ShowTextBoxes, Hints, HintsOnly, AutoCollect) = (true, false, false, true, true, false);
+    }
+
     public void Save()
     {
         try
         {
             Directory.CreateDirectory(Folder);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(this, Options));
+            var saved = this;
+            if (!Debug)
+            {
+                // The debug window's choices stay as the file has them.
+                var file = Load();
+                saved = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(this, Options), Options)!;
+                (saved.OverlayVisible, saved.ShowRegions, saved.ShowTextBoxes, saved.Hints, saved.HintsOnly, saved.AutoCollect) =
+                    (file.OverlayVisible, file.ShowRegions, file.ShowTextBoxes, file.Hints, file.HintsOnly, file.AutoCollect);
+            }
+            File.WriteAllText(FilePath, JsonSerializer.Serialize(saved, Options));
         }
         catch { }
     }

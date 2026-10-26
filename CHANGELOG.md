@@ -4,6 +4,15 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.3 — 2026-10-27
+
+- The window is the player's by default: the game window, auto scan and its period, the game's log, the version and
+  bug reports; the overlay shows the hints alone and nothing is saved to the dataset (the app's log is written, for
+  bug reports). `--debug` on the command line brings the whole window back (overlay views, hint quality, labels,
+  dataset, the log); its choices aren't touched by the player's window.
+- Auto scan's period on a slider, 0 to 1 s by 0.1 (0.5 by default, on by default): from one frame's start to the
+  next, never before the last frame's reading and hint are done; at 0 the next frame comes as soon as they are.
+
 ## 0.7.2 — 2026-10-27
 
 - The run's first Torture Instrument pick is weighed over the first Inmates it may bring out (they come out after
