@@ -440,7 +440,11 @@ public partial class ControlWindow : Window
         // frequent reading over the pick's frames.
         bool targetPick = r.Ok && (r.Text?.ConsumePick == true || LiveLogRun is { ConsumePick: true } && r.Text?.Cards.Count == 0);
         if (targetPick) _pickVotes.Apply(_scannedSandbox);
-        else _pickVotes.Clear();
+        else
+        {
+            _pickVotes.Clear();
+            if (r.Ok && WholeBoard(_scannedSandbox)) _pickVotes.Before(_scannedSandbox);
+        }
         // Instruments and Chromatic: what this run has gathered, not just this frame's panels (a tooltip, a fade or
         // an animation may spoil them).
         if (r.Ok)

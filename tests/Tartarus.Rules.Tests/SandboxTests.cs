@@ -42,6 +42,29 @@ public class SandboxTests
     }
 
     [Fact]
+    public void The_red_screen_doesn_t_take_an_Ultimate_s_rarity_away()
+    {
+        // 2026-10-27: under the Consume target pick a Mammoth Ultimate's red frame was lost in the red, it read Normal,
+        // and a Rat Rare was hinted to eat it (Cage Fight: lower rarities may be eaten).
+        var before = EditableSandbox.Empty();
+        before.Warden = 3;
+        (before[10].Kind, before[10].Code, before[10].Rarity) = (CellKind.Inmate, Vision.Code.Mammoth, Vision.Rarity.Ultimate);
+        (before[3].Kind, before[3].Code, before[3].Rarity) = (CellKind.Inmate, Vision.Code.Rat, Vision.Rarity.Magic);
+        var votes = new PickVotes();
+        votes.Before(before);
+        // The red's first frame, its banner not read yet: taken for an ordinary one.
+        var first = before.Clone();
+        first[10].Rarity = Vision.Rarity.Normal;
+        votes.Before(first);
+        var red = first.Clone();
+        red[3].Rarity = Vision.Rarity.Rare;
+        votes.Apply(red);
+        Assert.Equal(Vision.Rarity.Ultimate, red[10].Rarity);
+        // The eater's own rise reads as it is.
+        Assert.Equal(Vision.Rarity.Rare, red[3].Rarity);
+    }
+
+    [Fact]
     public void The_pulsing_Consumable_mark_does_not_hold_a_cell_back()
     {
         var shown = EditableSandbox.Empty();

@@ -4,13 +4,34 @@ namespace Tartarus.Vision;
 /// On the Consume target pick (the red screen) nothing on the Sandbox changes until a bite, while the red flickers
 /// over it (the glows, the target's jaws, the small mouth over each eater). Each Inmate there shows what its readings
 /// over the pick's frames say most often, so one frame's misread doesn't flip it. The votes start over when the pick
-/// ends or the cells' kinds change (a bite empties its meal's cell, Avenger's Casket opens one).
+/// ends or the cells' kinds change (a bite empties its meal's cell, Avenger's Casket opens one). No Inmate reads lower
+/// than it was read just before the red screen: an Inmate's rarity never drops in its cell, while the red takes an
+/// Ultimate's red frame away (a Mammoth Ultimate read Normal, and taken for a target).
 /// </summary>
 public sealed class PickVotes
 {
     private readonly Dictionary<(Code? Code, Rarity Rarity), int>[] _votes = Enumerable.Range(0, 16).Select(_ => new Dictionary<(Code?, Rarity), int>()).ToArray();
     private readonly (Code? Code, Rarity Rarity)?[] _last = new (Code?, Rarity)?[16];
     private string? _kinds;
+    // Each cell's Inmate as last read before the red screen (its Code must match for its rarity to hold).
+    private readonly (Code? Code, Rarity Rarity)?[] _before = new (Code?, Rarity)?[16];
+
+    /// <summary>
+    /// The Sandbox read whole off the red screen: the rarities no reading on it may drop below. Only the Warden's cell
+    /// may hold a lower one now (a Replace); elsewhere the higher of the two stands, as the red's first frame can come
+    /// before its banner reads.
+    /// </summary>
+    public void Before(EditableSandbox b)
+    {
+        for (int n = 2; n <= 16; n++)
+        {
+            var c = b[n];
+            if (c.Covered) continue;
+            if (c.Kind != CellKind.Inmate) _before[n - 1] = null;
+            else if (n != b.Warden && _before[n - 1] is { } was && was.Code == c.Code && was.Rarity > c.Rarity) continue;
+            else _before[n - 1] = (c.Code, c.Rarity);
+        }
+    }
 
     public void Clear()
     {
@@ -32,6 +53,7 @@ public sealed class PickVotes
         {
             var c = b[n];
             if (c.Kind != CellKind.Inmate || c.Covered) continue;
+            if (_before[n - 1] is { } was && was.Code == c.Code && was.Rarity > c.Rarity) c.Rarity = was.Rarity;
             var read = (c.Code, c.Rarity);
             var votes = _votes[n - 1];
             votes[read] = votes.GetValueOrDefault(read) + 1;
