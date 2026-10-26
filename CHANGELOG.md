@@ -4,6 +4,16 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.2 — 2026-10-27
+
+- The run's first Torture Instrument pick is weighed over the first Inmates it may bring out (they come out after
+  it), not over one drawn start, and with the Objective the Sandbox showed before the cards (it was one drawn
+  Objective, the same for every run); unread, every Objective is weighed.
+- A pick over a Sandbox whose day counter didn't read (a popup darkens it) takes the day from the game's log: an
+  Objective's pick on day 2 was weighed as day 1.
+- The first Sandbox frame after another screen, caught mid-fade (no Warden, odd cells), no longer holds the next good
+  frame's cells back: half a second of hints on a mixed Sandbox (an "End" worth 3.9 Chromatic instead of 7.7).
+
 ## 0.7.1 — 2026-10-26
 
 - Make Your Decision with only End, left to click when a merge took the Warden's Inmate away (the game ends such a

@@ -165,12 +165,23 @@ public struct GameState
     public PreyArray Prey;
     public byte PreyCount;
     public RunStats Stats;
+    /// <summary>The run's first pick as the screen shows it: what isn't seen yet, drawn again for each playout.</summary>
+    public UnseenStart Unseen;
 
     public readonly bool Has(Instrument i) => (Instruments & (1u << (int)i)) != 0;
     public readonly int RemainingDays => MaxDays - Day;
     public readonly bool Ended => Phase == Phase.Ended;
     /// <summary>The highest rarity an Inmate can reach now: Chromatic while the panel has room, else Ultimate.</summary>
     public readonly Rarity TopRarity => Chromatic < GameData.ChromaticCap ? Rarity.Chromatic : Rarity.Ultimate;
+}
+
+/// <summary>What a run's first pick hides: its first Inmates come out after it, the Objective may not have been read.</summary>
+[Flags]
+public enum UnseenStart : byte
+{
+    None = 0,
+    Inmates = 1,
+    Objective = 2,
 }
 
 /// <summary>Counts over a run, for Objectives and reports.</summary>

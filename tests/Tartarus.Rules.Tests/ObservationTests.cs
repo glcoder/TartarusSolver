@@ -163,6 +163,39 @@ public class PickObservationTests
     }
 
     [Fact]
+    public void The_run_s_first_pick_is_searched_over_first_Inmates_not_yet_out()
+    {
+        // 2026-10-27: every run's first pick was weighed on one drawn start (and one drawn Objective): Survival of the
+        // Fittest for an Undercurrents run.
+        var o = new Observation { Objective = ObjectiveKind.Undercurrents, StartOfRun = true, Rerolls = 1 };
+        o.Offer.AddRange([Instrument.Saw, Instrument.Shortchain, Instrument.Keys]);
+        var engine = new Engine();
+        var root = engine.FromObservation(o, 1);
+        var boards = new HashSet<string>();
+        for (ulong seed = 1; seed <= 20; seed++)
+        {
+            var s = root;
+            engine.Determinize(ref s, seed, fillHidden: true);
+            Assert.Equal(ObjectiveKind.Undercurrents, s.Objective);
+            Assert.Equal(root.Pending[0].A, s.Pending[0].A);
+            Assert.Equal(1, s.Rerolls);
+            boards.Add(string.Join(",", Enumerable.Range(1, GameData.Cells - 1).Where(n => !s.Cells[n].Sealed).Select(n => $"{n}:{s.Cells[n].Inmate}")));
+        }
+        Assert.True(boards.Count > 10);
+
+        o.Objective = null;
+        root = engine.FromObservation(o, 1);
+        var objectives = new HashSet<ObjectiveKind>();
+        for (ulong seed = 1; seed <= 40; seed++)
+        {
+            var s = root;
+            engine.Determinize(ref s, seed);
+            objectives.Add(s.Objective);
+        }
+        Assert.Equal(5, objectives.Count);
+    }
+
+    [Fact]
     public void A_Treasure_pick_on_screen_offers_the_rewards()
     {
         var o = new Observation { Warden = 4, RemainingDays = 9, Theme = Theme.Opulence, TreasurePicks = 3 };

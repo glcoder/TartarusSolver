@@ -189,12 +189,27 @@ public sealed partial class Engine
             }
             s.Pending[0] = p;
         }
+        s.Unseen = UnseenStart.Inmates | (o.Objective == null ? UnseenStart.Objective : UnseenStart.None);
         return s;
     }
 
     /// <summary>
+    /// The run's first pick with its unseen part drawn again from <paramref name="seed"/>: other first Inmates (and
+    /// Objective, when it wasn't read); the offer, the theme and the Re-rolls stay.
+    /// </summary>
+    private GameState RedrawStart(in GameState s, ulong seed)
+    {
+        var objective = (s.Unseen & UnseenStart.Objective) != 0 ? (ObjectiveKind?)null : s.Objective;
+        var e = new Engine(Options with { Rerolls = s.Rerolls, Theme = s.Theme, Objective = objective }) { AutoEnd = AutoEnd };
+        var fresh = e.NewRun(seed);
+        if (s.PendingCount > 0 && fresh.PendingCount > 0) fresh.Pending[0] = s.Pending[0];
+        return fresh;
+    }
+
+    /// <summary>
     /// Draws again what the player can't know, for one playout of a search: who is behind each door (a shown
-    /// rarity stays, its Code is drawn), which incident each unseen marker holds, and the dice from here on.
+    /// rarity stays, its Code is drawn), which incident each unseen marker holds, and the dice from here on. On the
+    /// run's first pick, its first Inmates too (and the Objective when it wasn't read).
     /// </summary>
     /// <param name="fillHidden">
     /// Draw every door's Inmate now instead of when it opens: playouts of different moves from one determinized
@@ -202,6 +217,7 @@ public sealed partial class Engine
     /// </param>
     public void Determinize(ref GameState s, ulong seed, bool fillHidden = false)
     {
+        if (s.Unseen != UnseenStart.None) s = RedrawStart(s, Rng.Mix(seed ^ 0x5A17A27UL));
         s.Rng = new Rng(seed);
         for (int n = 1; n < GameData.Cells; n++)
         {

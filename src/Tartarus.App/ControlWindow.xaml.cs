@@ -334,6 +334,8 @@ public partial class ControlWindow : Window
     // The last Sandbox the hints saw (with the run's memory) and its text: a pick screen's hint plays on from it.
     private EditableSandbox? _hintSandbox;
     private Vision.Ocr.ScreenText? _hintText;
+    // The log's run that text was read in.
+    private LoggedRun? _hintTextRun;
     // The same scan as read, before Steady: the base of a pick that comes up right after a change.
     private EditableSandbox? _hintRead;
     private GameLogWatcher? _gameLog;
@@ -408,9 +410,12 @@ public partial class ControlWindow : Window
         if (_editMode && !manual) return;
         if (manual && _sandbox?.AnyEdited == true && !_savedSinceScan) Log("Unsaved edits replaced by a new scan");
 
-        // Cells a tooltip covers keep what the last scan of the same Sandbox read there.
+        // Cells a tooltip covers keep what the last scan of the same Sandbox read there. Only a Sandbox read whole is
+        // kept to: the first frame after another screen is often caught mid-fade (no Warden, odd cells), and the next
+        // good one would be held to it.
         RememberFrame(frame);
-        var previous = r.Ok && _scan?.Ok == true && _frame is { } last && last.Width == frame.Width && last.Height == frame.Height ? _scannedSandbox : null;
+        var previous = r.Ok && _scan?.Ok == true && _frame is { } last && last.Width == frame.Width && last.Height == frame.Height
+            && _scannedSandbox is { } before && WholeBoard(before) ? before : null;
         _frame = frame;
         _stale = false;
         _scan = r;
@@ -671,6 +676,15 @@ public partial class ControlWindow : Window
                 _hintSandbox = _sandbox.Clone();
                 _hintRead = _lastRead?.Clone();
                 _hintText = r.Text;
+                _hintTextRun = _logRun;
+                // The log knows the day: it stands in when OCR didn't read the counter or read it wrong. The screen
+                // shows a new day about a second before the log has it, so one day fewer than the log's is the screen
+                // being ahead, not a misread. A pick's hint plays on from this Sandbox too (a popup darkens the counter).
+                var live = LiveLogRun;
+                if (live != null && (_hintSandbox.Days is not int d || (d != live.RemainingDays && d != live.RemainingDays - 1)))
+                    _hintSandbox.Days = live.RemainingDays;
+                // A run the log saw from its start: its Chromatic count, or the panel's when higher (a sound can go missing).
+                if (live is { FromStart: true }) _hintSandbox.Chromatic = Math.Max(_hintSandbox.Chromatic, live.ChromaticAtLeast);
                 // The Sandbox viewed from a pick (the eye button): read now, back to the pick is the hint.
                 bool viewing = LiveLogRun is { PickOpen: true };
                 if (viewing != _eyeHint)
@@ -685,14 +699,6 @@ public partial class ControlWindow : Window
                     ClearHint();
                     return;
                 }
-                // The log knows the day: it stands in when OCR didn't read the counter or read it wrong. The screen
-                // shows a new day about a second before the log has it, so one day fewer than the log's is the screen
-                // being ahead, not a misread.
-                var live = LiveLogRun;
-                if (live != null && (_hintSandbox.Days is not int d || (d != live.RemainingDays && d != live.RemainingDays - 1)))
-                    _hintSandbox.Days = live.RemainingDays;
-                // A run the log saw from its start: its Chromatic count, or the panel's when higher (a sound can go missing).
-                if (live is { FromStart: true }) _hintSandbox.Chromatic = Math.Max(_hintSandbox.Chromatic, live.ChromaticAtLeast);
                 // Only a screen that says what it asks: the Consume target pick's banner, Destination cards read, or a
                 // decision card. Frames in between (cards sliding in, a day's banner) would be taken for the wrong phase.
                 bool destinations = _sandbox.Phase == Phases.Destination && _sandbox.Destinations.Count > 0;
@@ -749,10 +755,13 @@ public partial class ControlWindow : Window
             {
                 // An instrument pick after the last day (or before any Sandbox) is a new run's first.
                 var under = _hintSandbox;
+                Vision.Ocr.ScreenText? startText = null;
                 if (pick.Kind == PickRead.Instrument && (under == null || under.Days == 0 || _logRun?.Day == 0))
                 {
                     under = EditableSandbox.Empty();
                     under.Theme = _run.Theme;
+                    // The Sandbox shows the Objective a moment before the cards cover it: read in this run, it's this run's.
+                    if (_hintTextRun is { FromStart: true } && _hintTextRun == _logRun) startText = _hintText;
                 }
                 // Re-rolls left: the card's count, else the run's one less those the log saw clicked.
                 if (pick.Kind == PickRead.Instrument)
@@ -774,7 +783,7 @@ public partial class ControlWindow : Window
                 }
                 else if (under != null)
                 {
-                    var text = under == _hintSandbox ? _hintText : null;
+                    var text = under == _hintSandbox ? _hintText : startText;
                     // The last scan's own reading of the cells: the change that brought the pick (a door opened on the
                     // Objective's Inmate) is in it, not yet in the steadied Sandbox.
                     if (under == _hintSandbox && _hintRead != null)
