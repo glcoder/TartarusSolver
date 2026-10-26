@@ -49,10 +49,14 @@ chests).
 | Ctrl+Shift+R | auto scan on/off (every 0.5 s by default) |
 | Ctrl+Shift+H | overlay on/off |
 | Ctrl+Shift+B | report a bug |
-| Ctrl+Shift+E / Ctrl+Shift+D | label editing / save the frame (for building the training set) |
+| Ctrl+Shift+E / Ctrl+Shift+D | label editing / save the frame (for building the training set; with `--debug`) |
 
-Hotkeys work while the game or the app is in front. Settings live in `%LOCALAPPDATA%\TartarusSolver\settings.json`,
-among them:
+Hotkeys work while the game or the app is in front. The control window holds the game window, auto scan and its
+period (0 to 1 s; 0: the next frame as soon as the last one's reading and hint are done), the hint quality, the
+game's log and bug reports. `TartarusSolver.exe --debug` opens the whole window: overlay views (regions, OCR text,
+everything read), labels, dataset collecting and the app's log.
+
+Settings live in `%LOCALAPPDATA%\TartarusSolver\settings.json`, among them:
 
 - `CacheWorth`: what a Riot chest per Inmate left is worth, in Chromatics, by rarity (Normal … Ultimate); the
   solver weighs a sure chest against a chance at a Chromatic with it.
