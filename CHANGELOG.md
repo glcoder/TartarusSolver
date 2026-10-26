@@ -4,6 +4,11 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.6 — 2026-10-27
+
+- The Re-roll button and its "Remaining attempts" are held to the screen's bottom, as the game places them: on a 16:9
+  screen (2560x1440 full screen) the Re-roll hint was framed a button's height below the button.
+
 ## 0.7.5 — 2026-10-27
 
 - A Torture Instrument pick's first frames, before its Re-roll counter shows, take the Re-rolls left from the game's

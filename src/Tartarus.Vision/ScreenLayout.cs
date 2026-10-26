@@ -135,10 +135,13 @@ public sealed class ScreenLayout
     public static CanvasRect PickCard(int i) => new(Anchor.Center, (i - 1) * PickPitch - 190, -306, (i - 1) * PickPitch + 190, 275);
     /// <summary>The instrument's name on pick card i, under its icon (one line; long names are set smaller), resting or chosen.</summary>
     public static CanvasRect PickName(int i) => new(Anchor.Center, (i - 1) * PickPitch - 178, -98, (i - 1) * PickPitch + 178, -8);
-    /// <summary>The Re-roll button under "Remaining attempts N" (measured at 1920x1200).</summary>
-    public static readonly CanvasRect PickRerollButton = new(Anchor.Center, -255, 372, -32, 428);
+    /// <summary>
+    /// The Re-roll button under "Remaining attempts N", held to the screen's bottom (measured at 1920x1200, checked at
+    /// 2560x1440: from the centre it was a button's height too low on 16:9).
+    /// </summary>
+    public static readonly CanvasRect PickRerollButton = new(Anchor.Bottom, -255, -128, -32, -72);
     /// <summary>"Remaining attempts N" over the Re-roll button, left of Confirm; only there while a re-roll is left.</summary>
-    public static readonly CanvasRect PickRerolls = new(Anchor.Center, -330, 335, 40, 374);
+    public static readonly CanvasRect PickRerolls = new(Anchor.Bottom, -330, -165, 40, -126);
 
     // The Warden's Treasure pick after a Chromatic ("Prisoner rarity reached Chromatic. Warden's Treasure obtained."):
     // four cards in the middle (measured at 1920x1200); the chosen one gets a dark square frame, its name stays.
