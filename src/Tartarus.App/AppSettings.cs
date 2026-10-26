@@ -112,12 +112,12 @@ public sealed class AppSettings
     }
 
     /// <summary>
-    /// Without --debug: the overlay shows the hints alone, nothing is collected. Only for this session: <see cref="Save"/>
+    /// Without --debug: auto scan on, the overlay shows the hints alone, nothing is collected. Only for this session: <see cref="Save"/>
     /// keeps the file's own values of these.
     /// </summary>
     public void PlayerView()
     {
-        (OverlayVisible, ShowRegions, ShowTextBoxes, Hints, HintsOnly, AutoCollect) = (true, false, false, true, true, false);
+        (AutoScan, OverlayVisible, ShowRegions, ShowTextBoxes, Hints, HintsOnly, AutoCollect) = (true, true, false, false, true, true, false);
     }
 
     public void Save()
@@ -131,8 +131,8 @@ public sealed class AppSettings
                 // The debug window's choices stay as the file has them.
                 var file = Load();
                 saved = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(this, Options), Options)!;
-                (saved.OverlayVisible, saved.ShowRegions, saved.ShowTextBoxes, saved.Hints, saved.HintsOnly, saved.AutoCollect) =
-                    (file.OverlayVisible, file.ShowRegions, file.ShowTextBoxes, file.Hints, file.HintsOnly, file.AutoCollect);
+                (saved.AutoScan, saved.OverlayVisible, saved.ShowRegions, saved.ShowTextBoxes, saved.Hints, saved.HintsOnly, saved.AutoCollect) =
+                    (file.AutoScan, file.OverlayVisible, file.ShowRegions, file.ShowTextBoxes, file.Hints, file.HintsOnly, file.AutoCollect);
             }
             File.WriteAllText(FilePath, JsonSerializer.Serialize(saved, Options));
         }

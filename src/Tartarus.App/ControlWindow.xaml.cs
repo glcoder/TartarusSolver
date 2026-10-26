@@ -87,7 +87,7 @@ public partial class ControlWindow : Window
         Title = $"Tartarus Solver {AppVersion.Number}" + (settings.Debug ? " (debug)" : "");
         // The player's window: the game window, scanning, the game's log, the version and bug reports.
         if (!settings.Debug)
-            foreach (var panel in new FrameworkElement[] { ViewPanel, HintsPanel, DebugPanel }) panel.Visibility = Visibility.Collapsed;
+            foreach (var panel in new FrameworkElement[] { ViewPanel, HintChecks, DebugPanel }) panel.Visibility = Visibility.Collapsed;
         VersionText.Text = "Version " + AppVersion.Short;
         VersionText.ToolTip = AppVersion.Full;
         Log("Version " + AppVersion.Short + (BugReports.Enabled ? "" : " · bug reports not set up"));

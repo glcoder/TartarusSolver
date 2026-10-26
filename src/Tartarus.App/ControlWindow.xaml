@@ -57,9 +57,9 @@
     <TextBlock x:Name="ScanStatus" Margin="0,4,0,0" Foreground="#9AA0AC" TextWrapping="Wrap" Text="—" />
 
     <!-- Move hints -->
-    <StackPanel x:Name="HintsPanel">
+    <StackPanel>
       <TextBlock Style="{StaticResource Section}" Text="Hints" />
-      <StackPanel Orientation="Horizontal">
+      <StackPanel x:Name="HintChecks" Orientation="Horizontal">
         <CheckBox x:Name="HintsCheck" Content="Move hints" Checked="HintsCheck_Changed" Unchecked="HintsCheck_Changed" />
         <CheckBox x:Name="HintsOnlyCheck" Content="Hints only" Margin="12,0,0,0" Checked="HintsOnlyCheck_Changed" Unchecked="HintsOnlyCheck_Changed" ToolTip="The overlay shows only the move frames and the hint line: no cells, Torture Instruments or Chromatic" />
       </StackPanel>

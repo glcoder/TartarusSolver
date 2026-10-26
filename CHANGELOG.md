@@ -4,6 +4,10 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.4 — 2026-10-27
+
+- The player's window has the hint quality slider too, and auto scan is on in it at every start.
+
 ## 0.7.3 — 2026-10-27
 
 - The window is the player's by default: the game window, auto scan and its period, the game's log, the version and
