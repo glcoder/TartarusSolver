@@ -1,0 +1,63 @@
+{
+  "kinds": [
+    "empty",
+    "unopened",
+    "inmate",
+    "covered"
+  ],
+  "codes": [
+    "Rat",
+    "Wolf",
+    "Lion",
+    "Mammoth"
+  ],
+  "rarities": [
+    "Normal",
+    "Magic",
+    "Rare",
+    "Legendary",
+    "Ultimate"
+  ],
+  "visible": [
+    "none",
+    "Normal",
+    "Magic",
+    "Rare",
+    "Legendary",
+    "Ultimate"
+  ],
+  "flags": [
+    "consumable",
+    "nest",
+    "incident",
+    "scratch_marks",
+    "tusk",
+    "prey"
+  ],
+  "flagCounts": {
+    "consumable": 2039,
+    "nest": 29,
+    "incident": 604,
+    "scratch_marks": 132,
+    "tusk": 71,
+    "prey": 31
+  },
+  "minFlagExamples": 20,
+  "outputs": [
+    "kind",
+    "code",
+    "rarity",
+    "visible",
+    "flags"
+  ],
+  "input": {
+    "image": [
+      3,
+      96,
+      84
+    ],
+    "cell": 16,
+    "scale": "RGB 0..1"
+  },
+  "trained": "2026-10-26 05:04"
+}

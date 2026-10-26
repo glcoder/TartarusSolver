@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Pure, AOT-compatible vision core: frames, scan result model, board geometry, labels, dataset IO, OCR.
+       No WinRT, no WPF, no JS engine here. -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.31.0" />
+    <PackageReference Include="StbImageSharp" Version="2.30.15" />
+    <PackageReference Include="StbImageWriteSharp" Version="1.16.7" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tartarus.Rules\Tartarus.Rules.csproj" />
+  </ItemGroup>
+
+  <!-- OCR models (PaddleOCR, Apache-2.0), downloaded once into models/ocr and copied next to the binaries:
+       PP-OCRv4 mobile text detector, PP-OCRv5 mobile English and East Slavic (Russian and English) recognizers, all ONNX.
+       Other languages' recognizers (OcrPacks: latin, chinese, korean, thai) go into models/ocr by the same names. -->
+  <ItemGroup>
+    <OcrModel Include="det.onnx" Url="https://huggingface.co/SWHL/RapidOCR/resolve/main/PP-OCRv4/ch_PP-OCRv4_det_infer.onnx" Sha256="d2a7720d45a54257208b1e13e36a8479894cb74155a5efe29462512d42f49da9" />
+    <OcrModel Include="rec_en.onnx" Url="https://huggingface.co/monkt/paddleocr-onnx/resolve/main/languages/english/rec.onnx" Sha256="4e16deb22c4da6468bdca539b2cd3c8687825538b67109177c47d359ab994cd7" />
+    <OcrModel Include="dict_en.txt" Url="https://huggingface.co/monkt/paddleocr-onnx/resolve/main/languages/english/dict.txt" Sha256="e025a66d31f327ba0c232e03f407ae8d105e1e709e7ccb3f408aa778c24e70d6" />
+    <OcrModel Include="rec_eslav.onnx" Url="https://huggingface.co/monkt/paddleocr-onnx/resolve/main/languages/eslav/rec.onnx" Sha256="dc6bf0e855247decce214ba6dae5bc135fa0ad725a5918a7fcfb59fad6c9cdee" />
+    <OcrModel Include="dict_eslav.txt" Url="https://huggingface.co/monkt/paddleocr-onnx/resolve/main/languages/eslav/dict.txt" Sha256="3e95f1581557162870cacdba5af91a4c6be2890710d395b0c3c7578e7ee5e6eb" />
+    <None Include="@(OcrModel->'$(OcrModelDir)%(Identity)')" Link="models\ocr\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="FetchOcrModels" BeforeTargets="BeforeBuild">
+    <ItemGroup>
+      <_OcrMissing Include="@(OcrModel)" Condition="!Exists('$(OcrModelDir)%(Identity)')" />
+    </ItemGroup>
+    <DownloadFile Condition="'@(_OcrMissing)' != ''" SourceUrl="%(_OcrMissing.Url)" DestinationFolder="$(OcrModelDir)" DestinationFileName="%(_OcrMissing.Identity)" Retries="2" />
+    <GetFileHash Condition="'@(_OcrMissing)' != ''" Files="@(_OcrMissing->'$(OcrModelDir)%(Identity)')" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_OcrFetched" />
+    </GetFileHash>
+    <Delete Files="@(_OcrFetched)" Condition="'%(_OcrFetched.FileHash)' != '%(_OcrFetched.Sha256)'" />
+    <Error Condition="'%(_OcrFetched.FileHash)' != '%(_OcrFetched.Sha256)'" Text="%(_OcrFetched.Url) has SHA-256 %(_OcrFetched.FileHash), expected %(_OcrFetched.Sha256)." />
+  </Target>
+</Project>

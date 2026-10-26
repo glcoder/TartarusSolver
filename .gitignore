@@ -1,0 +1,26 @@
+# Builds
+bin/
+obj/
+dist/
+*.user
+.vs/
+.idea/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Data that stays local: captured frames and labels, the game's extracted files
+dataset/
+game_art/
+
+# OCR models: downloaded by the build (src/Tartarus.Vision/Tartarus.Vision.csproj)
+models/ocr/
+
+# Training leftovers
+models/cells-candidate/
+models/**/backup*/
+
+# Bug reports' DSN or other local secrets, if kept in a file
+*.local.json

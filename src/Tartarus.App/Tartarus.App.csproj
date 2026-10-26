@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- WPF shell: click-through overlay over the game + small control window. JIT (WPF). -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(WinTfm)</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>TartarusSolver</AssemblyName>
+    <RootNamespace>Tartarus.App</RootNamespace>
+    <!-- Where bug reports go (BugReports.DefaultDsn): kept out of the source, passed at build time. -->
+    <SentryDsn Condition="'$(SentryDsn)' == ''">$(TARTARUS_SENTRY_DSN)</SentryDsn>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="SentryDsn" Value="$(SentryDsn)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tartarus.Vision\Tartarus.Vision.csproj" />
+    <ProjectReference Include="..\Tartarus.Solver\Tartarus.Solver.csproj" />
+    <ProjectReference Include="..\Tartarus.Capture\Tartarus.Capture.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Sentry" Version="6.12.1" />
+  </ItemGroup>
+</Project>

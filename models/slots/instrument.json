@@ -1,0 +1,46 @@
+{
+  "classes": [
+    "none",
+    "axe",
+    "blacklist",
+    "brand",
+    "cage",
+    "casket",
+    "chains",
+    "claws",
+    "coin",
+    "collar",
+    "crown",
+    "dogtag",
+    "forged",
+    "guillotine",
+    "hook",
+    "ironbox",
+    "keys",
+    "maiden",
+    "maul",
+    "muzzle",
+    "noose",
+    "pestle",
+    "saw",
+    "scales",
+    "scapegoat",
+    "shackles",
+    "shortchain",
+    "skewer",
+    "stake",
+    "tongs",
+    "trap",
+    "whip",
+    "hidden"
+  ],
+  "input": {
+    "image": [
+      3,
+      104,
+      63
+    ],
+    "scale": "RGB 0..1"
+  },
+  "trained": "2026-10-24 03:57"
+}

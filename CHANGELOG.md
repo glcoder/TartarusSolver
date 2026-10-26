@@ -1,0 +1,41 @@
+# Changelog
+
+The version is in `Directory.Build.props` (`<Version>`), shown in the app's window and sent with bug reports. The last
+number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
+things.
+
+## 0.6.0 — 2026-10-26
+
+Hints
+- The hint is the chests the run is expected to end with: the game's Chromatic and Ultimate chest icons over the
+  frame, "×8.0" by each (tenths, rounded); the best move framed bold, moves as good thin.
+- Moves are weighed by the Riot's caches too (settings `CacheWorth`: a cache per Inmate left, by rarity, in
+  Chromatics), not by Chromatics alone: a sure Ultimate isn't thrown away for a 5% chance at a Chromatic.
+- On a pick whose Sandbox changed underneath (a chain, Chromatics leaving), the eye button is ringed: look at the
+  Sandbox, then back to the pick (ringed again) for a hint on what it is now.
+- The value network's guesses kept to what can be (no fewer Chromatics than contained, none past 10).
+
+Rules
+- A Replace only before the day's Consume (the game's log: never after one).
+- A chain going on is told from the log and the screen (Consume card or red screen after a bite): eat on or stop,
+  no Replace.
+- The run theme now reaches every hint (it was lost in a copy: Cage Fight's wider diet, Iron Law's 30 days, ...),
+  and is remembered across restarts of the app for the run it was read in.
+- Survival of the Fittest and Undercurrents progress counted from the log over the red screen.
+
+Reading the screen
+- Any game language: decision cards, Destinations and pick screens told by their pictures; OCR for English and
+  Russian (East Slavic), other languages' recognizers downloaded on asking (with a progress window); the game's own
+  texts in all its languages (`models/text/tartarus_text.json`) to match what's read.
+- Chromatics counted from their own sounds and panel slots (one flight sound may serve two at once), and from the
+  Warden's Treasures they bring.
+- Half-hidden Sandboxes (a Chromatic's flight, a popup) no longer taken for the position.
+- The cell network retrained: Rat Nest, Tusk and Prey (Prey from 8 real cells and semi-synthetic ones).
+- The Objective's popup no longer taken for a Warden's Treasure pick.
+
+App
+- Bug reports to Sentry (Ctrl+Shift+B): screenshot with the overlay, recent frames, the app's log, this run's game
+  log, settings; crashes too.
+- English interface; hotkeys Ctrl+Shift+…, active only while the game or the app is in front; auto scan every 0.5 s.
+- "Hints only" overlay mode; "Interactable regions" frames.
+- `tools/package.py`: the zip for testers (`--full` with .NET inside).

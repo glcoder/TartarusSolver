@@ -1,0 +1,16 @@
+{
+  "classes": [
+    "empty",
+    "filled",
+    "hidden"
+  ],
+  "input": {
+    "image": [
+      3,
+      80,
+      60
+    ],
+    "scale": "RGB 0..1"
+  },
+  "trained": "2026-10-24 04:14"
+}

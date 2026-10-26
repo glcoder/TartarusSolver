@@ -1,0 +1,19 @@
+<Window x:Class="Tartarus.App.ReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Report a bug" Width="460" SizeToContent="Height"
+        Topmost="True" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" ShowInTaskbar="True"
+        FontFamily="Segoe UI" FontSize="12" Background="#1E1F24" Foreground="#E8E8EC">
+  <StackPanel Margin="12">
+    <TextBlock x:Name="Prompt" Text="What went wrong?" Margin="0,0,0,6" TextWrapping="Wrap" />
+    <TextBox x:Name="CommentBox" Height="120" PreviewKeyDown="CommentBox_PreviewKeyDown" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+             Background="#15161A" Foreground="#E8E8EC" BorderBrush="#3A3C44" CaretBrush="#E8E8EC" Padding="4" />
+    <TextBlock Margin="0,8,0,0" Foreground="#9AA0AC" TextWrapping="Wrap"
+               Text="By sending this report you share a screenshot of the game window, the app's log and the current Tartarus run's lines from the game log with the developer. No personal data is sent." />
+    <TextBlock x:Name="StatusText" Margin="0,6,0,0" Foreground="#E6B46E" TextWrapping="Wrap" Visibility="Collapsed" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+      <Button x:Name="SendButton" Content="Send" ToolTip="Shift+Enter" Padding="12,3" Margin="0,0,6,0" IsDefault="False" Click="SendButton_Click" />
+      <Button x:Name="CancelButton" Content="Cancel" Padding="12,3" IsCancel="True" Click="CancelButton_Click" />
+    </StackPanel>
+  </StackPanel>
+</Window>

@@ -1,0 +1,15 @@
+{
+  "outputs": [
+    "arrow"
+  ],
+  "input": {
+    "image": [
+      3,
+      48,
+      48
+    ],
+    "cell": 16,
+    "scale": "RGB 0..1"
+  },
+  "trained": "2026-10-24 01:57"
+}

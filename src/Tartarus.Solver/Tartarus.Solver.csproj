@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The move hints: a static evaluation of positions, a fast heuristic policy, and the Monte Carlo search over the
+       rules (Tartarus.Rules) that ranks the moves of a scanned position. Pure and AOT-compatible. -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tartarus.Rules\Tartarus.Rules.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Tartarus.Rules.Tests" />
+  </ItemGroup>
+</Project>

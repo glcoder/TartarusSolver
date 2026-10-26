@@ -1,0 +1,7 @@
+# Training scripts (tools/train). PyTorch with CUDA: install the build for your GPU from https://pytorch.org first.
+torch>=2.5
+numpy>=2.0
+pillow>=11.0
+onnx>=1.17
+onnxruntime>=1.20
+opencv-python-headless>=4.10  # pickicons.py

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- tartarus-sim: plays runs with the rules (Tartarus.Rules) for traces, statistics and speed. NativeAOT-ready:
+       dotnet publish tools/Tartarus.SimCli -c Release -p:PublishAot=true -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <AssemblyName>tartarus-sim</AssemblyName>
+    <IsAotCompatible>true</IsAotCompatible>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Tartarus.Rules\Tartarus.Rules.csproj" />
+    <ProjectReference Include="..\..\src\Tartarus.Solver\Tartarus.Solver.csproj" />
+  </ItemGroup>
+</Project>

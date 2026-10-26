@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The Tartarus rules: the game state, every action and chance, for the move hints' search and for generating
+       training data. Pure and AOT-compatible: no reflection, no I/O, no dependencies. -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Tartarus.Rules.Tests" />
+  </ItemGroup>
+</Project>

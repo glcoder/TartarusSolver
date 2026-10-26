@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(WinTfm)</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <AssemblyName>tartarus-scan</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Tartarus.Vision\Tartarus.Vision.csproj" />
+    <ProjectReference Include="..\..\src\Tartarus.Solver\Tartarus.Solver.csproj" />
+    <ProjectReference Include="..\..\src\Tartarus.Capture\Tartarus.Capture.csproj" />
+  </ItemGroup>
+</Project>
