@@ -4,6 +4,12 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.7 — 2026-10-27
+
+- Re-rolls left when a pick's counter doesn't read: the last count read in this run less the Re-rolls clicked since,
+  else none. 0.7.5 took one per run for granted and hinted a Re-roll where there was no button (a Cage Fight run has
+  none).
+
 ## 0.7.6 — 2026-10-27
 
 - The Re-roll button and its "Remaining attempts" are held to the screen's bottom, as the game places them: on a 16:9

@@ -362,6 +362,8 @@ public partial class ControlWindow : Window
     private bool _logRunFinished;
     // Re-rolls the run has left, as the last instrument pick showed them (shared by every pick of the run).
     private int? _rerolls;
+    // The last counter read: in which run, how many it showed, and the Re-rolls the log had seen clicked by then.
+    private (LoggedRun Run, int Left, int Used)? _rerollsRead;
     // The last Sandbox read before the Consume target pick's red screen.
     private Vision.Ocr.ScreenText? _textBeforeRed;
 
@@ -770,9 +772,13 @@ public partial class ControlWindow : Window
                     // The Sandbox shows the Objective a moment before the cards cover it: read in this run, it's this run's.
                     if (_hintTextRun is { FromStart: true } && _hintTextRun == _logRun) startText = _hintText;
                 }
-                // Re-rolls left: the card's count, else the run's one less those the log saw clicked.
+                // Re-rolls left: the counter's, else the last one read in this run less those the log saw clicked since
+                // (its dim text doesn't read on every frame), else none: a run may have no Re-roll at all (Cage Fight).
                 if (pick.Kind == PickRead.Instrument)
-                    _rerolls = pick.Rerolls ?? (LiveLogRun is { FromStart: true } logged ? Math.Max(0, Tartarus.Rules.RuleOptions.Default.Rerolls - logged.RerollsUsed) : 0);
+                {
+                    if (pick.Rerolls is int read && _logRun != null) _rerollsRead = (_logRun, read, _logRun.RerollsUsed);
+                    _rerolls = pick.Rerolls ?? (_rerollsRead is { } seen && seen.Run == _logRun ? Math.Max(0, seen.Left - (seen.Run.RerollsUsed - seen.Used)) : 0);
+                }
                 // The Sandbox changed under the pick since it was last seen (a chain, Chromatics leaving it): the hint is
                 // for the old one until the player looks at it (the game's eye button) and it's read again.
                 bool boardStale = under == _hintSandbox && LiveLogRun is { } logged2 && logged2.BoardChangedAt > _lastBoardAt;
