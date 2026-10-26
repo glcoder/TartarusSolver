@@ -95,8 +95,9 @@ public sealed class HintService : IDisposable
             {
                 var result = _search.Search(state, playoutsPerAction: Playouts, timeLimit: limit, cancel: cts.Token);
                 if (cts.IsCancellationRequested) return;
-                // Nothing to choose (only End, which the game takes by itself): no hint.
-                if (!consumeOnly && result.Actions.Count < 2) return;
+                // Nothing to choose (only End) still gets its frame: the game ends such a day by itself, but not when a
+                // merge took the Warden's Inmate away, and then it waits for the click.
+                if (result.Actions.Count == 0) return;
                 result = Steady(state, result, consumeOnly);
                 var hint = new Hint(state, result, consumeOnly, Final: true);
                 _shown = hint;

@@ -698,8 +698,11 @@ public partial class ControlWindow : Window
                 // The Sewer Ratway's pick: any cell to go to.
                 if (r.Text?.RatwayPick == true) decision = true;
                 // Right after a move the Warden's door is still opening: no decision is readable until an Inmate shows.
+                // An End card alone is read all the same: the game left it to click when a merge took the Warden's
+                // Inmate away (it ends such a day by itself otherwise).
                 var here = _sandbox.Warden > 1 ? _sandbox[_sandbox.Warden] : null;
-                if (decision && !consumeOnly && r.Text?.RatwayPick != true && here != null && here.Kind != CellKind.Inmate) decision = false;
+                bool endOnly = r.Text?.Cards is { Count: > 0 } cards && cards.All(c => c.Meaning is "end" || c.Meaning.EndsWith(" end"));
+                if (decision && !consumeOnly && r.Text?.RatwayPick != true && here != null && here.Kind != CellKind.Inmate && !endOnly) decision = false;
                 if (!consumeOnly && !destinations && !decision)
                 {
                     _hints.Clear();

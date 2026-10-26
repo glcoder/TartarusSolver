@@ -74,8 +74,8 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
         Span<GameAction> buf = stackalloc GameAction[Engine.MaxActions];
         int k = engine.Legal(root, buf);
         var actions = buf[..k].ToArray();
+        // One action is played out too: the hint shows what the run is expected to end with.
         if (k == 0) return new SearchResult([], 0, sw.Elapsed);
-        if (k == 1) return new SearchResult([new ActionValue(actions[0], 0, 0, 0, 0)], 0, sw.Elapsed);
 
         var sum = new double[k];
         var sumSq = new double[k];

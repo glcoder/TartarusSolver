@@ -4,6 +4,11 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.1 — 2026-10-26
+
+- Make Your Decision with only End, left to click when a merge took the Warden's Inmate away (the game ends such a
+  day by itself otherwise), gets its hint: the End card framed with the chests the run is expected to end with.
+
 ## 0.7.0 — 2026-10-26
 
 - The search's playouts make their moves by a policy network (`models/solver/policy.bin`) trained on the search's
