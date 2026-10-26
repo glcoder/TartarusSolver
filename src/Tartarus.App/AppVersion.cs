@@ -71,13 +71,5 @@ public static class AppVersion
         catch (Exception e) when (e is IOException or JsonException) { return null; }
     }
 
-    private static string? FindModelsDir()
-    {
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
-        {
-            string candidate = Path.Combine(dir.FullName, "models");
-            if (Directory.Exists(Path.Combine(candidate, "cells"))) return candidate;
-        }
-        return null;
-    }
+    private static string? FindModelsDir() => AppFiles.Find("models", "cells") is { } cells ? Path.GetDirectoryName(cells) : null;
 }

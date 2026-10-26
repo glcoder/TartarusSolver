@@ -52,9 +52,9 @@ public sealed class SlotReader : ICellReader
 
     public static string? FindModelDir()
     {
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
+        foreach (string dir in AppFiles.Folders)
         {
-            string candidate = Path.Combine(dir.FullName, "models", "slots");
+            string candidate = Path.Combine(dir, "models", "slots");
             if (File.Exists(Path.Combine(candidate, "chromatic.onnx")) && File.Exists(Path.Combine(candidate, "instrument.onnx"))) return candidate;
         }
         return null;

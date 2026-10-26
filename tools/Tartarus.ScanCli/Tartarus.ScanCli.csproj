@@ -10,4 +10,7 @@
     <ProjectReference Include="..\..\src\Tartarus.Solver\Tartarus.Solver.csproj" />
     <ProjectReference Include="..\..\src\Tartarus.Capture\Tartarus.Capture.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\Shared\AppFiles.cs" Link="AppFiles.cs" />
+  </ItemGroup>
 </Project>

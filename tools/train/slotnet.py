@@ -14,6 +14,7 @@ Tartarus.Vision's SlotReader.
 import argparse
 import csv
 import json
+import os
 import random
 import time
 from collections import Counter
@@ -77,7 +78,7 @@ def tooltips(images, n, rng):
     over the whole slot or from a random edge, drawn on random slot crops. They teach the "hidden" class: a slot that
     shows no instrument to read, so the app keeps what it read there before."""
     from PIL import Image, ImageDraw, ImageFont
-    fonts = [ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", size) for size in (14, 16, 18, 20, 22, 24)]
+    fonts = [ImageFont.truetype(str(Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts" / "segoeui.ttf"), size) for size in (14, 16, 18, 20, 22, 24)]
     colors = [(235, 230, 220)] * 3 + [(150, 145, 140), (220, 90, 80), (90, 200, 210)]
     out = []
     for _ in range(n):

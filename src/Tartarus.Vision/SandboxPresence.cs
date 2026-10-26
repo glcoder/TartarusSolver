@@ -44,16 +44,8 @@ public sealed class SandboxPresence
         File.WriteAllBytes(path, bytes);
     }
 
-    /// <summary>models/Sandbox/template.bin next to the executable or up the tree from it; null if there is none yet.</summary>
-    public static string? FindTemplate()
-    {
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
-        {
-            string candidate = Path.Combine(dir.FullName, "models", "sandbox", FileName);
-            if (File.Exists(candidate)) return candidate;
-        }
-        return null;
-    }
+    /// <summary>models/sandbox/template.bin next to the executable or in the repository it runs from; null if there is none yet.</summary>
+    public static string? FindTemplate() => AppFiles.Find("models", "sandbox", FileName);
 
     public float Score(Frame frame, ScreenLayout layout) => Score(Features(frame, layout));
 

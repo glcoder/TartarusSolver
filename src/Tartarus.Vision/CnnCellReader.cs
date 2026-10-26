@@ -52,9 +52,9 @@ public sealed class CnnCellReader : ICellReader
 
     public static string? FindModelDir()
     {
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
+        foreach (string dir in AppFiles.Folders)
         {
-            string candidate = Path.Combine(dir.FullName, "models", "cells");
+            string candidate = Path.Combine(dir, "models", "cells");
             if (File.Exists(Path.Combine(candidate, "cellnet.onnx")) && File.Exists(Path.Combine(candidate, "arrownet.onnx"))) return candidate;
         }
         return null;

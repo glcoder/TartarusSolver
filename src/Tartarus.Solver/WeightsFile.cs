@@ -28,6 +28,9 @@ public static class WeightsFile
         static string F(double x) => x.ToString("0.#####", CultureInfo.InvariantCulture);
     }
 
+    /// <summary>models/solver/weights.txt beside the program or in the repository it runs from; null if there is none.</summary>
+    public static string? Find() => AppFiles.Find("models", "solver", "weights.txt");
+
     public static EvalWeights Read(string text)
     {
         var w = new EvalWeights();

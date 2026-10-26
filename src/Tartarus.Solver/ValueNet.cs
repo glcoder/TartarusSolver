@@ -49,15 +49,7 @@ public sealed class ValueNet
         return new ValueNet(w, b, ins, outs);
     }
 
-    public static string? Find()
-    {
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
-        {
-            string candidate = Path.Combine(dir.FullName, "models", "solver", "value.bin");
-            if (File.Exists(candidate)) return candidate;
-        }
-        return null;
-    }
+    public static string? Find() => AppFiles.Find("models", "solver", "value.bin");
 
     /// <summary>The predicted utility of a state (<see cref="Utility"/> of its outputs).</summary>
     public double Value(in GameState s)

@@ -44,8 +44,8 @@ public sealed class HintService : IDisposable
     {
         Playouts = playouts;
         Seconds = seconds;
-        var weights = FindWeights() is { } path ? WeightsFile.Read(File.ReadAllText(path)) : EvalWeights.Default;
-        WeightsPath = FindWeights();
+        WeightsPath = WeightsFile.Find();
+        var weights = WeightsPath != null ? WeightsFile.Read(File.ReadAllText(WeightsPath)) : EvalWeights.Default;
         // The value network when trained (models/solver/value.bin): playouts to the next morning, then its estimate.
         Net = ValueNet.Find() is { } net ? ValueNet.Load(net) : null;
         _search = new MonteCarloSearch(_engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = Net };
@@ -66,16 +66,6 @@ public sealed class HintService : IDisposable
 
     /// <summary>Raised on a thread-pool thread with the final ranking of a position.</summary>
     public event Action<Hint>? Ready;
-
-    public static string? FindWeights()
-    {
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
-        {
-            string candidate = Path.Combine(dir.FullName, "models", "solver", "weights.txt");
-            if (File.Exists(candidate)) return candidate;
-        }
-        return null;
-    }
 
     /// <summary>Starts searching the position the screen shows, unless it's the one being searched. True when a new search started (the old hint no longer fits).</summary>
     public bool Request(Observation observation, bool consumeOnly)

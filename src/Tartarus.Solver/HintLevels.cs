@@ -17,15 +17,7 @@ public static class HintLevels
         new(512, 3.9, 7.26), new(1024, 7.7, 7.31), new(2048, 13.9, 7.3),
     ];
 
-    public static string? Find()
-    {
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
-        {
-            string candidate = Path.Combine(dir.FullName, "models", "solver", "levels.txt");
-            if (File.Exists(candidate)) return candidate;
-        }
-        return null;
-    }
+    public static string? Find() => AppFiles.Find("models", "solver", "levels.txt");
 
     public static IReadOnlyList<HintLevel> Load(string? path = null)
     {

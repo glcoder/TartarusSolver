@@ -80,14 +80,12 @@ public sealed class OcrEngine : IDisposable
     public static bool ModelsExist(string dir) =>
         File.Exists(Path.Combine(dir, DetectorFile)) && File.Exists(Path.Combine(dir, RecognizerFile)) && File.Exists(Path.Combine(dir, DictionaryFile));
 
-    /// <summary>models/ocr next to the executable, else up the tree from it (running from the source tree).</summary>
+    /// <summary>models/ocr next to the executable, else in the repository it runs from.</summary>
     public static string FindModelDir()
     {
-        string local = Path.Combine(AppContext.BaseDirectory, "models", "ocr");
-        if (ModelsExist(local)) return local;
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
+        foreach (string dir in AppFiles.Folders)
         {
-            string candidate = Path.Combine(dir.FullName, "models", "ocr");
+            string candidate = Path.Combine(dir, "models", "ocr");
             if (ModelsExist(candidate)) return candidate;
         }
         throw new DirectoryNotFoundException("OCR models not found (expected models/ocr with det.onnx, rec_en.onnx, dict_en.txt).");

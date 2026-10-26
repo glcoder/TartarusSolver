@@ -6,6 +6,9 @@
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Shared\AppFiles.cs" Link="AppFiles.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Tartarus.Rules\Tartarus.Rules.csproj" />
   </ItemGroup>
   <ItemGroup>

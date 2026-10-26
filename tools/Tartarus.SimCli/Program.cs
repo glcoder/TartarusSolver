@@ -83,17 +83,7 @@ IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWe
 
 EvalWeights LoadWeights()
 {
-    string? path = Opt("--weights");
-    if (path == null)
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
-        {
-            string candidate = Path.Combine(dir.FullName, "models", "solver", "weights.txt");
-            if (File.Exists(candidate))
-            {
-                path = candidate;
-                break;
-            }
-        }
+    string? path = Opt("--weights") ?? WeightsFile.Find();
     if (path == null) return EvalWeights.Default;
     Console.Error.WriteLine($"weights: {path}");
     return WeightsFile.Read(File.ReadAllText(path));

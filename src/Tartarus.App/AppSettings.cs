@@ -70,13 +70,8 @@ public sealed class AppSettings
     // Relaxed escaping: "Ctrl+Shift+S" and paths stay readable for editing by hand.
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
-    private static string DefaultDatasetDir()
-    {
-        // Next to the solution when running from the source tree, else in LocalAppData.
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
-            if (File.Exists(Path.Combine(dir.FullName, "TartarusSolver.sln"))) return Path.Combine(dir.FullName, "dataset");
-        return Path.Combine(Folder, "dataset");
-    }
+    // In the repository when running from the source tree, else in LocalAppData.
+    private static string DefaultDatasetDir() => Path.Combine(AppFiles.Root ?? Folder, "dataset");
 
     public static AppSettings Load()
     {

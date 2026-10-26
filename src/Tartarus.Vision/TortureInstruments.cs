@@ -151,12 +151,12 @@ public static class NameMatch
 
     private static string Letters(string s) => new(s.ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray());
 
-    /// <summary>models/&lt;name&gt;, looked for up from the program's folder (holding <paramref name="probe"/> if given).</summary>
+    /// <summary>models/&lt;name&gt; beside the program or in the repository it runs from (holding <paramref name="probe"/> if given).</summary>
     public static string? FindModelDir(string name, string? probe)
     {
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
+        foreach (string dir in AppFiles.Folders)
         {
-            string candidate = Path.Combine(dir.FullName, "models", name);
+            string candidate = Path.Combine(dir, "models", name);
             if (probe != null ? File.Exists(Path.Combine(candidate, probe)) : Directory.Exists(candidate)) return candidate;
         }
         return null;

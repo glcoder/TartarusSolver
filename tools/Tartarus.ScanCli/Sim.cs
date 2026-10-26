@@ -37,9 +37,7 @@ internal static class Sim
         var engine = new R.Engine();
         var state = engine.FromObservation(observation, 1);
         Console.Write(R.StateText.Describe(state));
-        string? path = null;
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null && path == null; dir = dir.Parent)
-            if (File.Exists(Path.Combine(dir.FullName, "models", "solver", "weights.txt"))) path = Path.Combine(dir.FullName, "models", "solver", "weights.txt");
+        string? path = WeightsFile.Find();
         var weights = path != null ? WeightsFile.Read(File.ReadAllText(path)) : EvalWeights.Default;
         var net = opt(args, "--no-net") == null && !args.Contains("--no-net") && ValueNet.Find() is { } netPath ? ValueNet.Load(netPath) : null;
         var search = new MonteCarloSearch(engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = net };

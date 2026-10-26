@@ -20,6 +20,9 @@
     <ProjectReference Include="..\Tartarus.Capture\Tartarus.Capture.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Shared\AppFiles.cs" Link="AppFiles.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Sentry" Version="6.12.1" />
   </ItemGroup>
 </Project>

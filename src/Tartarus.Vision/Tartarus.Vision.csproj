@@ -14,6 +14,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Tartarus.Rules\Tartarus.Rules.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\AppFiles.cs" Link="AppFiles.cs" />
+  </ItemGroup>
 
   <!-- OCR models (PaddleOCR, Apache-2.0), downloaded once into models/ocr and copied next to the binaries:
        PP-OCRv4 mobile text detector, PP-OCRv5 mobile English and East Slavic (Russian and English) recognizers, all ONNX.

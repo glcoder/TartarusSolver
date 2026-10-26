@@ -265,7 +265,7 @@ static int SandboxTemplate(string[] args)
     var first = SandboxPresence.Build(frames.Where(f => f.Seed).Select(f => f.Features));
     var template = SandboxPresence.Build(frames.Where(f => f.Seed && first.Score(f.Features) >= 0.2f).Select(f => f.Features));
     var scores = frames.Select(f => (f.Name, f.Seed, Score: template.Score(f.Features))).ToList();
-    string outPath = Path.Combine(FindRepoRoot(), "models", "sandbox", SandboxPresence.FileName);
+    string outPath = Path.Combine(Tartarus.AppFiles.Root ?? Directory.GetCurrentDirectory(), "models", "sandbox", SandboxPresence.FileName);
     template.Save(outPath);
     var boards = scores.Where(s => s.Score >= SandboxPresence.DefaultThreshold).ToList();
     var others = scores.Where(s => s.Score < SandboxPresence.DefaultThreshold).ToList();
@@ -275,13 +275,6 @@ static int SandboxTemplate(string[] args)
     Console.WriteLine($"saved {outPath}");
     return 0;
 
-}
-
-static string FindRepoRoot()
-{
-    for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
-        if (File.Exists(Path.Combine(dir.FullName, "TartarusSolver.sln"))) return dir.FullName;
-    return Directory.GetCurrentDirectory();
 }
 
 static int Migrate(string[] args)
