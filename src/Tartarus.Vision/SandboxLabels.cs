@@ -334,17 +334,32 @@ public sealed class EditableSandbox
     /// <summary>
     /// A cell's new reading counts once two scans in a row agree on it: until then the cell keeps what
     /// <paramref name="shown"/> had. One odd frame (an animation, a glow) doesn't flip a cell; a real change shows a
-    /// scan later. This is the newest reading; <paramref name="previousRead"/> the one before, as read.
+    /// scan later. This is the newest reading; <paramref name="previousRead"/> the one before, as read. The pulsing
+    /// Consumable mark isn't compared (the app sets it from the rules), and a cell the last one showed covered has
+    /// nothing to keep: it takes its first reading.
     /// </summary>
     public void Steady(EditableSandbox shown, EditableSandbox previousRead)
     {
         for (int n = 2; n <= 16; n++)
         {
-            if (SandboxText.CellShort(this[n]) == SandboxText.CellShort(previousRead[n])) continue;
+            if (Reading(this[n]) == Reading(previousRead[n]) || shown[n].Covered) continue;
             var (c, s) = (this[n], shown[n]);
             (c.Kind, c.Code, c.Rarity, c.Consumable, c.Nest, c.Incident, c.VisibleRarity, c.ScratchMarks, c.Tusk, c.Prey, c.Covered) =
                 (s.Kind, s.Code, s.Rarity, s.Consumable, s.Nest, s.Incident, s.VisibleRarity, s.ScratchMarks, s.Tusk, s.Prey, s.Covered);
         }
+
+        static string Reading(CellLabel c) => c.Consumable ? SandboxText.CellShort(c).Replace(" +Consumable", "") : SandboxText.CellShort(c);
+    }
+
+    /// <summary>
+    /// The cells as <paramref name="read"/> saw them, where it saw them (not covered). For a pick that comes up right
+    /// after a change (an Objective done as a door opens, a Chromatic made): <see cref="Steady"/> holds the change back
+    /// a scan, and the pick hides the Sandbox before that scan.
+    /// </summary>
+    public void TakeCells(EditableSandbox read)
+    {
+        for (int n = 2; n <= 16; n++)
+            if (!read[n].Covered) Cells[n - 1] = read[n].Clone();
     }
 
     public EditableSandbox Clone()

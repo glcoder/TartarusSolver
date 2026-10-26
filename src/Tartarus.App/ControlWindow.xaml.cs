@@ -334,6 +334,8 @@ public partial class ControlWindow : Window
     // The last Sandbox the hints saw (with the run's memory) and its text: a pick screen's hint plays on from it.
     private EditableSandbox? _hintSandbox;
     private Vision.Ocr.ScreenText? _hintText;
+    // The same scan as read, before Steady: the base of a pick that comes up right after a change.
+    private EditableSandbox? _hintRead;
     private GameLogWatcher? _gameLog;
     private string? _gameLogPath;
     private readonly PickVotes _pickVotes = new();
@@ -342,6 +344,9 @@ public partial class ControlWindow : Window
     private DateTime _lastBoardAt;
     // The hint is the eye button: the Sandbox changed under a pick (look at it), or it was read while the pick waits (go back).
     private bool _eyeHint;
+    // The Warden's Inmate while the Replace card was offered: after the click the card leaves a moment before the new
+    // Inmate shows.
+    private (int Warden, Tartarus.Vision.Code? Code, Tartarus.Vision.Rarity Rarity, DateTime At)? _replaceOffer;
 
     /// <summary>The run going on, as the game's log tells it; null without a log or between runs.</summary>
     private LoggedRun? LiveLogRun => _logRun is { Finished: false, MaxDays: > 0 } run ? run : null;
@@ -664,6 +669,7 @@ public partial class ControlWindow : Window
             if (r.Ok && _sandbox != null)
             {
                 _hintSandbox = _sandbox.Clone();
+                _hintRead = _lastRead?.Clone();
                 _hintText = r.Text;
                 // The Sandbox viewed from a pick (the eye button): read now, back to the pick is the hint.
                 bool viewing = LiveLogRun is { PickOpen: true };
@@ -703,6 +709,14 @@ public partial class ControlWindow : Window
                 var here = _sandbox.Warden > 1 ? _sandbox[_sandbox.Warden] : null;
                 bool endOnly = r.Text?.Cards is { Count: > 0 } cards && cards.All(c => c.Meaning is "end" || c.Meaning.EndsWith(" end"));
                 if (decision && !consumeOnly && r.Text?.RatwayPick != true && here != null && here.Kind != CellKind.Inmate && !endOnly) decision = false;
+                // Replace clicked: its card is gone but the old Inmate is still in the Warden's cell; the day read as
+                // after the Replace would be the old Inmate's (an End). Wait for the new one, two seconds at most (it can
+                // come out the same).
+                bool replaceCard = r.Text?.Cards.Any(c => c.Meaning.Contains("replace")) == true;
+                if (replaceCard && here is { Kind: CellKind.Inmate }) _replaceOffer = (_sandbox.Warden, here.Code, here.Rarity, DateTime.Now);
+                else if (decision && !consumeOnly && _replaceOffer is { } offer && offer.Warden == _sandbox.Warden && here is { Kind: CellKind.Inmate }
+                    && here.Code == offer.Code && here.Rarity == offer.Rarity && DateTime.Now - offer.At < TimeSpan.FromSeconds(2))
+                    decision = false;
                 if (!consumeOnly && !destinations && !decision)
                 {
                     _hints.Clear();
@@ -761,6 +775,13 @@ public partial class ControlWindow : Window
                 else if (under != null)
                 {
                     var text = under == _hintSandbox ? _hintText : null;
+                    // The last scan's own reading of the cells: the change that brought the pick (a door opened on the
+                    // Objective's Inmate) is in it, not yet in the steadied Sandbox.
+                    if (under == _hintSandbox && _hintRead != null)
+                    {
+                        under = under.Clone();
+                        under.TakeCells(_hintRead);
+                    }
                     // The Chromatic that brought this Warden's Treasure (or one more, gone by unheard): the log counts on
                     // while the panel is out of sight.
                     if (LiveLogRun is { FromStart: true } counted && counted.ChromaticAtLeast > under.Chromatic)

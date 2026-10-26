@@ -8,6 +8,12 @@ things.
 
 - Make Your Decision with only End, left to click when a merge took the Warden's Inmate away (the game ends such a
   day by itself otherwise), gets its hint: the End card framed with the chests the run is expected to end with.
+- No "End" hint for a moment after Replace: the card leaves before the new Inmate shows, and the old one was taken for
+  the day after the Replace; the hint waits for the new Inmate (two seconds at most).
+- A pick that comes up right after a change (an Objective done as a door opens on its Inmate) is weighed on the
+  Sandbox as last read, not as it was a scan before (the Wolf Ultimate that did it was missing from the hint).
+- Cells coming out from under a cover (an animation, a popup) take their reading at once, and the pulsing Consumable
+  mark no longer holds a reading back: two Lions read as Unopened for a hint after a Warden's Treasure pick.
 
 ## 0.7.0 — 2026-10-26
 
