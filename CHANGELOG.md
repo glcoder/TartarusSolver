@@ -4,6 +4,13 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.6.1 — 2026-10-26
+
+- The hint quality levels (playouts per move: time and Chromatic per run) remeasured on 4000 runs under the
+  chest-worth weighing; the old ones came from 400 runs and the earlier rules.
+- The app looks for its models only beside itself (and, run from the source tree, in the repository up to its root),
+  never in the folders above.
+
 ## 0.6.0 — 2026-10-26
 
 Hints
