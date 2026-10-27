@@ -4,6 +4,26 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## Unreleased
+
+- Steadier hints: a new position on the Sandbox is hinted once two scans in a row read it alike, so a frame in the
+  middle of an animation (a Chromatic's flight, a popup fading in) no longer moves the frame there and back; the hint
+  shown stays meanwhile.
+- No hint for the Sandbox the game has already changed: after the log tells of a bite, a Chromatic, a Prison Incident
+  or a Warden's Treasure taken, a reading like the one just before it is the old Sandbox still animating (up to 4 s).
+  In chains the eaten Inmate was framed as the next bite for up to 5 s (25 times in 4 runs).
+- Two Warden's Treasures in a row (two Chromatics at once): the second is no longer hinted over the Sandbox from
+  before the first was taken (a Three-Headed Thumb Ring that had opened three cells was hinted again; the eye button
+  showed the right one). The pick asks for the eye button until the new Sandbox is read, checked against the Sandbox
+  the hints play on; the game log's event times keep their milliseconds for it.
+- The Hunt's target pick is hinted as one: its banner reads "Select an Objective" like the Sewer Ratway's, and the
+  hint framed a cell to go to. After the Hunt card on the same day and cell, the best Hunt target is framed on its
+  cell, from the Sandbox read with the cards (the pick dims the other cells, an Ultimate read Normal there). The
+  banner still showing as the next day begins is no decision, and a Warden's Treasure or instrument pick never
+  carries a Sewer Ratway or Interrogation Room choice (a Treasure after a Hunt showed no hint at all).
+- The overlay moves onto another monitor small and takes the game's size there: on a 4K screen with another DPI than
+  where it started, the window's first placement hung for seconds while WPF scaled the screen-sized overlay.
+
 ## 0.7.17 — 2026-10-27
 
 - Fewer false hang reports: the window's start may take up to 30 s (a cold start loading WPF's theme took 5 s), and
