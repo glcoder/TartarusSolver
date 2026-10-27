@@ -4,6 +4,18 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.10 — 2026-10-27
+
+- The chests a hint shows are what runs end with: the search's expectations ran low (its playouts play worse than the
+  player it advises), by 0.8 Chromatic at a run's start down to none at its end (3000 runs; the player's real runs:
+  +0.5 on average). A table by Remaining Days, `models/solver/chests.txt` (`tartarus-sim calib`), corrects them; on
+  the real runs the shown Chromatic now miss by +0.1 on average instead of +0.5. The moves rank as before.
+- The playouts' moves no longer see behind the doors: they looked one step ahead on their world, where every door's
+  Inmate and every marker's incident is drawn already, and picked the Destination with the best Inmate behind it.
+  Now they look on a world of their own drawing. As strong as before (4000 paired runs: +0.03 ± 0.04). The hint
+  quality table is remeasured with them (4000 runs: 32…2048 playouts = 6.78…7.69 Chromatic, the same within noise;
+  a hint takes 5-10% longer).
+
 ## 0.7.9 — 2026-10-27
 
 - The game's log of some clients names only the pages they open (no sounds, clicks or day counter): it is read too,

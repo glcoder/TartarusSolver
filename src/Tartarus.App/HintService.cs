@@ -55,6 +55,8 @@ public sealed class HintService : IDisposable
         Policy = ValueNet.FindPolicy() is { } policy ? ValueNet.Load(policy) : null;
         // The playouts' instrument picks by a network of their own when there is one (models/solver/picks.bin).
         Picks = ValueNet.FindPicks() is { } picks ? ValueNet.Load(picks) : null;
+        // The chests shown as runs end with them, not as the playouts got them (models/solver/chests.txt).
+        Chests = ChestCalibration.Load();
         _search = new MonteCarloSearch(_engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = Net, Policy = Policy, InstrumentPolicy = Picks };
         // Warm up (the JIT's optimized code, the thread pool) so the first real hint is as quick as the rest.
         _ = Task.Run(() =>
@@ -72,6 +74,7 @@ public sealed class HintService : IDisposable
     public ValueNet? Net { get; }
     public ValueNet? Policy { get; }
     public ValueNet? Picks { get; }
+    public ChestCalibration? Chests { get; }
 
     /// <summary>Raised on a thread-pool thread with the final ranking of a position.</summary>
     public event Action<Hint>? Ready;
@@ -95,6 +98,7 @@ public sealed class HintService : IDisposable
         _cts?.Cancel();
         var cts = _cts = new CancellationTokenSource();
         var limit = TimeSpan.FromSeconds(Seconds);
+        int days = state.RemainingDays;
         Searching = Task.Run(() =>
         {
             try
@@ -105,6 +109,7 @@ public sealed class HintService : IDisposable
                 // merge took the Warden's Inmate away, and then it waits for the click.
                 if (result.Actions.Count == 0) return;
                 result = Steady(state, result, consumeOnly);
+                if (Chests is { } chests) result = result with { Actions = [.. result.Actions.Select(a => Calibrated(a, chests, days))] };
                 var hint = new Hint(state, result, consumeOnly, Final: true);
                 _shown = hint;
                 Ready?.Invoke(hint);
@@ -135,6 +140,13 @@ public sealed class HintService : IDisposable
         var reordered = new List<ActionValue> { same };
         reordered.AddRange(result.Actions.Where(a => a != same));
         return result with { Actions = reordered };
+    }
+
+    /// <summary>An action's expected chests as runs end with them: the ranking (its mean) stays the search's.</summary>
+    private static ActionValue Calibrated(ActionValue a, ChestCalibration chests, int days)
+    {
+        var (chromatic, ultimate) = chests.Adjust(days, a.Chromatic, a.Ultimate);
+        return a with { Chromatic = chromatic, Ultimate = ultimate };
     }
 
     /// <summary>Forget the position (a non-game screen): the next one is searched afresh.</summary>

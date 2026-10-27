@@ -1,0 +1,22 @@
+# A hint's expected chests -> what the runs ended with: per Remaining Days (19 = 19 and more), run's result =
+# a + b * expectation, for Chromatic and Ultimate. Fitted on 3000 runs of vn:1024:3:p (0.7.10): tartarus-sim calib --runs 3000 --table
+days=19 chromatic=1.693,0.880 ultimate=-0.335,1.723
+days=18 chromatic=1.515,0.896 ultimate=-0.380,1.671
+days=17 chromatic=1.411,0.910 ultimate=-0.347,1.645
+days=16 chromatic=1.295,0.917 ultimate=-0.282,1.582
+days=15 chromatic=1.348,0.906 ultimate=-0.342,1.606
+days=14 chromatic=1.111,0.929 ultimate=-0.273,1.548
+days=13 chromatic=1.176,0.921 ultimate=-0.189,1.482
+days=12 chromatic=0.983,0.939 ultimate=-0.182,1.465
+days=11 chromatic=0.923,0.942 ultimate=-0.129,1.406
+days=10 chromatic=0.807,0.953 ultimate=-0.155,1.393
+days=9 chromatic=0.782,0.950 ultimate=-0.091,1.328
+days=8 chromatic=0.690,0.959 ultimate=-0.109,1.299
+days=7 chromatic=0.615,0.963 ultimate=-0.089,1.244
+days=6 chromatic=0.502,0.974 ultimate=-0.085,1.212
+days=5 chromatic=0.460,0.977 ultimate=-0.083,1.168
+days=4 chromatic=0.427,0.979 ultimate=-0.057,1.116
+days=3 chromatic=0.511,0.968 ultimate=-0.097,1.080
+days=2 chromatic=0.611,0.960 ultimate=-0.152,1.064
+days=1 chromatic=0.358,0.976 ultimate=-0.044,1.029
+days=0 chromatic=0.082,0.994 ultimate=0.001,1.007

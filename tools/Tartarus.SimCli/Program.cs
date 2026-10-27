@@ -57,6 +57,7 @@ return args[0] switch
     "latency" => Latency(),
     "levels" => Levels(),
     "objcheck" => ObjCheck(),
+    "calib" => Calib(),
     _ => Fail($"unknown command {args[0]}"),
 };
 
@@ -77,14 +78,14 @@ IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWe
     if (p.StartsWith("mc:", StringComparison.Ordinal)) return new SearchPolicy(engine, int.Parse(p[3..]), weights, threads: 1);
     // vn:N[:D[:R]]: the search with the value network at the leaves, D days on (default 3, the best of 1-6); R the
     // playouts' own moves by the network too (0 never, 1 the morning's Destination, 2 every decision), or p: by the
-    // policy network (--policy-net).
+    // policy network (--policy-net). A last ":peek": the playouts' moves see the doors their world has drawn (before 0.7.10).
     if (p.StartsWith("vn:", StringComparison.Ordinal))
     {
         var parts = p.Split(':');
         bool byPolicy = parts.Length > 3 && parts[3] is "p" or "pi";
         return new SearchPolicy(engine, int.Parse(parts[1]), weights, threads: 1, net: net ?? throw new InvalidOperationException("no value network (models/solver/value.bin, --net)"),
-            leafDays: parts.Length > 2 ? int.Parse(parts[2]) : 3, rolloutNet: parts.Length > 3 && !byPolicy ? int.Parse(parts[3]) : 0,
-            policy: byPolicy ? PolicyNet(policy) : null, policyInstruments: parts.Length > 3 && parts[3] == "pi", instrumentPolicy: instruments ?? instrumentNet);
+            leafDays: parts.Length > 2 ? int.Parse(parts[2]) : 3, rolloutNet: parts.Length > 3 && !byPolicy && parts[3] != "peek" ? int.Parse(parts[3]) : 0,
+            policy: byPolicy ? PolicyNet(policy) : null, policyInstruments: parts.Length > 3 && parts[3] == "pi", instrumentPolicy: instruments ?? instrumentNet, peek: parts[^1] == "peek");
     }
     return p switch
     {
@@ -236,6 +237,27 @@ int ObjCheck()
     // objcheck [--runs N] [--policy vn:1024:3:p] [--seed S]: the search's values before a done Objective and on its pick.
     string policy = Opt("--policy") ?? "vn:1024:3:p";
     Calibration.Run(engine, seed => (SearchPolicy)MakePolicy(seed, policy), IntOpt("--runs", 2000), (ulong)IntOpt("--seed", 1));
+    return 0;
+}
+
+int Calib()
+{
+    // calib [--runs N] [--policy vn:1024:3:p] [--seed S] [--out decisions.csv] [--table chests.txt]: the chests a hint shows
+    // against the runs' results, and the fit that corrects them. calib --from decisions.csv --table chests.txt [--about text]:
+    // the fit again from decisions written before.
+    if (Opt("--from") is { } from)
+    {
+        var rows = File.ReadLines(from).Skip(1).Select(l => l.Split(',')).Select(f => (int.Parse(f[0], CultureInfo.InvariantCulture),
+            double.Parse(f[1], CultureInfo.InvariantCulture), double.Parse(f[2], CultureInfo.InvariantCulture),
+            int.Parse(f[3], CultureInfo.InvariantCulture), int.Parse(f[4], CultureInfo.InvariantCulture))).ToList();
+        string table = Opt("--table") ?? "chests.txt";
+        File.WriteAllText(table, ChestCalibration.Fit(rows, Opt("--about") ?? $"Fitted on {from}: tartarus-sim calib --from"));
+        Console.WriteLine($"{rows.Count} decisions, saved {table}");
+        return 0;
+    }
+    string policy = Opt("--policy") ?? "vn:1024:3:p";
+    Calibration.Chests(engine, seed => (SearchPolicy)MakePolicy(seed, policy), IntOpt("--runs", 2000), (ulong)IntOpt("--seed", 1), Opt("--out"),
+        Opt("--table"), $"Fitted on {IntOpt("--runs", 2000)} runs of {policy}: tartarus-sim calib --table");
     return 0;
 }
 

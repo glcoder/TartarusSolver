@@ -119,7 +119,8 @@ python tools/train/policynet.py actions-*.bin     # the playouts' policy network
 Optional: `policydata --values-out values.bin` writes the same runs' mornings for the value network too;
 `policynet.py --instruments --out models/solver/picks.bin` trains a network for the playouts' instrument picks, used
 when the file is there. `tartarus-sim compare` judges a change (4000 paired runs), `tartarus-sim levels` remeasures
-`models/solver/levels.txt`, `tartarus-sim objcheck` compares the search's values before a done Objective and on its
+`models/solver/levels.txt`, `tartarus-sim calib --table models/solver/chests.txt` refits how a hint's expected chests
+turn into what runs end with, `tartarus-sim objcheck` compares the search's values before a done Objective and on its
 pick. The simulator gives a run its Re-roll at 50% (the Pactspirit Twin Inquisitors); `--reroll-percent` changes it.
 
 ## Disclaimer

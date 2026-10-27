@@ -24,6 +24,7 @@ public static class AppVersion
         ("value", @"solver\value.bin"),
         ("policy", @"solver\policy.bin"),
         ("picks", @"solver\picks.bin"),
+        ("chests", @"solver\chests.txt"),
         ("weights", @"solver\weights.txt"),
     ];
 

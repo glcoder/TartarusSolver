@@ -42,6 +42,8 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
     public bool PolicyInstruments { get; init; }
     /// <summary>A network of their own for the playouts' instrument picks (and Re-rolls), whatever takes the rest.</summary>
     public ValueNet? InstrumentPolicy { get; init; }
+    /// <summary>The playouts' moves look at the doors their world has drawn (before 0.7.10; for comparison): <see cref="HeuristicPolicy"/>.</summary>
+    public bool PeekingPlayouts { get; init; }
 
     /// <summary>Plays on from <paramref name="s"/> and returns the run's (predicted) utility, Chromatic, Ultimate and Legendary counts.</summary>
     private (double Utility, double Chromatic, double Ultimate, double Legendary) Playout(ref GameState s, IPolicy policy)
@@ -102,7 +104,7 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
                 var det = start;
                 engine.Determinize(ref det, sampleSeed, fillHidden: true);
                 var policy = new HeuristicPolicy(engine, _w, sampleSeed ^ 0x5DEECE66DUL, Policy ?? (RolloutNet > 0 ? Net : null), movesOnly: Policy == null && RolloutNet == 1,
-                    instrumentsByNet: Policy != null && PolicyInstruments, instrumentNet: InstrumentPolicy);
+                    instrumentsByNet: Policy != null && PolicyInstruments, instrumentNet: InstrumentPolicy, peek: PeekingPlayouts);
                 foreach (int i in live)
                 {
                     var s = det;
@@ -153,9 +155,9 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
 }
 
 /// <summary>A policy that searches at every decision: for measuring how well the search plays.</summary>
-public sealed class SearchPolicy(Engine engine, int playouts, EvalWeights? weights = null, int threads = 1, ValueNet? net = null, int leafDays = 3, int rolloutNet = 0, ValueNet? policy = null, bool policyInstruments = false, ValueNet? instrumentPolicy = null) : IPolicy
+public sealed class SearchPolicy(Engine engine, int playouts, EvalWeights? weights = null, int threads = 1, ValueNet? net = null, int leafDays = 3, int rolloutNet = 0, ValueNet? policy = null, bool policyInstruments = false, ValueNet? instrumentPolicy = null, bool peek = false) : IPolicy
 {
-    private readonly MonteCarloSearch _search = new(engine, weights) { Threads = threads, Net = net, LeafDays = leafDays, RolloutNet = rolloutNet, Policy = policy, PolicyInstruments = policyInstruments, InstrumentPolicy = instrumentPolicy };
+    private readonly MonteCarloSearch _search = new(engine, weights) { Threads = threads, Net = net, LeafDays = leafDays, RolloutNet = rolloutNet, Policy = policy, PolicyInstruments = policyInstruments, InstrumentPolicy = instrumentPolicy, PeekingPlayouts = peek };
     private ulong _seed = 1;
 
     /// <summary>The last search's value of its position (the best action's mean utility); null when there was nothing to choose.</summary>
