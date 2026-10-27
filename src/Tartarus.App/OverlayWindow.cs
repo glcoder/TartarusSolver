@@ -65,6 +65,12 @@ public sealed class OverlayWindow : Window
         // Re-assert topmost every time: a borderless game window can climb above us when it's activated.
         uint flags = Native.SWP_NOACTIVATE;
         if (r == _placed) flags |= Native.SWP_NOMOVE | Native.SWP_NOSIZE;
+        // Onto another monitor, whose DPI may differ: a small window goes there first, then takes the size. On the DPI
+        // change WPF scales the window and waits for its frame, and a screen-sized transparent one hung the UI for
+        // seconds (2026-10-28, a 4K player's first placement).
+        else if (Native.MonitorFromPoint(new Native.POINT { X = r.Left + r.Width / 2, Y = r.Top + r.Height / 2 }, Native.MONITOR_DEFAULTTONEAREST)
+                 != Native.MonitorFromWindow(_hwnd, Native.MONITOR_DEFAULTTONEAREST))
+            Native.SetWindowPos(_hwnd, Native.HWND_TOPMOST, r.Left, r.Top, 16, 16, Native.SWP_NOACTIVATE);
         Native.SetWindowPos(_hwnd, Native.HWND_TOPMOST, r.Left, r.Top, r.Width, r.Height, flags);
         _placed = r;
     }
