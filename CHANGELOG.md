@@ -4,7 +4,7 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
-## Unreleased
+## 0.7.18 — 2026-10-28
 
 - Steadier hints: a new position on the Sandbox is hinted once two scans in a row read it alike, so a frame in the
   middle of an animation (a Chromatic's flight, a popup fading in) no longer moves the frame there and back; the hint
@@ -13,14 +13,11 @@ things.
   or a Warden's Treasure taken, a reading like the one just before it is the old Sandbox still animating (up to 4 s).
   In chains the eaten Inmate was framed as the next bite for up to 5 s (25 times in 4 runs).
 - Two Warden's Treasures in a row (two Chromatics at once): the second is no longer hinted over the Sandbox from
-  before the first was taken (a Three-Headed Thumb Ring that had opened three cells was hinted again; the eye button
-  showed the right one): the pick plays on the Sandbox read after the first was taken, or asks for the eye button
-  when none was; the game log's event times keep their milliseconds for it. A frame caught as a popup fades in or
-  out is no such reading (a Treasure was hinted over one: two Ultimates read Normal, 9.9 Chromatic instead of 10).
-  A look through the eye button always counts, and a Chromatic's flight to the panel is no change of its own (the
-  eye button was asked for again and again: the cell was empty before the flight's sound).
-  On the Sandbox viewed from a pick, "back to the pick" is framed once a reading of it counts, not as it comes up
-  (a quick look could go back before the Sandbox was read).
+  before the first was taken (a Three-Headed Thumb Ring that had opened three cells was hinted again). A pick plays
+  on the latest reading of the Sandbox after the first was taken, or asks for the eye button when there is none; a
+  frame caught as a popup fades in or out is no such reading (a Treasure was hinted over one at 9.9 Chromatic
+  instead of 10). A look through the eye button always counts, so the eye button is no longer asked for again and
+  again, and "back to the pick" is framed only once the Sandbox viewed from the pick has been read.
 - The Hunt's target pick is hinted as one: its banner reads "Select an Objective" like the Sewer Ratway's, and the
   hint framed a cell to go to. After the Hunt card on the same day and cell, the best Hunt target is framed on its
   cell, from the Sandbox read with the cards (the pick dims the other cells, an Ultimate read Normal there). The
