@@ -4,6 +4,16 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.8 — 2026-10-27
+
+- The simulator gives a run its Re-roll at 50%, as the Pactspirit Twin Inquisitors does (`--reroll-percent` changes
+  it); a position the screen shows keeps the Re-rolls it reads. The hint quality table is remeasured under it (4000
+  runs: 32…2048 playouts = 6.76…7.68 Chromatic; fewer than before because half the runs have no Re-roll).
+- Optional `models/solver/picks.bin`: a network of its own for the playouts' Torture Instrument picks (`policynet.py
+  --instruments`), used when the file is there. Not shipped: on 4000 paired runs it ties the heuristic picks.
+- `tartarus-sim`: `objcheck` (the search's values around a done Objective's reward pick), `policydata --values-out`
+  (the same runs' mornings for the value network, with the search's value), `--instrument-net`, `--policy-instruments`.
+
 ## 0.7.7 — 2026-10-27
 
 - Re-rolls left when a pick's counter doesn't read: the last count read in this run less the Re-rolls clicked since,

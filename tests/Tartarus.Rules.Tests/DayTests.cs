@@ -152,13 +152,22 @@ public class DayTests
     [Fact]
     public void Re_roll_draws_a_new_offer_and_spends_an_attempt()
     {
-        var e = new Engine(new RuleOptions { Rerolls = 1 });
+        var e = new Engine(new RuleOptions { Rerolls = 1, RerollPercent = 100 });
         var s = e.NewRun(9);
         Assert.Contains(new GameAction(ActionKind.Reroll), Legal(e, s));
         Do(e, ref s, new GameAction(ActionKind.Reroll));
         Assert.Equal(0, s.Rerolls);
         Assert.Equal(PendingKind.Instrument, s.Pending[0].Kind);
         Assert.DoesNotContain(new GameAction(ActionKind.Reroll), Legal(e, s));
+    }
+
+    [Fact]
+    public void A_run_has_its_Re_roll_by_the_Pactspirit_s_chance()
+    {
+        // Twin Inquisitors: a 50% chance of 1 refresh for the run's Warden's Duty.
+        var e = new Engine();
+        int with = Enumerable.Range(1, 2000).Count(seed => e.NewRun((ulong)seed).Rerolls == 1);
+        Assert.InRange(with, 900, 1100);
     }
 
     private static int Markers(in GameState s)

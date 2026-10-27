@@ -5,9 +5,10 @@
 
 Input: Tartarus.Solver.Features of the state after the action (the same dice for all of a decision's actions). The
 network scores each after-state; over a decision's actions the scores' softmax is fitted to the softmax of the
-search's means over a temperature (in Chromatic units). Instrument picks are left out: the playouts take those by
-the measured instrument values. Reported per decision kind: how often the network's choice is the search's, and its
-regret (the search's best mean minus the mean of the action taken), against the heuristic policy's.
+search's means over a temperature (in Chromatic units). Instrument picks are left out (the playouts take those by
+the measured instrument values) unless --instruments: then the network takes them too (the search's "pi").
+Reported per decision kind: how often the network's choice is the search's, and its regret (the search's best mean
+minus the mean of the action taken), against the heuristic policy's.
 Exported for Tartarus.Solver.ValueNet with one output: "TVNT", layer count, then per layer outputs, inputs, weights
 (row by row), biases, float32.
 """
@@ -34,8 +35,8 @@ def row_type(features):
                      ("decision", "<i4"), ("kind", "u1"), ("flags", "u1"), ("day", "u1"), ("pad", "u1")])
 
 
-def load(paths):
-    """All rows, decisions numbered across the files; decisions that are instrument picks dropped."""
+def load(paths, instruments=False):
+    """All rows, decisions numbered across the files; decisions that are instrument picks dropped unless instruments."""
     parts, offset = [], 0
     for p in paths:
         with open(p, "rb") as f:
@@ -52,7 +53,7 @@ def load(paths):
     group = np.cumsum(first) - 1
     has_pick = np.zeros(group[-1] + 1, bool)
     np.logical_or.at(has_pick, group, np.isin(data["kind"], list(LEFT_OUT)))
-    keep = ~has_pick[group]
+    keep = np.ones(len(group), bool) if instruments else ~has_pick[group]
     data = data[keep]
     first = np.r_[True, data["decision"][1:] != data["decision"][:-1]]
     group = np.cumsum(first) - 1
@@ -62,7 +63,7 @@ def load(paths):
         has = np.zeros(group[-1] + 1, bool)
         np.logical_or.at(has, group, data["kind"] == KINDS.index(k))
         kind[(kind == 0) & has] = KINDS.index(k)
-    print(f"{len(data)} actions in {group[-1] + 1} decisions (instrument picks left out)")
+    print(f"{len(data)} actions in {group[-1] + 1} decisions" + ("" if instruments else " (instrument picks left out)"))
     return data, group, kind
 
 
@@ -116,11 +117,12 @@ def main():
     ap.add_argument("--batch", type=int, default=4096, help="decisions per batch")
     ap.add_argument("--lr", type=float, default=2e-3)
     ap.add_argument("--tau", type=float, default=0.1, help="temperature of the search's means, Chromatic units")
+    ap.add_argument("--instruments", action="store_true", help="keep the instrument picks (and their Re-roll)")
     a = ap.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"device: {torch.cuda.get_device_name(0) if device.type == 'cuda' else 'cpu'}")
     paths = [p for pattern in a.data for p in sorted(glob.glob(pattern))]
-    data, group, kind = load(paths)
+    data, group, kind = load(paths, a.instruments)
     groups = int(group[-1]) + 1
     features = data["x"].shape[1]
     x = torch.from_numpy(np.ascontiguousarray(data["x"])).to(device)

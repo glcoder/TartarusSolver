@@ -62,6 +62,9 @@ public sealed class ValueNet
     /// <summary>The playouts' policy network, models/solver/policy.bin (tools/train/policynet.py); null if there is none.</summary>
     public static string? FindPolicy() => AppFiles.Find("models", "solver", "policy.bin");
 
+    /// <summary>The playouts' instrument picks' own network, models/solver/picks.bin (policynet.py --instruments); null if there is none.</summary>
+    public static string? FindPicks() => AppFiles.Find("models", "solver", "picks.bin");
+
     /// <summary>The predicted utility of a state (<see cref="Utility"/> of its outputs).</summary>
     public double Value(in GameState s)
     {

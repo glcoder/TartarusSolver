@@ -177,7 +177,7 @@ public sealed partial class Engine
     /// <summary>The run's first pick: a new run with the screen's theme, Objective and offer; its first Inmates drawn.</summary>
     private GameState StartOfRun(Observation o, ulong seed)
     {
-        var e = new Engine(Options with { Rerolls = o.Rerolls ?? Options.Rerolls, Theme = o.Theme, Objective = o.Objective }) { AutoEnd = AutoEnd };
+        var e = new Engine(Options with { Rerolls = o.Rerolls ?? Options.Rerolls, RerollPercent = 100, Theme = o.Theme, Objective = o.Objective }) { AutoEnd = AutoEnd };
         var s = e.NewRun(seed);
         if (o.Offer.Count > 0 && s.PendingCount > 0 && s.Pending[0].Kind == PendingKind.Instrument)
         {
@@ -200,7 +200,7 @@ public sealed partial class Engine
     private GameState RedrawStart(in GameState s, ulong seed)
     {
         var objective = (s.Unseen & UnseenStart.Objective) != 0 ? (ObjectiveKind?)null : s.Objective;
-        var e = new Engine(Options with { Rerolls = s.Rerolls, Theme = s.Theme, Objective = objective }) { AutoEnd = AutoEnd };
+        var e = new Engine(Options with { Rerolls = s.Rerolls, RerollPercent = 100, Theme = s.Theme, Objective = objective }) { AutoEnd = AutoEnd };
         var fresh = e.NewRun(seed);
         if (s.PendingCount > 0 && fresh.PendingCount > 0) fresh.Pending[0] = s.Pending[0];
         return fresh;

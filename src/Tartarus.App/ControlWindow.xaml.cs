@@ -62,7 +62,7 @@ public partial class ControlWindow : Window
                     + $" ({hint.Result.Elapsed.TotalMilliseconds:0} ms)");
             _hint = hint;
             HintStatus.Text = $"Last hint: {hint.Result.Elapsed.TotalMilliseconds:0} ms, {hint.Result.Playouts:N0} playouts"
-                + (_hints.Net != null ? " · value net" : " · no value net") + (_hints.Policy != null ? " · policy net" : "");
+                + (_hints.Net != null ? " · value net" : " · no value net") + (_hints.Policy != null ? " · policy net" : "") + (_hints.Picks != null ? " · picks net" : "");
             RefreshOverlay();
         });
         _dataset = new Dataset(settings.DatasetDir);

@@ -23,6 +23,7 @@ public static class AppVersion
         ("sandbox", @"sandbox\template.bin"),
         ("value", @"solver\value.bin"),
         ("policy", @"solver\policy.bin"),
+        ("picks", @"solver\picks.bin"),
         ("weights", @"solver\weights.txt"),
     ];
 
@@ -34,7 +35,7 @@ public static class AppVersion
 
     /// <summary>"0.5.0 (25.10 18:40) · cells 25.10 3fa1c2 · value 24.10 9b02e1": the app and the weights that matter most.</summary>
     public static string Short => $"{Number} ({Built:dd.MM HH:mm})"
-        + string.Concat(Models.Where(m => m.Name is "cells" or "value" or "policy").Select(m => $" · {m.Name} {m.Trained:dd.MM} {m.Hash}"));
+        + string.Concat(Models.Where(m => m.Name is "cells" or "value" or "policy" or "picks").Select(m => $" · {m.Name} {m.Trained:dd.MM} {m.Hash}"));
 
     /// <summary>Every model, one per line.</summary>
     public static string Full => $"Tartarus Solver {Number}, built {Built:yyyy-MM-dd HH:mm}"

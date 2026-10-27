@@ -143,6 +143,7 @@ public partial class ControlWindow
                 hintPlayouts = _hints.Playouts,
                 valueNet = _hints.Net != null,
                 policyNet = _hints.Policy != null,
+                picksNet = _hints.Picks != null,
             },
         };
     }

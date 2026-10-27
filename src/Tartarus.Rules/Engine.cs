@@ -19,7 +19,9 @@ public sealed partial class Engine(RuleOptions? options = null)
     /// <summary>A run as the game starts it: Inmates out on random cells, maybe a Prison Incident, the first instrument offer.</summary>
     public GameState NewRun(ulong seed)
     {
-        var s = new GameState { Rng = new Rng(seed), NextId = 1, Rerolls = (byte)Math.Clamp(Options.Rerolls, 0, 255) };
+        // The run's Re-rolls by a draw of their own: the rest of the run's dice stay as they were without it.
+        bool rerolls = Options.RerollPercent >= 100 || new Rng(seed ^ 0x2E2011UL).Chance(Options.RerollPercent);
+        var s = new GameState { Rng = new Rng(seed), NextId = 1, Rerolls = (byte)(rerolls ? Math.Clamp(Options.Rerolls, 0, 255) : 0) };
         for (int n = 0; n < GameData.Cells; n++) s.Cells[n].Sealed = n != GameData.Room;
 
         s.Objective = Options.Objective ?? (ObjectiveKind)s.Rng.Below(5);

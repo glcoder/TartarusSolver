@@ -9,9 +9,12 @@ namespace Tartarus.Solver;
 /// </summary>
 /// <remarks>
 /// With a value network (<paramref name="net"/>) the positions are compared by its estimate instead: all decisions,
-/// or only the morning's Destination (<paramref name="movesOnly"/>). Slower, closer to how the search plays.
+/// or only the morning's Destination (<paramref name="movesOnly"/>). Slower, closer to how the search plays. The
+/// instrument picks and their Re-roll by it too only when it was trained on them (<paramref name="instrumentsByNet"/>),
+/// or by a network of their own (<paramref name="instrumentNet"/>): the after-state of a Re-roll is the run without a
+/// new instrument and one Re-roll fewer.
 /// </remarks>
-public sealed class HeuristicPolicy(Engine engine, EvalWeights? weights = null, ulong seed = 1, ValueNet? net = null, bool movesOnly = false) : IPolicy
+public sealed class HeuristicPolicy(Engine engine, EvalWeights? weights = null, ulong seed = 1, ValueNet? net = null, bool movesOnly = false, bool instrumentsByNet = false, ValueNet? instrumentNet = null) : IPolicy
 {
     private readonly EvalWeights _w = weights ?? EvalWeights.Default;
     private Rng _rng = new(seed);
@@ -19,17 +22,19 @@ public sealed class HeuristicPolicy(Engine engine, EvalWeights? weights = null, 
     public GameAction Choose(Engine _, in GameState s, ReadOnlySpan<GameAction> legal)
     {
         if (legal.Length == 1) return legal[0];
-        if (legal[0].Kind == ActionKind.PickInstrument) return PickInstrument(s, legal);
+        bool pick = legal[0].Kind == ActionKind.PickInstrument;
+        var scorer = pick ? instrumentNet ?? (instrumentsByNet ? net : null) : net;
+        if (pick && scorer == null) return PickInstrument(s, legal);
         var dice = new Rng(_rng.Next());
         int best = 0;
         double bestValue = double.NegativeInfinity;
-        bool byNet = net != null && (!movesOnly || legal[0].Kind == ActionKind.Move);
+        bool byNet = scorer != null && (pick || !movesOnly || legal[0].Kind == ActionKind.Move);
         for (int i = 0; i < legal.Length; i++)
         {
             var copy = s;
             copy.Rng = dice;
             engine.Apply(ref copy, legal[i]);
-            double v = byNet ? net!.Value(copy) : Evaluator.Value(copy, _w);
+            double v = byNet ? scorer!.Value(copy) : Evaluator.Value(copy, _w);
             if (v > bestValue)
             {
                 bestValue = v;

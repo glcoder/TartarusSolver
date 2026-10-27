@@ -57,6 +57,11 @@ public sealed record RuleOptions
 
     /// <summary>Instrument Re-rolls the run has (the Pactspirits' "Remaining attempts", shared by every pick).</summary>
     public int Rerolls { get; init; } = 1;
+    /// <summary>
+    /// % chance a run has them at all: the Pactspirit Twin Inquisitors gives its 1 refresh for a run's Warden's Duty
+    /// at 50% (100% enhanced); without it there is none.
+    /// </summary>
+    public double RerollPercent { get; init; } = 50;
 
     /// <summary>
     /// Severed Iron Maiden: the condition is read on the Inmate replaced (as many Inmates above its rarity as below

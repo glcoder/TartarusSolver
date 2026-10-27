@@ -8,11 +8,12 @@ using Tartarus.Solver;
 /// the search's mean utility for it. File: "TPD1" magic, feature count, row count patched at the end, then one row per
 /// action: the after-state's features (float16), the search's mean and standard error (float32), its playouts
 /// (int32), the decision's number (int32, shared by its actions), the action's kind, flags (1 the heuristic policy's
-/// choice, 2 the search's), the day, a pad byte.
+/// choice, 2 the search's), the day, a pad byte. With <c>valuesOut</c> the same runs' mornings go there too, as
+/// <see cref="SelfPlay"/> writes them (one strong search's runs feed both networks).
 /// </summary>
 internal static class PolicyData
 {
-    public static void Run(Engine engine, Func<ulong, SearchPolicy> search, EvalWeights weights, int runs, ulong seed0, string outPath)
+    public static void Run(Engine engine, Func<ulong, SearchPolicy> search, EvalWeights weights, int runs, ulong seed0, string outPath, string? valuesOut = null)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath))!);
         using var file = new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.Read, 1 << 20);
@@ -20,6 +21,16 @@ internal static class PolicyData
         w.Write(0x31445054); // "TPD1"
         w.Write(Features.Count);
         w.Write(0); // rows, patched below
+        using var vfile = valuesOut != null ? new FileStream(valuesOut, FileMode.Create, FileAccess.Write, FileShare.Read, 1 << 20) : null;
+        using var vw = vfile != null ? new BinaryWriter(vfile) : null;
+        if (vw != null)
+        {
+            vw.Write(0x32415654); // "TVA2"
+            vw.Write(Features.Count);
+            vw.Write(SelfPlay.Targets);
+            vw.Write(0); // records, patched below
+        }
+        int records = 0;
         var gate = new object();
         int rows = 0, decisions = 0, done = 0;
         double utility = 0;
@@ -35,10 +46,21 @@ internal static class PolicyData
             Span<GameAction> legal = stackalloc GameAction[Engine.MaxActions];
             Span<float> x = stackalloc float[Features.Count];
             int decision = 0;
+            var mornings = new List<(float[] X, int Days, float Value)>();
+            int lastDay = 0;
             while (!s.Ended)
             {
+                bool morning = s.Phase == Phase.Move && s.PendingCount == 0 && s.Day != lastDay;
+                float[]? mx = null;
+                if (morning && vw != null)
+                {
+                    lastDay = s.Day;
+                    mx = new float[Features.Count];
+                    Features.Encode(s, mx);
+                }
                 int k = engine.Legal(s, legal);
                 var action = p.Choose(engine, s, legal[..k]);
+                if (mx != null) mornings.Add((mx, s.RemainingDays, p.LastValue is double mv ? (float)mv : float.NaN));
                 if (p.LastResult is { } result)
                 {
                     var mine = heuristic.Choose(engine, s, legal[..k]);
@@ -74,6 +96,20 @@ internal static class PolicyData
                     w.Write((byte)0);
                 }
                 rows += found.Count;
+                if (vw != null)
+                {
+                    foreach (var (mx, days, value) in mornings)
+                    {
+                        foreach (float f in mx) vw.Write(f);
+                        vw.Write((float)score.Utility);
+                        vw.Write((float)score.Chromatic);
+                        vw.Write((float)score.Ultimate);
+                        vw.Write((float)score.Legendary);
+                        vw.Write((float)days);
+                        vw.Write(value);
+                    }
+                    records += mornings.Count;
+                }
                 decisions += decision;
                 utility += score.Utility;
                 if (++done % 100 == 0) Console.WriteLine($"{done}/{runs} runs, {decisions} decisions, {rows} actions, utility {utility / done:0.000}, {sw.Elapsed.TotalSeconds:0} s");
@@ -82,6 +118,13 @@ internal static class PolicyData
         w.Flush();
         file.Seek(8, SeekOrigin.Begin);
         w.Write(rows);
+        if (vw != null)
+        {
+            vw.Flush();
+            vfile!.Seek(12, SeekOrigin.Begin);
+            vw.Write(records);
+            Console.WriteLine($"{records} mornings -> {valuesOut}");
+        }
         Console.WriteLine($"{runs} runs, {decisions} decisions, {rows} actions -> {outPath} ({sw.Elapsed.TotalSeconds:0} s, utility {utility / runs:0.000})");
     }
 }

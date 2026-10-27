@@ -53,7 +53,9 @@ public sealed class HintService : IDisposable
         Net = ValueNet.Find() is { } net ? ValueNet.Load(net) : null;
         // The playouts' policy network when trained (models/solver/policy.bin): their moves as the search would make them.
         Policy = ValueNet.FindPolicy() is { } policy ? ValueNet.Load(policy) : null;
-        _search = new MonteCarloSearch(_engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = Net, Policy = Policy };
+        // The playouts' instrument picks by a network of their own when there is one (models/solver/picks.bin).
+        Picks = ValueNet.FindPicks() is { } picks ? ValueNet.Load(picks) : null;
+        _search = new MonteCarloSearch(_engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = Net, Policy = Policy, InstrumentPolicy = Picks };
         // Warm up (the JIT's optimized code, the thread pool) so the first real hint is as quick as the rest.
         _ = Task.Run(() =>
         {
@@ -69,6 +71,7 @@ public sealed class HintService : IDisposable
     public string? WeightsPath { get; }
     public ValueNet? Net { get; }
     public ValueNet? Policy { get; }
+    public ValueNet? Picks { get; }
 
     /// <summary>Raised on a thread-pool thread with the final ranking of a position.</summary>
     public event Action<Hint>? Ready;
