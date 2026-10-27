@@ -4,6 +4,13 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.13 — 2026-10-27
+
+- Updates: the app asks GitHub for a new version at start and every 6 hours ("Check for updates", on unless taken
+  off; the `--debug` window never asks). A new one shows an "Update to …" button: it downloads the same kind of zip
+  (with .NET or without), checks it against the SHA-256 GitHub gives, and the new version puts itself in place of
+  this one and starts. Settings and downloaded OCR languages stay. A build from source gets the release's page.
+
 ## 0.7.12 — 2026-10-27
 
 - The window no longer freezes at the first scan (a player's dump, an AMD card): Windows hands the app a new frame

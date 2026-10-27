@@ -134,6 +134,10 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </StackPanel>
+    <DockPanel x:Name="UpdatePanel" Margin="0,8,0,0">
+      <Button x:Name="UpdateButton" DockPanel.Dock="Right" Margin="6,0,0,0" Visibility="Collapsed" Click="UpdateButton_Click" />
+      <CheckBox x:Name="UpdateCheck" Content="Check for updates" ToolTip="Ask GitHub for a new version at start and every 6 hours" Checked="UpdateCheck_Changed" Unchecked="UpdateCheck_Changed" />
+    </DockPanel>
     <DockPanel Margin="0,8,0,0">
       <Button x:Name="ReportButton" DockPanel.Dock="Right" Margin="6,0,0,0" Content="Report a bug" ToolTip="Send the developer a screenshot, the app's log and the current run's log with your comment" Click="ReportButton_Click" />
       <TextBlock x:Name="VersionText" Foreground="#6F7580" TextWrapping="Wrap" Text="Version" />

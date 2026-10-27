@@ -108,6 +108,7 @@ public partial class ControlWindow : Window
 
         RefreshWindowList();
         UpdateDatasetStatus();
+        SetupUpdates();
     }
 
     protected override void OnSourceInitialized(EventArgs e)

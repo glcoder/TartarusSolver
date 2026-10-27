@@ -44,6 +44,9 @@ chests).
    them in the control window).
 3. Play. The overlay shows the hint for whatever is on screen.
 
+New versions: with "Check for updates" on (it is by default) the app asks GitHub for the latest release at start and
+every 6 hours; when there is one, "Update to …" downloads it, checks it and restarts into it. Nothing else is sent.
+
 | Hotkey | |
 |---|---|
 | Ctrl+Shift+S | scan now |
@@ -63,6 +66,7 @@ Settings live in `%LOCALAPPDATA%\TartarusSolver\settings.json`, among them:
   solver weighs a sure chest against a chance at a Chromatic with it.
 - `GameLanguage`: the game's language for OCR (`en`, `ru`, …); by default read from the game's own settings.
 - `HintPlayouts`, `HintSeconds`: how hard the solver thinks per move (also the slider in the control window).
+- `CheckUpdates`: ask GitHub for new versions (the checkbox in the window).
 - `Hotkeys`, `GameLogPath`, `ReportDsn`.
 
 ## Building

@@ -11,6 +11,13 @@ public partial class App : Application
         // The interface is in English (localization comes later): numbers as "12,800" and "6.4" whatever Windows' language.
         System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
         System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        // A new version put in this install's place by itself (Updates.StartInstall), then started there.
+        if (e.Args is ["--install-update", _, _, ..])
+        {
+            Updates.InstallHere(e.Args[1..]);
+            Shutdown();
+            return;
+        }
         DispatcherUnhandledException += OnUnhandled;
         var settings = AppSettings.Load();
         // --debug: the whole window (overlay views, hint quality, labels, dataset collecting, the log); else the player's.
