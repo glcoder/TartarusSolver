@@ -345,7 +345,9 @@ public partial class ControlWindow : Window
     // The same scan as read, before Steady: the base of a pick that comes up right after a change.
     private EditableSandbox? _hintRead;
     private GameLogWatcher? _gameLog;
-    private string? _gameLogPath;
+    private volatile string? _gameLogPath;
+    /// <summary>The game's log followed (any thread may read it: a hang report takes its run).</summary>
+    public string? GameLogPath => _gameLogPath;
     private readonly PickVotes _pickVotes = new();
     private readonly Tartarus.Rules.Engine _rulesEngine = new();
     /// <summary>When the Sandbox was last seen (a frame's capture time), and the pick screen's request to look at it again.</summary>
@@ -399,7 +401,10 @@ public partial class ControlWindow : Window
         }
         if (_scans.Busy || (_editMode && !manual)) return false;
         if (_target is { } t && Win32Windows.IsMinimized(t.Hwnd)) return false;
-        var frame = _capture.Grab();
+        // Off the UI thread: the copy waits on the graphics card, which may take its time (or never answer).
+        var capture = _capture;
+        var frame = await Task.Run(capture.Grab);
+        if (capture != _capture) return false;
         if (frame == null)
         {
             if (manual) ScanStatus.Text = "No frames yet (is the window minimized?)";

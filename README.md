@@ -28,7 +28,8 @@ chests).
 - **The game's log:** run start, days, Consumes, Chromatics, Prison Incidents and picks, read from the log file the
   game writes, to fill in what the screen hides (a red Consume screen, a popup).
 - **Bug reports:** one hotkey sends a screenshot with the overlay, the recent frames, the app's log and the current
-  run's game-log lines to the developer (when built with a Sentry DSN; otherwise the report is saved locally).
+  run's game-log lines to the developer (when built with a Sentry DSN; otherwise the report is saved locally). A
+  window frozen for 5 seconds reports itself, with where the app stands (its own threads' stacks).
 
 ## Requirements
 
@@ -145,4 +146,4 @@ No code from these projects is used here.
 ## License
 
 [MIT](LICENSE) © 2026 Artem Gurevich. Third-party components keep their licenses: ONNX Runtime (MIT), PaddleOCR
-models (Apache-2.0), Sentry .NET SDK (MIT), Vortice.Windows (MIT), StbImageSharp (public domain).
+models (Apache-2.0), Sentry .NET SDK (MIT), ClrMD (MIT), Vortice.Windows (MIT), StbImageSharp (public domain).

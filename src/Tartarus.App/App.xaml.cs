@@ -24,9 +24,19 @@ public partial class App : Application
         {
             if (e.ExceptionObject is Exception ex) BugReports.Crash(ex, fatal: true);
         };
-        var main = new ControlWindow(settings);
+        ControlWindow? main = null;
+        _watchdog = new UiWatchdog(Dispatcher, () => main?.GameLogPath);
+        main = new ControlWindow(settings);
         MainWindow = main;
         main.Show();
+    }
+
+    private UiWatchdog? _watchdog;
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _watchdog?.Dispose();
+        base.OnExit(e);
     }
 
     private void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)

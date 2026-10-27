@@ -4,6 +4,14 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.11 — 2026-10-27
+
+- A window that stops answering reports itself: when the app's own window doesn't answer for 5 seconds, where it
+  stands (its threads' stacks, read from a snapshot of the app itself) goes to the app's log and to the developer
+  with the log, without asking (a frozen window can't). Players saw the window freeze as it caught the game's.
+- A frame is copied from the graphics card off the window's thread: a slow or stuck copy no longer freezes the window
+  (the likeliest cause of the freeze above), and stopping the capture doesn't wait for it.
+
 ## 0.7.10 — 2026-10-27
 
 - The chests a hint shows are what runs end with: the search's expectations ran low (its playouts play worse than the

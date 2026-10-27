@@ -31,7 +31,7 @@ public sealed unsafe class WindowCapture : IDisposable
     private Direct3D11CaptureFrame? _latest;
     private DateTimeOffset _latestAt;
     private ID3D11Texture2D? _staging;
-    private bool _disposed;
+    private volatile bool _disposed;
 
     public WindowCapture(IntPtr hwnd)
     {
@@ -160,12 +160,24 @@ public sealed unsafe class WindowCapture : IDisposable
 
     public void Dispose()
     {
-        lock (_lock)
+        // A Grab stuck in the graphics driver holds the lock: its device is left to it, the caller doesn't wait too.
+        if (!Monitor.TryEnter(_lock, TimeSpan.FromSeconds(1)))
+        {
+            _disposed = true;
+            _pool.FrameArrived -= OnFrameArrived;
+            _session.Dispose();
+            return;
+        }
+        try
         {
             if (_disposed) return;
             _disposed = true;
             _latest?.Dispose();
             _latest = null;
+        }
+        finally
+        {
+            Monitor.Exit(_lock);
         }
         _pool.FrameArrived -= OnFrameArrived;
         _session.Dispose();

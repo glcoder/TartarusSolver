@@ -125,6 +125,26 @@ public static partial class BugReports
         if (fatal) SentrySdk.Flush(TimeSpan.FromSeconds(5));
     }
 
+    /// <summary>
+    /// A hang <see cref="UiWatchdog"/> caught, sent without asking (the window can't), titled by the method the UI thread
+    /// stands in, its stacks in the report; returns what to log.
+    /// </summary>
+    public static string SendHang(BugReport report, string at, string stacks)
+    {
+        byte[] zip = report.Zip("");
+        string saved = Keep(report, zip);
+        if (!Enabled) return $"saved (sending not set up): {saved}";
+        var id = SentrySdk.CaptureMessage("Hang: " + Scrub(at), scope =>
+        {
+            scope.SetTag("kind", "hang");
+            scope.SetExtra("stacks", Scrub(stacks));
+            scope.SetExtra("version", AppVersion.Full);
+            scope.AddAttachment(zip, $"report-{report.At:yyyyMMdd_HHmmss}.zip", AttachmentType.Default, "application/zip");
+        }, SentryLevel.Error);
+        SentrySdk.Flush(TimeSpan.FromSeconds(60));
+        return $"sent ({id.ToString()[..8]}), copy: {saved}";
+    }
+
     /// <summary>The zip in reports/, the last 20 kept.</summary>
     private static string Keep(BugReport report, byte[] zip)
     {
