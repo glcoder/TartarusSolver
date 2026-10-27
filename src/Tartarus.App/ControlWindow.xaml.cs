@@ -356,7 +356,7 @@ public partial class ControlWindow : Window
     private readonly Tartarus.Rules.Engine _rulesEngine = new();
     /// <summary>When the Sandbox was last seen (a frame's capture time), and the pick screen's request to look at it again.</summary>
     private DateTime _lastBoardAt;
-    // When the Sandbox the hints play on (_hintSandbox) was seen: a reading BoardSettle didn't take leaves it older.
+    // When the Sandbox the hints play on (_hintSandbox) was seen: the old one after the log's change leaves it older.
     private DateTime _hintBoardAt;
     // Which Sandbox readings a hint is made of: read alike twice, and not the old Sandbox after the log's change.
     private readonly BoardSettle _boardSettle = new();
@@ -727,19 +727,12 @@ public partial class ControlWindow : Window
             if (r.Ok && _sandbox != null && !WholeBoard(_sandbox)) return;
             if (r.Ok && _sandbox != null)
             {
-                // A reading in the middle of an animation waits for the next scan (the hint shown stays); the old Sandbox
-                // still on screen after the log's bite, Chromatic or Prison Incident takes the hint away: it's for that one.
-                switch (_boardSettle.Take(_sandbox, _lastBoardAt, LiveLogRun?.BoardChangedAt ?? default))
-                {
-                    case BoardSettle.Verdict.Unsettled:
-                        return;
-                    case BoardSettle.Verdict.Stale:
-                        _hints.Clear();
-                        ClearHint();
-                        return;
-                }
+                var settle = _boardSettle.Take(_sandbox, _lastBoardAt, LiveLogRun?.BoardChangedAt ?? default);
+                // A pick that covers the Sandbox plays on its latest reading, settled or not: the Warden's Treasure comes up
+                // with the Chromatic's sound, before a reading settles (every Treasure asked for the eye button). The old
+                // Sandbox still on screen after the log's change counts as seen before it: the pick asks for the eye button.
                 _hintSandbox = _sandbox.Clone();
-                _hintBoardAt = _lastBoardAt;
+                if (settle != BoardSettle.Verdict.Stale) _hintBoardAt = _lastBoardAt;
                 _hintRead = _lastRead?.Clone();
                 _hintText = r.Text;
                 _hintTextRun = _logRun;
@@ -754,6 +747,17 @@ public partial class ControlWindow : Window
                 _hintSandbox.Days ??= _run.LastDays;
                 // A run the log saw from its start: its Chromatic count, or the panel's when higher (a sound can go missing).
                 if (live is { FromStart: true }) _hintSandbox.Chromatic = Math.Max(_hintSandbox.Chromatic, live.ChromaticAtLeast);
+                // A reading in the middle of an animation waits for the next scan (the hint shown stays); the old Sandbox
+                // still on screen after the log's bite, Chromatic or Prison Incident takes the hint away: it's for that one.
+                switch (settle)
+                {
+                    case BoardSettle.Verdict.Unsettled:
+                        return;
+                    case BoardSettle.Verdict.Stale:
+                        _hints.Clear();
+                        ClearHint();
+                        return;
+                }
                 // The Sandbox viewed from a pick (the eye button): read now, back to the pick is the hint.
                 bool viewing = LiveLogRun is { PickOpen: true };
                 if (viewing != _eyeHint)

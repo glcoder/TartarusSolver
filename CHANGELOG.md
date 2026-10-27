@@ -14,8 +14,8 @@ things.
   In chains the eaten Inmate was framed as the next bite for up to 5 s (25 times in 4 runs).
 - Two Warden's Treasures in a row (two Chromatics at once): the second is no longer hinted over the Sandbox from
   before the first was taken (a Three-Headed Thumb Ring that had opened three cells was hinted again; the eye button
-  showed the right one). The pick asks for the eye button until the new Sandbox is read, checked against the Sandbox
-  the hints play on; the game log's event times keep their milliseconds for it.
+  showed the right one): the pick plays on the Sandbox read after the first was taken, or asks for the eye button
+  when none was; the game log's event times keep their milliseconds for it.
 - The Hunt's target pick is hinted as one: its banner reads "Select an Objective" like the Sewer Ratway's, and the
   hint framed a cell to go to. After the Hunt card on the same day and cell, the best Hunt target is framed on its
   cell, from the Sandbox read with the cards (the pick dims the other cells, an Ultimate read Normal there). The
