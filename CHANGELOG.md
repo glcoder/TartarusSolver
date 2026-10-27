@@ -4,6 +4,13 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.12 — 2026-10-27
+
+- The window no longer freezes at the first scan (a player's dump, an AMD card): Windows hands the app a new frame
+  holding the graphics device's lock, and the frame's copy for a scan, holding the app's own lock, waited on the
+  device's, while the new frame waited on the app's. Each waited on the other for good; a frame that comes during a
+  copy is now let go instead (the next one is kept). In 0.7.11 the window answered, but scans stopped all the same.
+
 ## 0.7.11 — 2026-10-27
 
 - A window that stops answering reports itself: when the app's own window doesn't answer for 5 seconds, where it

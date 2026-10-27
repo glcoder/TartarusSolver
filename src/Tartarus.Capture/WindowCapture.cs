@@ -63,7 +63,15 @@ public sealed unsafe class WindowCapture : IDisposable
     {
         var frame = pool.TryGetNextFrame();
         if (frame == null) return;
-        lock (_lock)
+        // Windows calls this holding the Direct3D device's lock, and Grab, holding ours, waits on that one for its
+        // copy: waiting here for ours would deadlock the two for good (a player's AMD card, the window frozen at the
+        // first scan). A frame that comes during a Grab is dropped instead; the next one does.
+        if (!Monitor.TryEnter(_lock))
+        {
+            frame.Dispose();
+            return;
+        }
+        try
         {
             if (_disposed)
             {
@@ -81,6 +89,10 @@ public sealed unsafe class WindowCapture : IDisposable
                 _poolSize = size;
                 pool.Recreate(_winrtDevice, Format, 2, size);
             }
+        }
+        finally
+        {
+            Monitor.Exit(_lock);
         }
     }
 
