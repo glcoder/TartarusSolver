@@ -7,8 +7,8 @@ things.
 ## 0.7.7 — 2026-10-27
 
 - Re-rolls left when a pick's counter doesn't read: the last count read in this run less the Re-rolls clicked since,
-  else none. 0.7.5 took one per run for granted and hinted a Re-roll where there was no button (a Cage Fight run has
-  none).
+  else none. 0.7.5 took one per run for granted and hinted a Re-roll where there was no button (the run's Re-roll
+  comes from a Pactspirit, Twin Inquisitors, and only by chance).
 - Under the Consume target pick's red screen no Inmate reads lower than just before it (a rarity never drops in its
   cell): an Ultimate's red frame was lost in the red, a Mammoth Ultimate read Normal and was hinted as a meal the game
   doesn't allow.
