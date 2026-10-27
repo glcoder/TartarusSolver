@@ -737,7 +737,8 @@ public partial class ControlWindow : Window
                 // with the Chromatic's sound, before a reading settles (every Treasure asked for the eye button). The old
                 // Sandbox still on screen after the log's change counts as seen before it: the pick asks for the eye button.
                 _hintSandbox = _sandbox.Clone();
-                if (settle != BoardSettle.Verdict.Stale) _hintBoardAt = _lastBoardAt;
+                // A look at the Sandbox from a pick (the eye button) comes after its animations: always the new one.
+                if (settle != BoardSettle.Verdict.Stale || LiveLogRun is { PickOpen: true }) _hintBoardAt = _lastBoardAt;
                 _hintRead = _lastRead?.Clone();
                 _hintText = r.Text;
                 _hintTextRun = _logRun;

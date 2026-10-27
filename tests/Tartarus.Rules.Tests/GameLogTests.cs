@@ -35,6 +35,24 @@ public class GameLogTests
     }
 
     [Fact]
+    public void A_Chromatic_s_flight_is_no_change_of_its_own()
+    {
+        // 2026-10-28: the cell was empty before the flight's sound; a reading after it like those before passed for the
+        // old Sandbox, and the eye button was asked for again and again over the Warden's Treasure.
+        var log = new GameLog();
+        foreach (var line in new[]
+        {
+            "[2026.10.27-23.30.00:000][674]TLGame: Display: [Game] UIButton@ normal-click Btn_S16GamePlay_Start",
+            "[2026.10.27-23.30.01:000][  1]TLLua: Display: [S16LastDay] check cur=0 max=30",
+            "[2026.10.27-23.40.47:476][645]TLLua: Display: [Game] AudioMgr@PlayAudio  AudioEnum  == UI_S16_Premium_Quality",
+            "[2026.10.27-23.40.49:149][770]TLLua: Display: [Game] AudioMgr@PlayAudio  AudioEnum  == UI_S16_Premium_Quality_Fly",
+        }) log.Feed(line);
+        var run = Assert.Single(log.Runs);
+        Assert.Equal(new DateTime(2026, 10, 27, 23, 40, 47, 476, DateTimeKind.Utc).ToLocalTime(), run.BoardChangedAt);
+        Assert.Equal(1, run.Chromatic);
+    }
+
+    [Fact]
     public void A_run_ends_at_its_first_result_screen()
     {
         // The statistics' time in runs: from the Start button to the Riot's result, which may come up twice.

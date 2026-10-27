@@ -200,8 +200,10 @@ public sealed partial class GameLog
         else if (line.Contains("AudioEnum  == UI_S16_Click_Cancel", StringComparison.Ordinal) || line.Contains("] S16BoardNewDayPop Run", StringComparison.Ordinal)) run.ConsumePick = false;
         else if (line.Contains("normal-click Btn_S16Board_RelicPop_Reroll", StringComparison.Ordinal)) run.RerollsUsed++;
         // A Chromatic: its sound as it reaches the rarity, one each (the flight to the panel after it plays once for two
-        // that come at once), and its panel slot lighting up.
-        else if (line.Contains("AudioEnum  == UI_S16_Premium_Quality_Fly", StringComparison.Ordinal)) run.BoardChangedAt = LocalTime(line);
+        // that come at once), and its panel slot lighting up. The flight's sound is no change of its own: the cell is
+        // often empty by then, and a reading after it like those before looked like the old Sandbox still on screen
+        // (2026-10-28: the eye button asked for again and again over a Warden's Treasure).
+        else if (line.Contains("AudioEnum  == UI_S16_Premium_Quality_Fly", StringComparison.Ordinal)) { }
         else if (line.Contains("AudioEnum  == UI_S16_Premium_Quality", StringComparison.Ordinal)) (run.Chromatic, run.BoardChangedAt) = (run.Chromatic + 1, LocalTime(line));
         else if (line.Contains("Anim_Archive_LightUp", StringComparison.Ordinal)) run.PanelLights++;
         else if (line.Contains("] S16BoardEventPop Run", StringComparison.Ordinal)) (run.Incidents, run.BoardChangedAt) = (run.Incidents + 1, LocalTime(line));
