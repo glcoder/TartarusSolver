@@ -6,11 +6,12 @@ using Tartarus.Vision;
 namespace Tartarus.App;
 
 /// <summary>A move hint: the position searched and its actions ranked, as far as the search has got.</summary>
-public sealed record Hint(GameState State, SearchResult Result, bool ConsumeOnly, bool Final)
+public sealed record Hint(GameState State, SearchResult Result, bool ConsumeOnly, bool Final, bool HuntOnly = false)
 {
-    /// <summary>The actions to show: on the Consume target pick only the targets, and stopping as "Cancel".</summary>
+    /// <summary>The actions to show: on the Consume target pick only the targets, and stopping as "Cancel"; on the Hunt's, its targets.</summary>
     public IReadOnlyList<ActionValue> Shown => ConsumeOnly
         ? Result.Actions.Where(a => a.Action.Kind is ActionKind.Consume or ActionKind.Chain).ToList()
+        : HuntOnly ? Result.Actions.Where(a => a.Action.Kind == ActionKind.Hunt).ToList()
         : Result.Actions;
 
     /// <summary>Within this of the best's worth (in Chromatics) a move is as good: the playouts can't tell them apart.</summary>
@@ -80,14 +81,14 @@ public sealed class HintService : IDisposable
     public event Action<Hint>? Ready;
 
     /// <summary>Starts searching the position the screen shows, unless it's the one being searched. True when a new search started (the old hint no longer fits).</summary>
-    public bool Request(Observation observation, bool consumeOnly)
+    public bool Request(Observation observation, bool consumeOnly, bool huntOnly = false)
     {
         var state = _engine.FromObservation(observation, 1);
         if (state.Ended) return false;
-        string key = StateText.Describe(state) + consumeOnly;
+        string key = StateText.Describe(state) + consumeOnly + huntOnly;
         if (key + Playouts == _key) return false;
         _key = key + Playouts;
-        string text = StateText.Describe(state) + (consumeOnly ? "(Consume target pick)" : "");
+        string text = StateText.Describe(state) + (consumeOnly ? "(Consume target pick)" : huntOnly ? "(Hunt target pick)" : "");
         if (_lastText != null)
         {
             var before = _lastText.Split('|', '\n').Select(x => x.Trim()).ToHashSet();
@@ -108,9 +109,9 @@ public sealed class HintService : IDisposable
                 // Nothing to choose (only End) still gets its frame: the game ends such a day by itself, but not when a
                 // merge took the Warden's Inmate away, and then it waits for the click.
                 if (result.Actions.Count == 0) return;
-                result = Steady(state, result, consumeOnly);
+                result = Steady(state, result, consumeOnly, huntOnly);
                 if (Chests is { } chests) result = result with { Actions = [.. result.Actions.Select(a => Calibrated(a, chests, days))] };
-                var hint = new Hint(state, result, consumeOnly, Final: true);
+                var hint = new Hint(state, result, consumeOnly, Final: true, huntOnly);
                 _shown = hint;
                 Ready?.Invoke(hint);
             }
@@ -126,9 +127,9 @@ public sealed class HintService : IDisposable
     /// <see cref="KeepWithin"/>: a slightly different reading of the same screen doesn't flip the hint. Not
     /// across another day, phase or Warden's Inmate: that is another decision, not another reading of it.
     /// </summary>
-    private SearchResult Steady(in GameState state, SearchResult result, bool consumeOnly)
+    private SearchResult Steady(in GameState state, SearchResult result, bool consumeOnly, bool huntOnly)
     {
-        if (_shown?.Shown is not { Count: > 0 } old || result.Actions.Count < 2 || _shown.ConsumeOnly != consumeOnly) return result;
+        if (_shown?.Shown is not { Count: > 0 } old || result.Actions.Count < 2 || _shown.ConsumeOnly != consumeOnly || _shown.HuntOnly != huntOnly) return result;
         var before = _shown.State;
         if (before.Day != state.Day || before.Phase != state.Phase || before.Position != state.Position
             || before.Cells[before.Position].Inmate.Code != state.Cells[state.Position].Inmate.Code

@@ -52,6 +52,21 @@ public class GameTextTests
     [Fact]
     public void ConsumeBanner() => Assert.True(Parse(("banner", "Выберите узника для пожирания")).ConsumePick);
 
+    [Fact]
+    public void A_pick_is_not_the_Sewer_Ratway_the_last_Sandbox_text_told_of()
+    {
+        // 2026-10-28: the Hunt's "Select an Objective" was the last Sandbox text before a Warden's Treasure, whose hint
+        // became a Sewer Ratway's cell (no card to frame).
+        var text = Parse(("title", "Select an Objective"));
+        Assert.True(text.RatwayPick);
+        var under = EditableSandbox.Empty();
+        under.Warden = 7;
+        var pick = new PickRead { Kind = PickRead.Treasure, Cards = [new PickCardRead { Index = 1, Id = "vintage" }] };
+        var o = GameObservation.FromPick(pick, under, text);
+        Assert.False(o.Ratway);
+        Assert.Single(o.Treasures);
+    }
+
     /// <summary>Lines as OCR gives them, by region, laid out on a 1920x1200 screen (cards left to right).</summary>
     private static ScreenText Parse(params (string Role, string Text)[] lines)
     {

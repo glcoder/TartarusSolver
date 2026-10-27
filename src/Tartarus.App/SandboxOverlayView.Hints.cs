@@ -93,7 +93,7 @@ public sealed partial class SandboxOverlayView
     /// <summary>
     /// A Sandbox screen's hint. Make Your Decision: each card (Consume and Hunt by their best target); Select a
     /// Destination: its cards; the Consume target pick: the targets' cells, and Cancel worth the best move but
-    /// consuming (on a chain, stopping it); the Sewer Ratway: the cells.
+    /// consuming (on a chain, stopping it); the Hunt target pick: its targets' cells; the Sewer Ratway: the cells.
     /// </summary>
     private static void DrawSandboxHint(DrawingContext dc, ScreenLayout layout, ScanResult scan, Hint hint, double sx, double sy, double fontSize, double ppd, bool alternatives)
     {
@@ -117,6 +117,12 @@ public sealed partial class SandboxOverlayView
         foreach (var v in hint.Result.Actions)
         {
             var act = v.Action;
+            // The Hunt's target pick: its targets' cells.
+            if (hint.HuntOnly)
+            {
+                if (act.Kind == ActionKind.Hunt) Add($"cell{act.Arg}", CellBox(act.Arg), v);
+                continue;
+            }
             if (hint.ConsumeOnly)
             {
                 if (act.Kind is ActionKind.Consume or ActionKind.Chain) Add($"cell{act.Arg}", CellBox(act.Arg), v);

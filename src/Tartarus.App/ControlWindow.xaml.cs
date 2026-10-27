@@ -360,6 +360,8 @@ public partial class ControlWindow : Window
     private DateTime _hintBoardAt;
     // Which Sandbox readings a hint is made of: read alike twice, and not the old Sandbox after the log's change.
     private readonly BoardSettle _boardSettle = new();
+    // The Hunt card last offered: where the Warden stood, the day, the Sandbox and the text read with it.
+    private (int Warden, int? Days, EditableSandbox Board, Vision.Ocr.ScreenText Text)? _huntOffer;
     // The hint is the eye button: the Sandbox changed under a pick (look at it), or it was read while the pick waits (go back).
     private bool _eyeHint;
     // The Warden's Inmate while the Replace card was offered: after the click the card leaves a moment before the new
@@ -774,6 +776,18 @@ public partial class ControlWindow : Window
                 // The target pick: its banner read, or the log's red-screen sound with nothing else on screen (the
                 // banner's text doesn't always read).
                 bool consumeOnly = r.Text?.ConsumePick == true || live is { ConsumePick: true } && !destinations && !decision;
+                // The Hunt card's target pick reads "Select an Objective" like the Sewer Ratway's: after the Hunt card, on
+                // the same day and cell, it's the Hunt's. It dims the cells it doesn't offer (an Ultimate read Normal there),
+                // so it plays on from the Sandbox and cards read with the Hunt card (2026-10-28: a Sewer Ratway was hinted).
+                if (r.Text?.Cards.Any(c => c.Meaning.Contains("hunt")) == true) _huntOffer = (_sandbox.Warden, _hintSandbox.Days, _hintSandbox.Clone(), r.Text);
+                bool huntPick = r.Text?.RatwayPick == true && _huntOffer is { } hunt && hunt.Warden == _sandbox.Warden && hunt.Days == _hintSandbox.Days;
+                // The Hunt made: the game starts the next day while the pick's banner still shows; nothing to hint there.
+                if (r.Text?.RatwayPick == true && _huntOffer is { } made && made.Warden == _sandbox.Warden && made.Days - 1 == _hintSandbox.Days)
+                {
+                    _hints.Clear();
+                    ClearHint();
+                    return;
+                }
                 // The Sewer Ratway's pick: any cell to go to.
                 if (r.Text?.RatwayPick == true) decision = true;
                 // Right after a move the Warden's door is still opening: no decision is readable until an Inmate shows.
@@ -797,8 +811,9 @@ public partial class ControlWindow : Window
                     return;
                 }
                 // The red screen spoils the panels' text too (the Objective): the last text read before it stands in.
-                if (!consumeOnly) _textBeforeRed = r.Text;
-                var text = consumeOnly ? _textBeforeRed ?? r.Text : r.Text;
+                if (!consumeOnly && !huntPick) _textBeforeRed = r.Text;
+                if (huntPick) _hintSandbox = _huntOffer!.Value.Board.Clone();
+                var text = consumeOnly ? _textBeforeRed ?? r.Text : huntPick ? _huntOffer!.Value.Text : r.Text;
                 var observation = Tartarus.Vision.GameObservation.From(_hintSandbox, text, _rerolls);
                 // The log knows whether today's Consume is used, which a missing Consume card doesn't (no target either).
                 if (live is { Paged: false, MaxDays: > 0 } && live.RemainingDays == _hintSandbox.Days)
@@ -816,7 +831,7 @@ public partial class ControlWindow : Window
                     && (objective == Tartarus.Rules.ObjectiveKind.SurvivalOfTheFittest ? live.Consumes
                         : objective == Tartarus.Rules.ObjectiveKind.Undercurrents ? live.Incidents : -1) is int counted and >= 0)
                     observation.ObjectiveProgress = Math.Max(observation.ObjectiveProgress, Math.Min(counted, Tartarus.Rules.GameData.Target(objective)));
-                if (_hints.Request(observation, consumeOnly)) ClearHint();
+                if (_hints.Request(observation, consumeOnly, huntPick)) ClearHint();
             }
             else if (r.Pick is { } pick)
             {

@@ -73,6 +73,9 @@ public static class GameObservation
     {
         // No "Remaining attempts" on the pick: no Re-roll left (after one, the button is gone).
         var o = From(under, lastText, pick.Kind == PickRead.Instrument ? pick.Rerolls ?? 0 : null);
+        // The pick on screen is what's asked: not a Sewer Ratway's or Interrogation Room's choice the last Sandbox text
+        // told of (2026-10-28: a Warden's Treasure was hinted a Sewer Ratway's cell, and showed nothing).
+        o.Ratway = o.Interrogation = false;
         if (pick.Kind == PickRead.Treasure)
         {
             foreach (var c in pick.Cards)
