@@ -358,6 +358,7 @@ public partial class ControlWindow : Window
     private DateTime _lastBoardAt;
     // When the Sandbox the hints play on (_hintSandbox) was seen: the old one after the log's change leaves it older.
     private DateTime _hintBoardAt;
+    private const double FadePresence = 0.45;
     // Which Sandbox readings a hint is made of: read alike twice, and not the old Sandbox after the log's change.
     private readonly BoardSettle _boardSettle = new();
     // The Hunt card last offered: where the Warden stood, the day, the Sandbox and the text read with it.
@@ -728,6 +729,10 @@ public partial class ControlWindow : Window
             if (r.Ok && _sandbox != null)
             {
                 var settle = _boardSettle.Take(_sandbox, _lastBoardAt, LiveLogRun?.BoardChangedAt ?? default);
+                // A frame caught as a popup comes or goes (presence well below a plain Sandbox's 0.6-0.7) reads wrong where
+                // it's dim: not taken unless the next scan reads it alike (2026-10-28: a Warden's Treasure hinted over
+                // one at 0.22, two Ultimates read Normal and the Warden elsewhere).
+                if (settle == BoardSettle.Verdict.Unsettled && r.Loc is { Score: < FadePresence }) return;
                 // A pick that covers the Sandbox plays on its latest reading, settled or not: the Warden's Treasure comes up
                 // with the Chromatic's sound, before a reading settles (every Treasure asked for the eye button). The old
                 // Sandbox still on screen after the log's change counts as seen before it: the pick asks for the eye button.
