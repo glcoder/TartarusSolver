@@ -24,6 +24,8 @@ public sealed class RunMemory
     /// <summary>Instrument slots shown from memory in the last update (their read wasn't an instrument), by index.</summary>
     public IReadOnlySet<int> Kept => _kept;
     public int Chromatic => _chromatic;
+    /// <summary>The Remaining Days last read (or told by the log) in this run; null before any.</summary>
+    public int? LastDays => _lastDays;
     /// <summary>The run's theme by id (<see cref="RunThemes"/>), or null.</summary>
     public string? Theme => _theme;
 

@@ -4,6 +4,15 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.9 — 2026-10-27
+
+- The game's log of some clients names only the pages they open (no sounds, clicks or day counter): it is read too,
+  for the run's start and end, its days, Chromatics, Prison Incidents and picks. Such a log told no run before, and a
+  log that tells none no longer stops a new run from being told by Remaining Days going up: the last run's 10
+  Chromatics went on into the next, and every hint was for chests alone (a player's bug report).
+- Remaining Days that don't read (the red Consume screen, a popup) are the last read in this run when the log can't
+  tell them, not the run's first day.
+
 ## 0.7.8 — 2026-10-27
 
 - The simulator gives a run its Re-roll at 50%, as the Pactspirit Twin Inquisitors does (`--reroll-percent` changes

@@ -357,7 +357,7 @@ public partial class ControlWindow : Window
     private (int Warden, Tartarus.Vision.Code? Code, Tartarus.Vision.Rarity Rarity, DateTime At)? _replaceOffer;
 
     /// <summary>The run going on, as the game's log tells it; null without a log or between runs.</summary>
-    private LoggedRun? LiveLogRun => _logRun is { Finished: false, MaxDays: > 0 } run ? run : null;
+    private LoggedRun? LiveLogRun => _logRun is { Finished: false } run && (run.MaxDays > 0 || run.Paged) ? run : null;
     private LoggedRun? _logRun;
     private bool _logRunFinished;
     // Re-rolls the run has left, as the last instrument pick showed them (shared by every pick of the run).
@@ -464,7 +464,11 @@ public partial class ControlWindow : Window
         else if (r.Theme is { } theme)
         {
             _run.SawTheme(theme);
-            if (_logRun is { Finished: false } logged) KeepTheme(logged, theme);
+            if (_logRun is { Finished: false } logged)
+            {
+                KeepTheme(logged, theme);
+                PagedDays(logged);
+            }
         }
         _sandbox = _scannedSandbox.Clone();
         _selected = -1;
@@ -557,8 +561,10 @@ public partial class ControlWindow : Window
             _gameLog = null;
             _gameLogPath = path;
             _logRun = null;
-            // With a log it tells runs apart, and the day count's reading no longer has to; without, recognition alone.
-            _run.NewRunByDays = path == null;
+            // Once the log has told a run (OnLogRun) it tells runs apart, and the day count's reading no longer has to.
+            // Until then the screen alone: a log that names no run (another client's, another game's) must not keep the
+            // last run's Chromatics in the next.
+            _run.NewRunByDays = true;
             if (path != null)
             {
                 var watcher = _gameLog = new GameLogWatcher(path);
@@ -609,6 +615,12 @@ public partial class ControlWindow : Window
         Log($"Run theme: {RunThemes.NameOf(theme)} (remembered for this run)");
     }
 
+    /// <summary>A run the log tells by its pages, its theme's scroll seen: 30 days for Iron Law, else 20, once the theme is read.</summary>
+    private void PagedDays(LoggedRun run)
+    {
+        if (run is { Paged: true, ThemeShown: true, MaxDays: 0 } && _run.Theme is { } theme) run.MaxDays = theme == "ironlaw" ? 30 : 20;
+    }
+
     private void ShowLogStatus() => LogStatus.Text =
         (_gameLogPath ?? "not found: screen recognition only") + (_settings.GameLogPath != null ? " (chosen by hand)" : " (found automatically)");
 
@@ -637,7 +649,7 @@ public partial class ControlWindow : Window
     {
         bool newRun = !ReferenceEquals(run, _logRun);
         _logRun = run;
-        _run.Days(run.RemainingDays);
+        _run.NewRunByDays = false;
         if (newRun)
         {
             _logRunFinished = false;
@@ -655,6 +667,8 @@ public partial class ControlWindow : Window
             Log(run.FromStart ? "Log: new run" : $"Log: run in progress (day {run.Day} of {run.MaxDays})");
         }
         RestoreTheme(run);
+        PagedDays(run);
+        if (run.MaxDays > 0) _run.Days(run.RemainingDays);
         if (run.Finished && !_logRunFinished)
         {
             _logRunFinished = true;
@@ -694,8 +708,11 @@ public partial class ControlWindow : Window
                 // shows a new day about a second before the log has it, so one day fewer than the log's is the screen
                 // being ahead, not a misread. A pick's hint plays on from this Sandbox too (a popup darkens the counter).
                 var live = LiveLogRun;
-                if (live != null && (_hintSandbox.Days is not int d || (d != live.RemainingDays && d != live.RemainingDays - 1)))
+                if (live is { MaxDays: > 0 } && (_hintSandbox.Days is not int d || (d != live.RemainingDays && d != live.RemainingDays - 1)))
                     _hintSandbox.Days = live.RemainingDays;
+                // No log's day (none, or a run's length it doesn't tell): the count last read in this run, not none
+                // (a red screen or a popup darkens it, and none would be taken for the run's first day).
+                _hintSandbox.Days ??= _run.LastDays;
                 // A run the log saw from its start: its Chromatic count, or the panel's when higher (a sound can go missing).
                 if (live is { FromStart: true }) _hintSandbox.Chromatic = Math.Max(_hintSandbox.Chromatic, live.ChromaticAtLeast);
                 // The Sandbox viewed from a pick (the eye button): read now, back to the pick is the hint.
@@ -747,7 +764,7 @@ public partial class ControlWindow : Window
                 var text = consumeOnly ? _textBeforeRed ?? r.Text : r.Text;
                 var observation = Tartarus.Vision.GameObservation.From(_hintSandbox, text, _rerolls);
                 // The log knows whether today's Consume is used, which a missing Consume card doesn't (no target either).
-                if (live != null && live.RemainingDays == _hintSandbox.Days)
+                if (live is { Paged: false, MaxDays: > 0 } && live.RemainingDays == _hintSandbox.Days)
                 {
                     observation.ConsumedToday = live.ConsumedToday;
                     // Consumed today and offered to eat (the red screen, or a Consume card): that's the chain going on.

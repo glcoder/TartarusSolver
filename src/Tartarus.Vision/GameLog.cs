@@ -44,6 +44,13 @@ public sealed class LoggedRun
     public int ChromaticAtLeast => Math.Min(10, Math.Max(Math.Max(Chromatic, PanelLights), Treasures + (TreasureOpen ? 1 : 0)));
     /// <summary>The Chromatic panel's slots lit up (an animation the log names): one per Chromatic.</summary>
     public int PanelLights { get; set; }
+    /// <summary>
+    /// Told by the pages the game opens (some clients' logs have no sounds, clicks or day counter): days counted by the
+    /// new-day popup, the run's length known only without a theme (20), no Consumes, Re-rolls or Objective.
+    /// </summary>
+    public bool Paged { get; set; }
+    /// <summary>The theme's scroll came up at the run's start (a log of pages doesn't say which theme).</summary>
+    public bool ThemeShown { get; set; }
 }
 
 /// <summary>
@@ -51,6 +58,7 @@ public sealed class LoggedRun
 /// ("[S16LastDay] check cur=N max=M"), each Chromatic, Prison Incident, Consume, instrument pick and Warden's
 /// Treasure, and the run's end. Read as a file the game writes; nothing of the game's memory or input is touched.
 /// Each event counts once: the engine's "requested row ... not in DataTable" warning that follows a sound is skipped.
+/// Some clients log none of that, only the pages they open: then the run is told from those (<see cref="LoggedRun.Paged"/>).
 /// </summary>
 public sealed partial class GameLog
 {
@@ -161,6 +169,8 @@ public sealed partial class GameLog
     {
         if (!line.Contains("S16", StringComparison.Ordinal)) return false;
         if (line.Contains("requested row", StringComparison.Ordinal)) return false;
+        // Another client's log: the game's pages, no sounds, clicks or day counter. Not where the counter shows.
+        if (line.Contains("Page@ ", StringComparison.Ordinal)) return !_dayCounter && FeedPage(line);
         // A new run: its Start button (then the objective, the Sandbox, day 0 and the first instrument pick).
         if (line.Contains("normal-click Btn_S16GamePlay_Start", StringComparison.Ordinal))
         {
@@ -170,6 +180,7 @@ public sealed partial class GameLog
         if (DayRx().Match(line) is { Success: true } m)
         {
             int day = int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture), max = int.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture);
+            _dayCounter = true;
             // "max=0": the lobby's check, no run.
             if (max == 0) return false;
             // A run the log didn't see start (the log begins in it, a saved run went on), or the day count going back
@@ -200,6 +211,54 @@ public sealed partial class GameLog
         else if (line.Contains("normal-click Btn_S16Board_ColoredPop_Confirm", StringComparison.Ordinal)) (run.Treasures, run.PickOpen, run.TreasureOpen) = (run.Treasures + 1, false, false);
         else if (line.Contains("AudioEnum  == UI_S16_Prison_Task_Done", StringComparison.Ordinal)) run.ObjectiveDone = true;
         else if (line.Contains("] S16GamePlayCheckOut Run", StringComparison.Ordinal)) run.Finished = true;
+        else return false;
+        return true;
+    }
+
+    // The log has the day counter (and the sounds and clicks with it): its pages aren't needed.
+    private bool _dayCounter;
+    // Pages: the entry screen or a run's result was the last seen (true), a run's page (false), nothing yet (null).
+    private bool? _pageLobby;
+
+    /// <summary>
+    /// A page the game opens or closes ("Page@ OpenView S16BoardNewDayPop", "Page@ CloseView 3535_S16BoardColoredPopCtrl").
+    /// A run begins with its first page after the entry screen or the last run's result (the theme's scroll, the
+    /// Objective, the first instrument pick); each new-day popup is a day, each Chromatic brings a Warden's Treasure
+    /// pick (one popup each), and the result screen ends the run.
+    /// </summary>
+    private bool FeedPage(string line)
+    {
+        bool open = line.Contains("Page@ OpenView ", StringComparison.Ordinal);
+        if (!open && !line.Contains("Page@ CloseView ", StringComparison.Ordinal)) return false;
+        bool Is(string page) => line.Contains(page, StringComparison.Ordinal);
+        if (open && (Is("S16GamePlayEntry") || Is("S16GamePlayCheckOut")))
+        {
+            _pageLobby = true;
+            if (!Is("S16GamePlayCheckOut") || Current is not { Paged: true, Finished: false } ended) return false;
+            ended.Finished = true;
+            return true;
+        }
+        bool theme = Is("S16BoardThemePop");
+        if (open && (theme || Is("S16BoardTaskPop") || Is("S16BoardRelicPop") || Is("S16BoardNewDayPop") || Is("S16BoardEventPop") || Is("S16BoardColoredPop"))
+            && (Current is not { Paged: true } || _pageLobby != false))
+        {
+            // Seen from the entry screen on: the whole run, 20 days unless a theme (Iron Law: 30) says otherwise.
+            bool start = _pageLobby == true;
+            Runs.Add(new LoggedRun { Start = Time(line) ?? DateTime.Now, Paged = true, FromStart = start, MaxDays = start && !theme ? 20 : 0 });
+            _pageLobby = false;
+        }
+        if (Current is not { Paged: true } run) return false;
+        if (open)
+        {
+            if (theme) run.ThemeShown = true;
+            else if (Is("S16BoardNewDayPop")) (run.Day, run.DayStartConsumes, run.ConsumePick) = (run.Day + 1, run.Consumes, false);
+            else if (Is("S16BoardEventPop")) (run.Incidents, run.BoardChangedAt) = (run.Incidents + 1, LocalTime(line));
+            else if (Is("S16BoardRelicPop")) (run.InstrumentPicks, run.PickOpen) = (run.InstrumentPicks + 1, true);
+            else if (Is("S16BoardColoredPop")) (run.Chromatic, run.PickOpen, run.TreasureOpen, run.BoardChangedAt) = (run.Chromatic + 1, true, true, LocalTime(line));
+            else return false;
+        }
+        else if (Is("_S16BoardRelicPopCtrl")) run.PickOpen = false;
+        else if (Is("_S16BoardColoredPopCtrl")) (run.Treasures, run.PickOpen, run.TreasureOpen) = (run.Treasures + 1, false, false);
         else return false;
         return true;
     }

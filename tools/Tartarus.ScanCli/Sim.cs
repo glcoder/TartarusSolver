@@ -66,8 +66,8 @@ internal static class LogRuns
         var log = GameLog.Read(path);
         Console.WriteLine($"{path}: {log.Runs.Count} runs");
         foreach (var r in log.Runs)
-            Console.WriteLine($"  {r.Start:yyyy-MM-dd HH:mm}  day {r.Day}/{r.MaxDays}  Chromatic {r.Chromatic,2}  Warden's Treasures {r.Treasures,2}  Prison Incidents {r.Incidents}  Consumes {r.Consumes,2}  instrument picks {r.InstrumentPicks}  Objective {(r.ObjectiveDone ? "done" : "-")}{(r.Finished ? "" : "  (unfinished)")}");
-        var done = log.Runs.Where(r => r.Day >= r.MaxDays && r.MaxDays > 0).ToList();
+            Console.WriteLine($"  {r.Start:yyyy-MM-dd HH:mm}  day {r.Day}/{r.MaxDays}  Chromatic {r.Chromatic,2}  Warden's Treasures {r.Treasures,2}  Prison Incidents {r.Incidents}  Consumes {r.Consumes,2}  instrument picks {r.InstrumentPicks}  Objective {(r.ObjectiveDone ? "done" : "-")}{(r.Finished ? "" : "  (unfinished)")}{(r.Paged ? "  (told by pages)" : "")}");
+        var done = log.Runs.Where(r => r.Day >= r.MaxDays && r.MaxDays > 0 || r.Paged && r.Finished).ToList();
         if (done.Count > 0) Console.WriteLine($"finished runs: {done.Count}, Chromatic per run {done.Average(r => r.Chromatic):0.00}");
         return 0;
     }
