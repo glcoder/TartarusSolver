@@ -4,6 +4,12 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.17 — 2026-10-27
+
+- Fewer false hang reports: the window's start may take up to 30 s (a cold start loading WPF's theme took 5 s), and
+  a UI thread that answered or stood idle by the time its stack was read (a PC back from sleep) is only written to
+  the app's log, not sent.
+
 ## 0.7.16 — 2026-10-27
 
 - The Consume target pick no longer shows an Inmate at a rarity it had before it left: a cell whose Inmate went

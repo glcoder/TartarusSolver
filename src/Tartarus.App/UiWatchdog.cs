@@ -10,6 +10,8 @@ namespace Tartarus.App;
 /// Watches the UI thread from a thread of its own: when it doesn't answer for <see cref="Limit"/>, its stack goes to the
 /// app's log and out as a bug report with the log (a frozen window can't send one, nor take the report hotkey). The
 /// stack is read from a snapshot of this process (ClrMD); nothing of another process is looked at. One report per hang.
+/// A UI thread that answered or stood idle by the time its stack was read was late, not hung: only the log tells of
+/// it (2026-10-27: a PC back from an hour away, idle in GetMessage).
 /// </summary>
 public sealed class UiWatchdog : IDisposable
 {
@@ -19,6 +21,7 @@ public sealed class UiWatchdog : IDisposable
     private readonly Func<string?> _gameLogPath;
     private readonly ManualResetEventSlim _stop = new();
     private volatile bool _answered = true;
+    private volatile bool _started;
 
     /// <summary>Created on the UI thread; <paramref name="gameLogPath"/> is read on the watchdog's.</summary>
     public UiWatchdog(Dispatcher dispatcher, Func<string?> gameLogPath)
@@ -29,11 +32,16 @@ public sealed class UiWatchdog : IDisposable
     }
 
     public static TimeSpan Limit { get; } = TimeSpan.FromSeconds(5);
+    /// <summary>The limit until <see cref="Started"/>: a cold start may take seconds to load WPF's theme (2026-10-27: 5 s in the overlay's constructor).</summary>
+    public static TimeSpan StartLimit { get; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>The main window is on screen: the start is over, <see cref="Limit"/> holds from now on.</summary>
+    public void Started() => _started = true;
 
     private void Run()
     {
         // Counted in checks, not by the clock: a PC waking from sleep has one late answer, not a hang.
-        int missed = 0, limit = (int)(Limit / Check);
+        int missed = 0;
         bool reported = false;
         var since = Stopwatch.StartNew();
         while (!_stop.Wait(Check))
@@ -48,7 +56,7 @@ public sealed class UiWatchdog : IDisposable
                 _dispatcher.BeginInvoke(DispatcherPriority.Send, () => _answered = true);
                 continue;
             }
-            if (++missed < limit || reported || Debugger.IsAttached) continue;
+            if (++missed < (int)((_started ? Limit : StartLimit) / Check) || reported || Debugger.IsAttached) continue;
             reported = true;
             Report(since.Elapsed);
         }
@@ -64,6 +72,14 @@ public sealed class UiWatchdog : IDisposable
         var ui = stacks.Split('\n').Skip(1).TakeWhile(l => l.StartsWith("  ")).Select(l => l.Trim()).Where(l => !l.StartsWith('[')).ToList();
         string top = ui.FirstOrDefault() ?? "unknown";
         if (ui.FirstOrDefault(l => l.StartsWith("Tartarus.")) is { } ours && ours != top) top += " ← " + ours;
+        // Idle: waiting for the next message in the dispatcher's loop, nothing of its own above it.
+        const string wait = "System.Windows.Threading.Dispatcher.GetMessage(";
+        bool idle = ui.Any(l => l.StartsWith(wait)) && ui.TakeWhile(l => !l.StartsWith(wait)).All(l => l.Contains("GetMessage") || l.StartsWith("ILStubClass."));
+        if (_answered || idle)
+        {
+            Write($"UI thread late by {hung.TotalSeconds:0} s, idle by the time its stack was read (not reported)");
+            return;
+        }
         Write($"UI thread not answering for {hung.TotalSeconds:0} s, at {top}{Environment.NewLine}  {string.Join(Environment.NewLine + "  ", ui)}");
         try
         {

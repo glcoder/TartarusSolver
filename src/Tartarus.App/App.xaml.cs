@@ -35,6 +35,7 @@ public partial class App : Application
         _watchdog = new UiWatchdog(Dispatcher, () => main?.GameLogPath);
         main = new ControlWindow(settings);
         MainWindow = main;
+        main.ContentRendered += (_, _) => _watchdog?.Started();
         main.Show();
     }
 
