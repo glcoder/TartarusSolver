@@ -9,6 +9,8 @@ using Tartarus.Vision;
 /// is right (its reading goes into truth.json), neither (set the cell by hand), or the cell is covered by the
 /// game's UI. Every decision marks the cell as checked by hand (meta EditedCells), which training trusts and the
 /// next review skips. A list of all disagreements, without the buttons, is written to review/index.html.
+/// --flips: only what may move a hint, on plain Sandbox screens: a cell read otherwise for one frame (an Inmate in it
+/// or around it, not Unopened, Empty and covered alone) and cells the network read unsurely.
 /// </summary>
 static class Review
 {
@@ -21,7 +23,8 @@ static class Review
     public static int Run(string[] args, Func<string[], string, string?> opt)
     {
         var ds = new Dataset(args[0]);
-        bool all = args.Contains("--all"), serve = !args.Contains("--no-serve"), suspect = args.Contains("--suspect"), red = args.Contains("--red"), mouth = args.Contains("--mouth") || suspect, covered = args.Contains("--covered"), marks = args.Contains("--marks"), found = args.Contains("--found"), nests = args.Contains("--nests");
+        bool flips = args.Contains("--flips");
+        bool all = args.Contains("--all"), serve = !args.Contains("--no-serve"), suspect = args.Contains("--suspect") || flips, red = args.Contains("--red"), mouth = args.Contains("--mouth") || suspect, covered = args.Contains("--covered"), marks = args.Contains("--marks"), found = args.Contains("--found"), nests = args.Contains("--nests");
         string? since = opt(args, "--since");
         int port = int.TryParse(opt(args, "--port"), out var p) ? p : 8765;
         string outDir = Path.Combine(ds.Root, "review"), imgDir = Path.Combine(outDir, "img");
@@ -30,6 +33,13 @@ static class Review
 
         Console.WriteLine("reading the frames through the networks (the page starts after that, about a minute)");
         var (items, frames, cells, wardens) = Collect(ds, imgDir, all, suspect, red, mouth, covered, marks, found, nests, since);
+        if (flips)
+        {
+            static bool Inmate(string cell) => !(cell.StartsWith("Unopened") || cell.StartsWith("Empty") || cell.StartsWith("Covered"));
+            items = items.Where(i => i.Plain && !i.IsWarden && (i.Note.Contains("сеть не уверена")
+                    || i.Note.StartsWith(FlipNote) && (Inmate(i.Label) || Inmate(i.Note[FlipNote.Length..].Trim()))))
+                .Select((i, k) => i with { Id = k }).ToList();
+        }
         Console.WriteLine();
         int wrongCells = items.Count(i => !i.IsWarden), wrongWardens = items.Count(i => i.IsWarden);
         int mouthNotes = items.Count(i => i.Note.Contains("по правилам", StringComparison.Ordinal));
@@ -193,6 +203,8 @@ static class Review
             {
                 var board = got.Clone();
                 board.Instruments = [.. want.Instruments];
+                // The run's theme too: in Cage Fight lower rarities are targets (2026-10-28: 306 of 341 suspects were that).
+                board.Theme = want.Theme;
                 board.Warden = want.Warden > 0 ? want.Warden : got.Warden;
                 var rules = engine.FromObservation(GameObservation.From(board), 1);
                 var have = items.Select(i => (i.FrameId, i.Cell)).ToHashSet();
@@ -254,6 +266,8 @@ static class Review
     }
 
     // A cell that reads the same in the frames just before and after (within 20 s) but not in this one: the odd one out.
+    const string FlipNote = "подозрение: в кадрах до и после — ";
+
     static void AddFlips(List<(string Id, string File, string Path, DateTime At, EditableSandbox Want, EditableSandbox Got, bool Plain, SampleMeta? Meta)> frames, List<Item> items, string imgDir, bool all)
     {
         var have = items.Select(i => (i.FrameId, i.Cell)).ToHashSet();
@@ -271,7 +285,7 @@ static class Review
                 var (cx, cy, k) = layout.Cell(n);
                 string img = $"{b.Id}_c{n:00}.png";
                 ImageIO.SavePng(CellCrops.CropBox(image, cx - 90 * k, cy - 140 * k, cx + 110 * k, cy + 40 * k, 400, 360), System.IO.Path.Combine(imgDir, img));
-                items.Add(new Item(items.Count, b.File, b.Id, n, y, SandboxText.CellShort(b.Got[n]), b.Want[n].Clone(), b.Got[n].Clone(), 0, 0, b.Plain, img, $"подозрение: в кадрах до и после — {x}"));
+                items.Add(new Item(items.Count, b.File, b.Id, n, y, SandboxText.CellShort(b.Got[n]), b.Want[n].Clone(), b.Got[n].Clone(), 0, 0, b.Plain, img, $"{FlipNote}{x}"));
             }
         }
     }
