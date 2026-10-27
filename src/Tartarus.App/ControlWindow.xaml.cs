@@ -109,6 +109,7 @@ public partial class ControlWindow : Window
         RefreshWindowList();
         UpdateDatasetStatus();
         SetupUpdates();
+        ShowStats();
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -388,6 +389,7 @@ public partial class ControlWindow : Window
             Status = stale ? "Tartarus: the window's size changed, a new scan is needed" : _status,
             EyeHint = !stale && _settings.Hints && _eyeHint,
             HintsOnly = _settings.Hints && _settings.HintsOnly,
+            HintLine = _settings.Debug,
         };
     }
 
@@ -680,6 +682,7 @@ public partial class ControlWindow : Window
             _logRunFinished = true;
             Log($"Log: run finished — Chromatic {run.Chromatic}, Prison Incidents {run.Incidents}, Consume {run.Consumes}");
         }
+        CountRuns();
     }
 
     // ---------- Move hints ----------

@@ -31,6 +31,8 @@ public sealed class OverlayModel
     public bool EyeHint { get; init; }
     /// <summary>Only the hint's frames and summary (and warnings): no cells, instruments, Chromatic Inmates or read text.</summary>
     public bool HintsOnly { get; init; }
+    /// <summary>The hint's line at the top (the moves, the chests, the playouts): the debug window's, not the player's.</summary>
+    public bool HintLine { get; init; }
 }
 
 /// <summary>
@@ -124,7 +126,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
             if (!m.HintsOnly) DrawPick(dc, pickLayout, pick, m.ShowRegions, sx, sy, ppd);
             if (m.Hint is { } pickHint) DrawPickHint(dc, pickLayout, pick, pickHint, sx, sy, ppd);
         }
-        if (m.Hint is { } summary && (m.Scan?.Ok == true || m.Scan?.Pick != null)) DrawHintSummary(dc, summary, ppd);
+        if (m.HintLine && m.Hint is { } summary && (m.Scan?.Ok == true || m.Scan?.Pick != null)) DrawHintSummary(dc, summary, ppd);
         // The run theme's scroll: say what was read, under the theme's name.
         if (!m.HintsOnly && m.Scan is { Theme: { } runTheme, Layout: { } themeLayout })
         {

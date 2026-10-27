@@ -23,6 +23,8 @@ public sealed class LoggedRun
     public bool ObjectiveDone { get; set; }
     /// <summary>The Riot's result screen came up.</summary>
     public bool Finished { get; set; }
+    /// <summary>When the Riot's result came up (the log's clock, as <see cref="Start"/>); null before.</summary>
+    public DateTime? End { get; set; }
     /// <summary>The run's start is in the log (the Start button, or its day 0): its counts are the whole run's.</summary>
     public bool FromStart { get; set; }
     /// <summary>Instrument Re-rolls clicked.</summary>
@@ -210,7 +212,8 @@ public sealed partial class GameLog
         else if (line.Contains("normal-click Btn_S16Board_RelicPop_Confirm", StringComparison.Ordinal)) run.PickOpen = false;
         else if (line.Contains("normal-click Btn_S16Board_ColoredPop_Confirm", StringComparison.Ordinal)) (run.Treasures, run.PickOpen, run.TreasureOpen) = (run.Treasures + 1, false, false);
         else if (line.Contains("AudioEnum  == UI_S16_Prison_Task_Done", StringComparison.Ordinal)) run.ObjectiveDone = true;
-        else if (line.Contains("] S16GamePlayCheckOut Run", StringComparison.Ordinal)) run.Finished = true;
+        // The result screen; it may come up twice for one run.
+        else if (line.Contains("] S16GamePlayCheckOut Run", StringComparison.Ordinal)) (run.End, run.Finished) = (run.End ?? Time(line), true);
         else return false;
         return true;
     }
@@ -235,7 +238,7 @@ public sealed partial class GameLog
         {
             _pageLobby = true;
             if (!Is("S16GamePlayCheckOut") || Current is not { Paged: true, Finished: false } ended) return false;
-            ended.Finished = true;
+            (ended.End, ended.Finished) = (Time(line), true);
             return true;
         }
         bool theme = Is("S16BoardThemePop");

@@ -13,10 +13,10 @@ chests).
 
 ## Features
 
-- **Move hints:** the best move framed bold green, moves as good framed thin, with the chests the run is expected to
-  end with (Chromatic and Ultimate) over the frame. Hints for every decision: Destinations, Make Your Decision
-  (Consume, Replace, Hunt, End, Instigate, Bestow), the Consume target pick and chains, the Sewer Ratway, the Torture
-  Instrument picks (with Re-roll) and the Warden's Treasure.
+- **Move hints:** the best move framed bold green, a move as good framed thin (when more are, the best alone: any
+  will do), with the chests the run is expected to end with (Chromatic and Ultimate) over the frame. Hints for every
+  decision: Destinations, Make Your Decision (Consume, Replace, Hunt, End, Instigate, Bestow), the Consume target pick
+  and chains, the Sewer Ratway, the Torture Instrument picks (with Re-roll) and the Warden's Treasure.
 - **The game's rules:** all 31 Torture Instruments, the 17 Prison Incidents, the Objectives, the run themes (Tyranny,
   Opulence, Iron Law, Cage Fight), Rat Nests, Tusk and Prey marks, Scratch Marks.
 - **The solver:** a determinized Monte Carlo search (what's hidden behind doors is drawn again for every playout:
@@ -27,6 +27,8 @@ chests).
   for the text. Works in any of the game's languages: English and Russian OCR ship, others are downloaded on asking.
 - **The game's log:** run start, days, Consumes, Chromatics, Prison Incidents and picks, read from the log file the
   game writes, to fill in what the screen hides (a red Consume screen, a popup).
+- **Statistics:** the runs played and the Chromatic Inmates they ended with (in all and per run), from the game's
+  log, kept across restarts until reset.
 - **Bug reports:** one hotkey sends a screenshot with the overlay, the recent frames, the app's log and the current
   run's game-log lines to the developer (when built with a Sentry DSN; otherwise the report is saved locally). A
   window frozen for 5 seconds reports itself, with where the app stands (its own threads' stacks).

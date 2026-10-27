@@ -4,6 +4,18 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.14 — 2026-10-27
+
+- More decisive hints: a move as good as the best one (within 0.05 Chromatic) is still framed thin beside it, but
+  when two or more are, the best is framed alone: all of them are about equal and any will do (players found the
+  many frames confusing).
+- The hint's long line at the top of the overlay is the debug window's only; the player sees the frames and the
+  chests over them.
+- Statistics in the window: the runs played, the Chromatic Inmates they ended with in all and per run; Reset clears
+  them (after asking). A run counts once the game's log has seen it from its Start to the Riot's result, counted
+  from this version's first start on; kept in `%LOCALAPPDATA%\TartarusSolver\statistic.json` (with each run's time,
+  not shown yet).
+
 ## 0.7.13 — 2026-10-27
 
 - Updates: the app asks GitHub for a new version at start and every 6 hours ("Check for updates", on unless taken

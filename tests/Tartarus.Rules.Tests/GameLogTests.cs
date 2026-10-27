@@ -16,6 +16,23 @@ public class GameLogTests
     ];
 
     [Fact]
+    public void A_run_ends_at_its_first_result_screen()
+    {
+        // The statistics' time in runs: from the Start button to the Riot's result, which may come up twice.
+        var log = new GameLog();
+        foreach (var line in new[]
+        {
+            "[2026.10.26-23.35.58:091][674]TLGame: Display: [Game] UIButton@ normal-click Btn_S16GamePlay_Start",
+            "[2026.10.26-23.36.01:000][  1]TLLua: Display: [S16LastDay] check cur=0 max=20",
+            "[2026.10.26-23.52.52:391][566]TLLua: Display: [Game] S16GamePlayCheckOut Run",
+            "[2026.10.26-23.53.58:020][650]TLLua: Display: [Game] S16GamePlayCheckOut Run",
+        }) log.Feed(line);
+        var run = Assert.Single(log.Runs);
+        Assert.True(run is { FromStart: true, Finished: true });
+        Assert.Equal(TimeSpan.FromSeconds(16 * 60 + 54), run.End!.Value - run.Start);
+    }
+
+    [Fact]
     public void A_log_of_pages_tells_the_runs_days_and_Chromatics()
     {
         // 2026-10-27, a player's report: their client logs the pages it opens, not the sounds, clicks and day counter the
@@ -45,6 +62,7 @@ public class GameLogTests
         Assert.Equal((20, 10, 10, 10, 1, 1), (first.Day, first.Chromatic, first.Treasures, first.ChromaticAtLeast, first.Incidents, first.InstrumentPicks));
         // A theme's run: its length is the theme's (Iron Law 30), which the log doesn't name.
         Assert.Equal(0, first.MaxDays);
+        Assert.Equal(new DateTime(2026, 10, 27, 4, 55, 10), first.End);
 
         // Back in the Tartarus: the board and the last result show again, then the entry screen and a run with no theme.
         foreach (var line in new[]

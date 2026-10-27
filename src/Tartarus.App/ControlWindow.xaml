@@ -80,6 +80,13 @@
     </StackPanel>
     <TextBlock x:Name="LogStatus" Margin="0,2,0,0" Foreground="#9AA0AC" TextWrapping="Wrap" Text="—" />
 
+    <!-- Statistics -->
+    <TextBlock Style="{StaticResource Section}" Text="Statistics" />
+    <DockPanel>
+      <Button x:Name="ResetStatsButton" DockPanel.Dock="Right" Margin="6,0,0,0" VerticalAlignment="Center" Content="Reset" ToolTip="Clear the statistics and count from now on" Click="ResetStatsButton_Click" />
+      <TextBlock x:Name="StatsText" TextWrapping="Wrap" Text="—" />
+    </DockPanel>
+
     <!-- Debugging (the command line's debug flag): labels, dataset, what was read, the log -->
     <StackPanel x:Name="DebugPanel">
       <TextBlock Style="{StaticResource Section}" Text="Labels and dataset" />
