@@ -4,6 +4,14 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.15 — 2026-10-27
+
+- "Hide alternatives" in the window's Hints (on by default): the best move is framed alone. Off, the moves as good as
+  it (within 0.05 Chromatic) are framed beside it, dashed now, all of them (0.7.14 framed the best alone when two or
+  more were; that rule is gone).
+- The app's log says when the update check found nothing newer ("Update check: 0.7.15 is the latest version"), once
+  a start: a check that ran is told from one that didn't.
+
 ## 0.7.14 — 2026-10-27
 
 - More decisive hints: a move as good as the best one (within 0.05 Chromatic) is still framed thin beside it, but

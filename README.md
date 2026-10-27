@@ -13,8 +13,8 @@ chests).
 
 ## Features
 
-- **Move hints:** the best move framed bold green, a move as good framed thin (when more are, the best alone: any
-  will do), with the chests the run is expected to end with (Chromatic and Ultimate) over the frame. Hints for every
+- **Move hints:** the best move framed bold green (with "Hide alternatives" off, the moves as good framed dashed
+  beside it), with the chests the run is expected to end with (Chromatic and Ultimate) over the frame. Hints for every
   decision: Destinations, Make Your Decision (Consume, Replace, Hunt, End, Instigate, Bestow), the Consume target pick
   and chains, the Sewer Ratway, the Torture Instrument picks (with Re-roll) and the Warden's Treasure.
 - **The game's rules:** all 31 Torture Instruments, the 17 Prison Incidents, the Objectives, the run themes (Tyranny,

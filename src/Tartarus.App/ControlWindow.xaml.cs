@@ -85,15 +85,17 @@ public partial class ControlWindow : Window
         AutoScanCheck.Content = "Auto" + Hk("auto") + ", every";
         ReportButton.Content = "Report a bug" + Hk("report");
         Title = $"Tartarus Solver {AppVersion.Number}" + (settings.Debug ? " (debug)" : "");
-        // The player's window: the game window, scanning, the game's log, the version and bug reports.
+        // The player's window: the game window, scanning, the hints' quality and alternatives, the game's log, the version
+        // and bug reports.
         if (!settings.Debug)
-            foreach (var panel in new FrameworkElement[] { ViewPanel, HintChecks, DebugPanel }) panel.Visibility = Visibility.Collapsed;
+            foreach (var panel in new FrameworkElement[] { ViewPanel, HintsCheck, HintsOnlyCheck, DebugPanel }) panel.Visibility = Visibility.Collapsed;
         VersionText.Text = "Version " + AppVersion.Short;
         VersionText.ToolTip = AppVersion.Full;
         Log("Version " + AppVersion.Short + (BugReports.Enabled ? "" : " · bug reports not set up"));
 
         settings.AutoScanSeconds = Math.Clamp(Math.Round(settings.AutoScanSeconds, 1), 0, 1);
         IntervalSlider.Value = settings.AutoScanSeconds;
+        HideAlternativesCheck.IsChecked = settings.HideAlternatives;
         ShowInterval();
         AutoScanCheck.IsChecked = settings.AutoScan;
         OverlayCheck.IsChecked = settings.OverlayVisible;
@@ -390,6 +392,7 @@ public partial class ControlWindow : Window
             EyeHint = !stale && _settings.Hints && _eyeHint,
             HintsOnly = _settings.Hints && _settings.HintsOnly,
             HintLine = _settings.Debug,
+            Alternatives = !_settings.HideAlternatives,
         };
     }
 
@@ -537,6 +540,15 @@ public partial class ControlWindow : Window
     {
         if (!_hintSliderReady) return;
         _settings.HintsOnly = HintsOnlyCheck.IsChecked == true;
+        RefreshOverlay();
+    }
+
+    private void HideAlternativesCheck_Changed(object sender, RoutedEventArgs e)
+    {
+        bool hide = HideAlternativesCheck.IsChecked == true;
+        if (hide == _settings.HideAlternatives) return;
+        _settings.HideAlternatives = hide;
+        _settings.Save();
         RefreshOverlay();
     }
 

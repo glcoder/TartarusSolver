@@ -33,6 +33,8 @@ public sealed class OverlayModel
     public bool HintsOnly { get; init; }
     /// <summary>The hint's line at the top (the moves, the chests, the playouts): the debug window's, not the player's.</summary>
     public bool HintLine { get; init; }
+    /// <summary>The moves as good as the best framed dashed beside it (else the best alone).</summary>
+    public bool Alternatives { get; init; }
 }
 
 /// <summary>
@@ -124,7 +126,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
         if (m.Scan is { Pick: { } pick, Layout: { } pickLayout })
         {
             if (!m.HintsOnly) DrawPick(dc, pickLayout, pick, m.ShowRegions, sx, sy, ppd);
-            if (m.Hint is { } pickHint) DrawPickHint(dc, pickLayout, pick, pickHint, sx, sy, ppd);
+            if (m.Hint is { } pickHint) DrawPickHint(dc, pickLayout, pick, pickHint, sx, sy, ppd, m.Alternatives);
         }
         if (m.HintLine && m.Hint is { } summary && (m.Scan?.Ok == true || m.Scan?.Pick != null)) DrawHintSummary(dc, summary, ppd);
         // The run theme's scroll: say what was read, under the theme's name.
@@ -138,7 +140,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
         // Hints only: the frames on the moves, without the reading of cells, instruments and Chromatic Inmates.
         if (m.HintsOnly)
         {
-            if (m.Scan.Layout is { } hintLayout && m.Hint is { } onlyHint) DrawSandboxHint(dc, hintLayout, m.Scan, onlyHint, sx, sy, fontSize, ppd);
+            if (m.Scan.Layout is { } hintLayout && m.Hint is { } onlyHint) DrawSandboxHint(dc, hintLayout, m.Scan, onlyHint, sx, sy, fontSize, ppd, m.Alternatives);
             return;
         }
         foreach (var c in cells)
@@ -203,7 +205,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
             DrawInstruments(dc, layout, sandbox.Instruments, m.KeptInstruments, m.ShowRegions, sx, sy, fontSize, ppd);
             DrawChromatic(dc, layout, sandbox.Chromatic, m.ShowRegions, sx, sy, fontSize, ppd);
             if (m.ShowRegions) DrawButtons(dc, layout, m.Scan, sx, sy, fontSize, ppd);
-            if (m.Hint is { } hint) DrawSandboxHint(dc, layout, m.Scan, hint, sx, sy, fontSize, ppd);
+            if (m.Hint is { } hint) DrawSandboxHint(dc, layout, m.Scan, hint, sx, sy, fontSize, ppd, m.Alternatives);
         }
     }
 

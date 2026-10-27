@@ -35,6 +35,8 @@ public sealed class AppSettings
     public bool Hints { get; set; } = true;
     /// <summary>The overlay shows only the hint (its frames and summary), not what was read on the screen.</summary>
     public bool HintsOnly { get; set; }
+    /// <summary>The best move framed alone; off: the moves as good as it (Hint.TieWithin) framed dashed beside it.</summary>
+    public bool HideAlternatives { get; set; } = true;
     /// <summary>Hint quality: playouts per action (models/solver/levels.txt says what each level costs and gives).</summary>
     public int HintPlayouts { get; set; } = 1024;
     /// <summary>The most a hint may take, whatever its playouts (a slow PC, a position with many moves).</summary>

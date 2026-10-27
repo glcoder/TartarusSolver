@@ -43,7 +43,7 @@ public partial class ControlWindow
 
     private async Task CheckUpdatesAsync(CancellationToken ct)
     {
-        bool failed = false;
+        bool failed = false, latestSaid = false;
         try
         {
             await Task.Delay(TimeSpan.FromSeconds(3), ct);
@@ -51,11 +51,18 @@ public partial class ControlWindow
             {
                 try
                 {
-                    if (await Updates.LatestAsync(ct) is { } latest && latest.Version > Updates.Current && latest.Version != _update?.Version)
+                    var latest = await Updates.LatestAsync(ct);
+                    if (latest != null && latest.Version > Updates.Current && latest.Version != _update?.Version)
                     {
                         _update = latest;
                         Log($"Update: version {latest.Version} is out ({latest.Page})");
                         ShowUpdate(latest);
+                    }
+                    else if (latest != null && latest.Version <= Updates.Current && !latestSaid)
+                    {
+                        // Once a start: the check ran and found nothing newer.
+                        latestSaid = true;
+                        Log($"Update check: {AppVersion.Number} is the latest version (GitHub's latest is {latest.Version})");
                     }
                 }
                 catch (Exception ex) when (!ct.IsCancellationRequested)

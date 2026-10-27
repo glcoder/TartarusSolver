@@ -10,14 +10,14 @@ namespace Tartarus.App;
 
 // The move hints on the overlay, kept to two marks: the best move framed bold green where it is clicked (a decision
 // card, a Destination's card, a target's cell, the Cancel button, a pick card), the moves as good as it (within
-// Hint.TieWithin, at most Hint.MaxTies of them) framed thin green. Over each frame, the chests the run is expected to
+// Hint.TieWithin; unless the player hides them) framed dashed green. Over each frame, the chests the run is expected to
 // end with after the move: each rarity's Riot chest (the game's minimap icons, models/chests) and its expected count;
 // and in the debug window a summary line top left.
 public sealed partial class SandboxOverlayView
 {
     private static readonly Brush HintBrush = Freeze(new SolidColorBrush(Color.FromRgb(90, 235, 125)));
     private static readonly Pen BestPen = FreezePen(new Pen(HintBrush, 5));
-    private static readonly Pen TiePen = FreezePen(new Pen(HintBrush, 2));
+    private static readonly Pen TiePen = FreezePen(new Pen(HintBrush, 2) { DashStyle = new DashStyle([4, 3], 0) });
     private static readonly string? ChestDir = NameMatch.FindModelDir("chests", "chromatic.png");
 
     /// <summary>A place to click and the best of the moves made there.</summary>
@@ -30,22 +30,20 @@ public sealed partial class SandboxOverlayView
     }
 
     /// <summary>
-    /// The best spot bold, the ones as good thin (the best alone when more than <see cref="Hint.MaxTies"/> are); nothing
-    /// for the rest. Over each, the chests the run is expected to
+    /// The best spot bold, the ones as good dashed (with <paramref name="alternatives"/>); nothing for the rest. Over each, the chests the run is expected to
     /// end with after that move (Chromatic and Ultimate), "×8.0" by each chest (tenths, rounded): the player
     /// compares them.
     /// </summary>
-    private static void DrawSpots(DrawingContext dc, IEnumerable<Spot> spots, double fontSize, double ppd)
+    private static void DrawSpots(DrawingContext dc, IEnumerable<Spot> spots, double fontSize, double ppd, bool alternatives)
     {
         var ordered = spots.OrderByDescending(s => s.Value.Mean).ToList();
         if (ordered.Count == 0) return;
         double top = ordered[0].Value.Mean;
-        int ties = ordered.Skip(1).Count(s => top - s.Value.Mean < Hint.TieWithin);
-        int framed = ties <= Hint.MaxTies ? 1 + ties : 1;
-        for (int i = 0; i < framed; i++)
+        for (int i = 0; i < ordered.Count; i++)
         {
             var s = ordered[i];
             bool best = i == 0;
+            if (!best && (!alternatives || top - s.Value.Mean >= Hint.TieWithin)) break;
             // Inside the card's or cell's edge (the pen straddles the line): neighbours sit only ~8 canvas units apart.
             var box = Inflate(s.Box, best ? -3 : -1);
             dc.DrawRoundedRectangle(null, best ? BestPen : TiePen, box, 8, 8);
@@ -97,7 +95,7 @@ public sealed partial class SandboxOverlayView
     /// Destination: its cards; the Consume target pick: the targets' cells, and Cancel worth the best move but
     /// consuming (on a chain, stopping it); the Sewer Ratway: the cells.
     /// </summary>
-    private static void DrawSandboxHint(DrawingContext dc, ScreenLayout layout, ScanResult scan, Hint hint, double sx, double sy, double fontSize, double ppd)
+    private static void DrawSandboxHint(DrawingContext dc, ScreenLayout layout, ScanResult scan, Hint hint, double sx, double sy, double fontSize, double ppd, bool alternatives)
     {
         if (scan.Cells is not { } cells) return;
         var spots = new Dictionary<string, Spot>();
@@ -151,7 +149,7 @@ public sealed partial class SandboxOverlayView
                     break;
             }
         }
-        DrawSpots(dc, spots.Values, fontSize, ppd);
+        DrawSpots(dc, spots.Values, fontSize, ppd, alternatives);
     }
 
     /// <summary>"Hint: Consume: Cell 9 ≈ Replace (tied) — at the Riot ≈6.4 Chromatic · 2.1 Ultimate · 3.0 Legendary · then End (12,800 playouts)".</summary>
@@ -168,7 +166,7 @@ public sealed partial class SandboxOverlayView
         var ties = shown.Skip(1).Where(a => best.Mean - a.Mean < Hint.TieWithin).ToList();
         var next = shown.Skip(1 + ties.Count).FirstOrDefault();
         string text = $"Hint: {Name(best)}"
-            + (ties.Count > Hint.MaxTies ? $" ({ties.Count + 1} moves about equal)" : string.Concat(ties.Select(t => $" ≈ {Name(t)}")) + (ties.Count > 0 ? " (tied)" : ""))
+            + string.Concat(ties.Select(t => $" ≈ {Name(t)}")) + (ties.Count > 0 ? " (tied)" : "")
             + $" — at the Riot ≈{best.Chromatic:0.0} Chromatic · {best.Ultimate:0.0} Ultimate · {best.Legendary:0.0} Legendary"
             + (next != null ? $" · then {Name(next)}" : "")
             + $"  ({hint.Result.Playouts.ToString("N0", CultureInfo.InvariantCulture)} playouts{(hint.Final ? "" : ", computing…")})";
@@ -204,7 +202,7 @@ public sealed partial class SandboxOverlayView
     }
 
     /// <summary>An instrument or Warden's Treasure pick: its cards, and the Re-roll button.</summary>
-    private static void DrawPickHint(DrawingContext dc, ScreenLayout layout, PickRead pick, Hint hint, double sx, double sy, double ppd)
+    private static void DrawPickHint(DrawingContext dc, ScreenLayout layout, PickRead pick, Hint hint, double sx, double sy, double ppd, bool alternatives)
     {
         if (hint.Shown.Count == 0) return;
         double fontSize = Math.Clamp(13 * layout.K * sx, 10, 20);
@@ -221,6 +219,6 @@ public sealed partial class SandboxOverlayView
         }
         if (hint.Shown.FirstOrDefault(a => a.Action.Kind == ActionKind.Reroll) is { } reroll)
             spots.Add(new Spot(Pixels(layout, ScreenLayout.PickRerollButton, sx, sy), reroll));
-        DrawSpots(dc, spots, fontSize, ppd);
+        DrawSpots(dc, spots, fontSize, ppd, alternatives);
     }
 }

@@ -61,7 +61,8 @@
       <TextBlock Style="{StaticResource Section}" Text="Hints" />
       <StackPanel x:Name="HintChecks" Orientation="Horizontal">
         <CheckBox x:Name="HintsCheck" Content="Move hints" Checked="HintsCheck_Changed" Unchecked="HintsCheck_Changed" />
-        <CheckBox x:Name="HintsOnlyCheck" Content="Hints only" Margin="12,0,0,0" Checked="HintsOnlyCheck_Changed" Unchecked="HintsOnlyCheck_Changed" ToolTip="The overlay shows only the move frames and the hint line: no cells, Torture Instruments or Chromatic" />
+        <CheckBox x:Name="HintsOnlyCheck" Content="Hints only" Margin="12,0,12,0" Checked="HintsOnlyCheck_Changed" Unchecked="HintsOnlyCheck_Changed" ToolTip="The overlay shows only the move frames and the hint line: no cells, Torture Instruments or Chromatic" />
+        <CheckBox x:Name="HideAlternativesCheck" Content="Hide alternatives" ToolTip="Frame the best move alone; off: the moves as good as it are framed dashed beside it" Checked="HideAlternativesCheck_Changed" Unchecked="HideAlternativesCheck_Changed" />
       </StackPanel>
       <DockPanel Margin="0,6,0,0">
         <TextBlock DockPanel.Dock="Left" Text="Faster" Foreground="#9AA0AC" Margin="0,0,6,0" />

@@ -16,12 +16,6 @@ public sealed record Hint(GameState State, SearchResult Result, bool ConsumeOnly
     /// <summary>Within this of the best's worth (in Chromatics) a move is as good: the playouts can't tell them apart.</summary>
     public const double TieWithin = 0.05;
 
-    /// <summary>
-    /// At most this many moves as good as the best are framed beside it: one is a choice the player may make (by the
-    /// chests over the frames), more say it doesn't matter, and the best is framed alone.
-    /// </summary>
-    public const int MaxTies = 1;
-
     /// <summary>The other moves as good as the best one.</summary>
     public IReadOnlyList<ActionValue> Ties => Shown.Skip(1).Where(a => Shown[0].Mean - a.Mean < TieWithin).ToList();
 }
