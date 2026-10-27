@@ -15,11 +15,14 @@ public sealed class PickVotes
     private string? _kinds;
     // Each cell's Inmate as last read before the red screen (its Code must match for its rarity to hold).
     private readonly (Code? Code, Rarity Rarity)?[] _before = new (Code?, Rarity)?[16];
+    // A cell read lower than before once: a second such reading in a row is a new Inmate, not the red.
+    private readonly bool[] _lowerOnce = new bool[16];
 
     /// <summary>
     /// The Sandbox read whole off the red screen: the rarities no reading on it may drop below. Only the Warden's cell
-    /// may hold a lower one now (a Replace); elsewhere the higher of the two stands, as the red's first frame can come
-    /// before its banner reads.
+    /// may hold a lower one now (a Replace); elsewhere one lower reading leaves the higher one standing, as the red's
+    /// first frame can come before its banner reads. Two in a row are taken: another Inmate of the same Code took the
+    /// cell (2026-10-27: a Lion Ultimate became Chromatic, a Lion Magic came, and the red screen showed it Ultimate).
     /// </summary>
     public void Before(EditableSandbox b)
     {
@@ -27,9 +30,14 @@ public sealed class PickVotes
         {
             var c = b[n];
             if (c.Covered) continue;
-            if (c.Kind != CellKind.Inmate) _before[n - 1] = null;
-            else if (n != b.Warden && _before[n - 1] is { } was && was.Code == c.Code && was.Rarity > c.Rarity) continue;
-            else _before[n - 1] = (c.Code, c.Rarity);
+            bool lower = n != b.Warden && _before[n - 1] is { } was && was.Code == c.Code && was.Rarity > c.Rarity;
+            if (c.Kind == CellKind.Inmate && lower && !_lowerOnce[n - 1])
+            {
+                _lowerOnce[n - 1] = true;
+                continue;
+            }
+            _before[n - 1] = c.Kind == CellKind.Inmate ? (c.Code, c.Rarity) : null;
+            _lowerOnce[n - 1] = false;
         }
     }
 

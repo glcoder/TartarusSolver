@@ -4,6 +4,12 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.16 — 2026-10-27
+
+- The Consume target pick no longer shows an Inmate at a rarity it had before it left: a cell whose Inmate went
+  (became Chromatic, was consumed) and was taken by a lower one of the same Code read the old rarity on the red
+  screen, and the hint there could turn to Cancel right after Consume was hinted on the decision.
+
 ## 0.7.15 — 2026-10-27
 
 - "Hide alternatives" in the window's Hints (on by default): the best move is framed alone. Off, the moves as good as

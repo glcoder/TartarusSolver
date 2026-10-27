@@ -65,6 +65,25 @@ public class SandboxTests
     }
 
     [Fact]
+    public void A_new_Inmate_of_the_same_Code_reads_as_it_is_on_the_red_screen()
+    {
+        // 2026-10-27: a Lion Ultimate in cell 9 became Chromatic, a Lion Magic came; the red screen showed it Ultimate,
+        // and Cancel was hinted there right after Consume on the decision.
+        var before = EditableSandbox.Empty();
+        before.Warden = 11;
+        (before[9].Kind, before[9].Code, before[9].Rarity) = (CellKind.Inmate, Vision.Code.Lion, Vision.Rarity.Ultimate);
+        var votes = new PickVotes();
+        votes.Before(before);
+        var after = before.Clone();
+        after[9].Rarity = Vision.Rarity.Magic;
+        votes.Before(after);
+        votes.Before(after);
+        var red = after.Clone();
+        votes.Apply(red);
+        Assert.Equal(Vision.Rarity.Magic, red[9].Rarity);
+    }
+
+    [Fact]
     public void The_pulsing_Consumable_mark_does_not_hold_a_cell_back()
     {
         var shown = EditableSandbox.Empty();
