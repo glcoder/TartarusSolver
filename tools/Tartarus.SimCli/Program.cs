@@ -79,13 +79,14 @@ IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWe
     // vn:N[:D[:R]]: the search with the value network at the leaves, D days on (default 3, the best of 1-6); R the
     // playouts' own moves by the network too (0 never, 1 the morning's Destination, 2 every decision), or p: by the
     // policy network (--policy-net). A last ":peek": the playouts' moves see the doors their world has drawn (before 0.7.10).
-    if (p.StartsWith("vn:", StringComparison.Ordinal))
+    // tp:N[:D[:R]]: the same with the decision after each action searched too (MonteCarloSearch.TwoPly, a probe).
+    if (p.StartsWith("vn:", StringComparison.Ordinal) || p.StartsWith("tp:", StringComparison.Ordinal))
     {
         var parts = p.Split(':');
         bool byPolicy = parts.Length > 3 && parts[3] is "p" or "pi";
         return new SearchPolicy(engine, int.Parse(parts[1]), weights, threads: 1, net: net ?? throw new InvalidOperationException("no value network (models/solver/value.bin, --net)"),
             leafDays: parts.Length > 2 ? int.Parse(parts[2]) : 3, rolloutNet: parts.Length > 3 && !byPolicy && parts[3] != "peek" ? int.Parse(parts[3]) : 0,
-            policy: byPolicy ? PolicyNet(policy) : null, policyInstruments: parts.Length > 3 && parts[3] == "pi", instrumentPolicy: instruments ?? instrumentNet, peek: parts[^1] == "peek");
+            policy: byPolicy ? PolicyNet(policy) : null, policyInstruments: parts.Length > 3 && parts[3] == "pi", instrumentPolicy: instruments ?? instrumentNet, peek: parts[^1] == "peek", twoPly: parts[0] == "tp");
     }
     return p switch
     {

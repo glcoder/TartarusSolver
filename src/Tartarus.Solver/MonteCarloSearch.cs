@@ -44,9 +44,15 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
     public ValueNet? InstrumentPolicy { get; init; }
     /// <summary>The playouts' moves look at the doors their world has drawn (before 0.7.10; for comparison): <see cref="HeuristicPolicy"/>.</summary>
     public bool PeekingPlayouts { get; init; }
+    /// <summary>
+    /// A probe of deeper search: the decision after each action is searched too, open-loop (a follow-up is the same
+    /// action in every world where it's legal; where it isn't, the playout policy's pick there stands in), and an
+    /// action is worth its best follow-up's mean. The leaf stays where the action alone would put it.
+    /// </summary>
+    public bool TwoPly { get; init; }
 
     /// <summary>Plays on from <paramref name="s"/> and returns the run's (predicted) utility, Chromatic, Ultimate and Legendary counts.</summary>
-    private (double Utility, double Chromatic, double Ultimate, double Legendary) Playout(ref GameState s, IPolicy policy)
+    private (double Utility, double Chromatic, double Ultimate, double Legendary) Playout(ref GameState s, IPolicy policy, int? leafAt = null)
     {
         if (Net == null)
         {
@@ -54,7 +60,7 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
             var score = RunScore.Of(s);
             return (score.Utility, score.Chromatic, score.Ultimate, score.Legendary);
         }
-        int leafDay = s.Day + LeafDays;
+        int leafDay = leafAt ?? s.Day + LeafDays;
         Span<GameAction> legal = stackalloc GameAction[Engine.MaxActions];
         for (int steps = 0; !s.Ended && steps < 2000; steps++)
         {
@@ -83,11 +89,9 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
         // One action is played out too: the hint shows what the run is expected to end with.
         if (k == 0) return new SearchResult([], 0, sw.Elapsed);
 
-        var sum = new double[k];
-        var sumSq = new double[k];
-        var chroma = new double[k];
-        var ultimate = new double[k];
-        var legendary = new double[k];
+        var own = Enumerable.Range(0, k).Select(_ => new Tally()).ToArray();
+        // TwoPly: each action's follow-ups, and the worlds it was played in.
+        var follow = Enumerable.Range(0, k).Select(_ => new Dictionary<GameAction, Tally>()).ToArray();
         var count = new int[k];
         var alive = Enumerable.Repeat(true, k).ToArray();
         var gate = new object();
@@ -98,6 +102,7 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
         {
             int baseSample = round * RoundSize;
             var live = Enumerable.Range(0, k).Where(i => alive[i]).ToArray();
+            int played = 0;
             Parallel.For(0, RoundSize, new ParallelOptions { MaxDegreeOfParallelism = Threads, CancellationToken = CancellationToken.None }, j =>
             {
                 ulong sampleSeed = Rng.Mix(seed * 0x9E3779B97F4A7C15UL + (ulong)(baseSample + j));
@@ -110,19 +115,22 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
                     var s = det;
                     s.Rng = new Rng(sampleSeed + 1);
                     engine.Apply(ref s, actions[i]);
-                    var (u, c, ult, leg) = Playout(ref s, policy);
+                    if (TwoPly)
+                    {
+                        int n = FollowUps(i, s, policy);
+                        Interlocked.Add(ref played, n);
+                        continue;
+                    }
+                    var v = Playout(ref s, policy);
+                    Interlocked.Increment(ref played);
                     lock (gate)
                     {
-                        sum[i] += u;
-                        sumSq[i] += u * u;
-                        chroma[i] += c;
-                        ultimate[i] += ult;
-                        legendary[i] += leg;
+                        own[i].Add(v);
                         count[i]++;
                     }
                 }
             });
-            total += RoundSize * live.Length;
+            total += played;
             round++;
             progress?.Invoke(new SearchResult(Ranked(), total, sw.Elapsed));
             if (count.Where((c, i) => alive[i]).Min() >= playoutsPerAction) break;
@@ -130,34 +138,106 @@ public sealed class MonteCarloSearch(Engine engine, EvalWeights? weights = null)
             // Successive rejection: an action whose mean is more than 4 standard errors below the leader's stops.
             if (round >= 2)
             {
-                int lead = Enumerable.Range(0, k).Where(i => alive[i]).MaxBy(i => sum[i] / count[i]);
-                double leadMean = sum[lead] / count[lead];
+                int lead = Enumerable.Range(0, k).Where(i => alive[i]).MaxBy(i => Worth(i).Mean);
+                var leader = Worth(lead);
                 for (int i = 0; i < k; i++)
-                    if (alive[i] && i != lead && sum[i] / count[i] + 4 * StdErr(i) < leadMean - 4 * StdErr(lead)) alive[i] = false;
+                    if (alive[i] && i != lead && Worth(i).Mean + 4 * Worth(i).StdErr < leader.Mean - 4 * leader.StdErr) alive[i] = false;
             }
         }
         return new SearchResult(Ranked(), total, sw.Elapsed);
 
         List<ActionValue> Ranked() => Enumerable.Range(0, k)
             .Where(i => count[i] > 0)
-            .Select(i => new ActionValue(actions[i], sum[i] / count[i], StdErr(i), count[i], chroma[i] / count[i], ultimate[i] / count[i], legendary[i] / count[i]))
+            .Select(i =>
+            {
+                var t = Worth(i);
+                return new ActionValue(actions[i], t.Mean, t.StdErr, count[i], t.Chromatic / t.Count, t.Ultimate / t.Count, t.Legendary / t.Count);
+            })
             .OrderByDescending(a => a.Mean)
             .ToList();
 
-        double StdErr(int i)
+        // What action i is worth: its own playouts, or (TwoPly) its best follow-up among those played in at least
+        // half its worlds (one found late hasn't met the same worlds).
+        Tally Worth(int i)
         {
-            if (count[i] < 2) return double.PositiveInfinity;
-            double mean = sum[i] / count[i];
-            double variance = Math.Max(0, sumSq[i] / count[i] - mean * mean);
-            return Math.Sqrt(variance / count[i]);
+            if (!TwoPly) return own[i];
+            lock (gate)
+                return follow[i].Values.Where(t => 2 * t.Count >= count[i]).MaxBy(t => t.Mean) ?? new Tally();
+        }
+
+        // TwoPly: every follow-up legal in this world played out from the same dice; a known follow-up not legal here
+        // gets what the playout policy's pick here brought. The playouts made.
+        int FollowUps(int i, GameState s, IPolicy policy)
+        {
+            int leafDay = s.Day + LeafDays;
+            Span<GameAction> next = stackalloc GameAction[Engine.MaxActions];
+            int n = s.Ended ? 0 : engine.Legal(s, next);
+            var results = new (GameAction Action, (double, double, double, double) Value)[Math.Max(n, 1)];
+            int pick = 0;
+            if (n == 0) results[0] = (Over, Playout(ref s, policy, leafDay));
+            else
+            {
+                var chosen = policy.Choose(engine, s, next[..n]);
+                for (int f = 0; f < n; f++)
+                {
+                    var t = s;
+                    engine.Apply(ref t, next[f]);
+                    results[f] = (next[f], Playout(ref t, policy, leafDay));
+                    if (next[f] == chosen) pick = f;
+                }
+            }
+            lock (gate)
+            {
+                var seen = follow[i];
+                foreach (var (a, v) in results)
+                {
+                    if (!seen.TryGetValue(a, out var t)) seen[a] = t = new Tally();
+                    t.Add(v);
+                }
+                foreach (var (a, t) in seen)
+                    if (Array.FindIndex(results, r => r.Action == a) < 0) t.Add(results[pick].Value);
+                count[i]++;
+            }
+            return results.Length;
+        }
+    }
+
+    /// <summary>TwoPly's follow-up of an action that ends the run.</summary>
+    private static readonly GameAction Over = new(ActionKind.End, 255);
+
+    /// <summary>Playout results summed: utility (mean, standard error) and the counts the run ends with.</summary>
+    private sealed class Tally
+    {
+        public double Sum, SumSq, Chromatic, Ultimate, Legendary;
+        public int Count;
+        public double Mean => Count > 0 ? Sum / Count : double.NegativeInfinity;
+
+        public double StdErr
+        {
+            get
+            {
+                if (Count < 2) return double.PositiveInfinity;
+                double variance = Math.Max(0, SumSq / Count - Mean * Mean);
+                return Math.Sqrt(variance / Count);
+            }
+        }
+
+        public void Add((double Utility, double Chromatic, double Ultimate, double Legendary) v)
+        {
+            Sum += v.Utility;
+            SumSq += v.Utility * v.Utility;
+            Chromatic += v.Chromatic;
+            Ultimate += v.Ultimate;
+            Legendary += v.Legendary;
+            Count++;
         }
     }
 }
 
 /// <summary>A policy that searches at every decision: for measuring how well the search plays.</summary>
-public sealed class SearchPolicy(Engine engine, int playouts, EvalWeights? weights = null, int threads = 1, ValueNet? net = null, int leafDays = 3, int rolloutNet = 0, ValueNet? policy = null, bool policyInstruments = false, ValueNet? instrumentPolicy = null, bool peek = false) : IPolicy
+public sealed class SearchPolicy(Engine engine, int playouts, EvalWeights? weights = null, int threads = 1, ValueNet? net = null, int leafDays = 3, int rolloutNet = 0, ValueNet? policy = null, bool policyInstruments = false, ValueNet? instrumentPolicy = null, bool peek = false, bool twoPly = false) : IPolicy
 {
-    private readonly MonteCarloSearch _search = new(engine, weights) { Threads = threads, Net = net, LeafDays = leafDays, RolloutNet = rolloutNet, Policy = policy, PolicyInstruments = policyInstruments, InstrumentPolicy = instrumentPolicy, PeekingPlayouts = peek };
+    private readonly MonteCarloSearch _search = new(engine, weights) { Threads = threads, Net = net, LeafDays = leafDays, RolloutNet = rolloutNet, Policy = policy, PolicyInstruments = policyInstruments, InstrumentPolicy = instrumentPolicy, PeekingPlayouts = peek, TwoPly = twoPly };
     private ulong _seed = 1;
 
     /// <summary>The last search's value of its position (the best action's mean utility); null when there was nothing to choose.</summary>
