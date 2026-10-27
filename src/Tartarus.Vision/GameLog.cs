@@ -210,7 +210,9 @@ public sealed partial class GameLog
         else if (line.Contains("] S16BoardRelicPop Run", StringComparison.Ordinal)) (run.InstrumentPicks, run.PickOpen) = (run.InstrumentPicks + 1, true);
         else if (line.Contains("] S16BoardColoredPop Run", StringComparison.Ordinal)) (run.PickOpen, run.TreasureOpen) = (true, true);
         else if (line.Contains("normal-click Btn_S16Board_RelicPop_Confirm", StringComparison.Ordinal)) run.PickOpen = false;
-        else if (line.Contains("normal-click Btn_S16Board_ColoredPop_Confirm", StringComparison.Ordinal)) (run.Treasures, run.PickOpen, run.TreasureOpen) = (run.Treasures + 1, false, false);
+        // A Warden's Treasure taken works on the Sandbox at once (opens cells, raises rarities): a second one that comes
+        // right after (two Chromatics at once) is picked over another Sandbox than the first.
+        else if (line.Contains("normal-click Btn_S16Board_ColoredPop_Confirm", StringComparison.Ordinal)) (run.Treasures, run.PickOpen, run.TreasureOpen, run.BoardChangedAt) = (run.Treasures + 1, false, false, LocalTime(line));
         else if (line.Contains("AudioEnum  == UI_S16_Prison_Task_Done", StringComparison.Ordinal)) run.ObjectiveDone = true;
         // The result screen; it may come up twice for one run.
         else if (line.Contains("] S16GamePlayCheckOut Run", StringComparison.Ordinal)) (run.End, run.Finished) = (run.End ?? Time(line), true);
@@ -276,8 +278,10 @@ public sealed partial class GameLog
     }
 
     /// <summary>A line's time (the log writes UTC) in local time; now when it doesn't read.</summary>
+    /// <summary>When the line was written, to the millisecond (a Sandbox change is told against frames' times), in local time.</summary>
     private static DateTime LocalTime(string line) =>
-        Time(line) is { } t ? DateTime.SpecifyKind(t, DateTimeKind.Utc).ToLocalTime() : DateTime.Now;
+        (line.Length > 24 && DateTime.TryParseExact(line[1..24], "yyyy.MM.dd-HH.mm.ss:fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out var ms) ? ms : Time(line)) is { } t
+            ? DateTime.SpecifyKind(t, DateTimeKind.Utc).ToLocalTime() : DateTime.Now;
 
     private static DateTime? Time(string line) =>
         line.Length > 24 && DateTime.TryParseExact(line[1..20], "yyyy.MM.dd-HH.mm.ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out var t) ? t : null;

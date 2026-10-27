@@ -95,4 +95,58 @@ public class SandboxTests
         read.Steady(shown, previousRead);
         Assert.Equal(CellKind.Inmate, read[5].Kind);
     }
+
+    [Fact]
+    public void A_hint_takes_a_Sandbox_read_alike_twice()
+    {
+        var settle = new BoardSettle();
+        var t = new DateTime(2026, 10, 27, 22, 12, 57);
+        var board = EditableSandbox.Empty();
+        board.Warden = 11;
+        (board[9].Kind, board[9].Code, board[9].Rarity) = (CellKind.Inmate, Vision.Code.Mammoth, Vision.Rarity.Ultimate);
+        Assert.Equal(BoardSettle.Verdict.Unsettled, settle.Take(board, t, default));
+        // The pulsing Consumable mark is no other reading.
+        board[9].Consumable = true;
+        Assert.Equal(BoardSettle.Verdict.Take, settle.Take(board, t.AddSeconds(0.5), default));
+        // Mid-flight the Ultimate reads Normal for a frame.
+        var flight = board.Clone();
+        flight[9].Rarity = Vision.Rarity.Normal;
+        Assert.Equal(BoardSettle.Verdict.Unsettled, settle.Take(flight, t.AddSeconds(1), default));
+        Assert.Equal(BoardSettle.Verdict.Unsettled, settle.Take(board, t.AddSeconds(1.5), default));
+    }
+
+    [Fact]
+    public void After_a_bite_the_old_Sandbox_still_on_screen_gets_no_hint()
+    {
+        // 2026-10-27 22:02:15: Cell 16 eaten, its Inmate stood there 3 s more and was hinted as the chain's next bite.
+        var settle = new BoardSettle();
+        var t = new DateTime(2026, 10, 27, 22, 2, 13);
+        var before = EditableSandbox.Empty();
+        before.Warden = 14;
+        (before[14].Kind, before[14].Code, before[14].Rarity) = (CellKind.Inmate, Vision.Code.Lion, Vision.Rarity.Rare);
+        (before[16].Kind, before[16].Code, before[16].Rarity) = (CellKind.Inmate, Vision.Code.Wolf, Vision.Rarity.Magic);
+        settle.Take(before, t, default);
+        Assert.Equal(BoardSettle.Verdict.Take, settle.Take(before, t.AddSeconds(1), default));
+        var bite = t.AddSeconds(1.5);
+        Assert.Equal(BoardSettle.Verdict.Stale, settle.Take(before, t.AddSeconds(2), bite));
+        Assert.Equal(BoardSettle.Verdict.Stale, settle.Take(before, t.AddSeconds(4), bite));
+        var after = before.Clone();
+        after[16].Kind = CellKind.Unopened;
+        after[14].Rarity = Vision.Rarity.Legendary;
+        Assert.Equal(BoardSettle.Verdict.Unsettled, settle.Take(after, t.AddSeconds(4.5), bite));
+        Assert.Equal(BoardSettle.Verdict.Take, settle.Take(after, t.AddSeconds(5), bite));
+    }
+
+    [Fact]
+    public void A_Sandbox_the_log_s_change_left_as_it_was_is_hinted_again_after_a_while()
+    {
+        var settle = new BoardSettle();
+        var t = new DateTime(2026, 10, 27, 22, 0, 0);
+        var board = EditableSandbox.Empty();
+        board.Warden = 5;
+        settle.Take(board, t, default);
+        var incident = t.AddSeconds(0.5);
+        Assert.Equal(BoardSettle.Verdict.Stale, settle.Take(board, t.AddSeconds(1), incident));
+        Assert.Equal(BoardSettle.Verdict.Take, settle.Take(board, incident + BoardSettle.StaleFor, incident));
+    }
 }

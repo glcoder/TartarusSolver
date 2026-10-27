@@ -16,6 +16,25 @@ public class GameLogTests
     ];
 
     [Fact]
+    public void A_Warden_s_Treasure_taken_changes_the_Sandbox()
+    {
+        // 2026-10-28: two Chromatics, two Treasures; the first (Three-Headed Thumb Ring) opened three cells, and the
+        // second was hinted over the Sandbox from before it.
+        var log = new GameLog();
+        foreach (var line in new[]
+        {
+            "[2026.10.27-22.40.00:000][674]TLGame: Display: [Game] UIButton@ normal-click Btn_S16GamePlay_Start",
+            "[2026.10.27-22.40.01:000][  1]TLLua: Display: [S16LastDay] check cur=0 max=20",
+            "[2026.10.27-22.55.14:156][961]TLLua: Display: [Game] S16BoardColoredPop Run",
+            "[2026.10.27-22.55.19:580][  7]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_ColoredPop_Confirm",
+        }) log.Feed(line);
+        var run = Assert.Single(log.Runs);
+        var confirm = new DateTime(2026, 10, 27, 22, 55, 19, 580, DateTimeKind.Utc).ToLocalTime();
+        Assert.Equal(confirm, run.BoardChangedAt);
+        Assert.Equal(1, run.Treasures);
+    }
+
+    [Fact]
     public void A_run_ends_at_its_first_result_screen()
     {
         // The statistics' time in runs: from the Start button to the Riot's result, which may come up twice.
