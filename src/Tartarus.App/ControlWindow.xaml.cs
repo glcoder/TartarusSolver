@@ -715,6 +715,15 @@ public partial class ControlWindow : Window
         RefreshOverlay();
     }
 
+    /// <summary>The eye button framed or not: on a pick, look at the Sandbox; on the Sandbox viewed from one, back to it.</summary>
+    private void ShowEye(bool on, string? note = null)
+    {
+        if (on == _eyeHint) return;
+        _eyeHint = on;
+        if (on && note != null) Log("Hint: " + note);
+        Dispatcher.BeginInvoke(RefreshOverlay);
+    }
+
     /// <summary>A Sandbox read whole: the Warden found and no more than a couple of cells under the interface.</summary>
     private static bool WholeBoard(EditableSandbox b) => b.Warden > 0 && b.Cells.Count(c => c.Covered) < 3;
 
@@ -725,20 +734,31 @@ public partial class ControlWindow : Window
         {
             // A Sandbox half hidden (a Chromatic's flight or a popup over it, the Warden not found): no position to
             // search, nor a base for the pick that may follow; the last whole one stays.
-            if (r.Ok && _sandbox != null && !WholeBoard(_sandbox)) return;
+            // The Sandbox viewed from a pick (the eye button): back to the pick is the hint once a reading of it counts,
+            // not as the Sandbox comes up (a quick look went back before it was read, and the pick asked again).
+            bool viewing = LiveLogRun is { PickOpen: true };
+            if (r.Ok && _sandbox != null && !WholeBoard(_sandbox))
+            {
+                if (viewing) ShowEye(false);
+                return;
+            }
             if (r.Ok && _sandbox != null)
             {
                 var settle = _boardSettle.Take(_sandbox, _lastBoardAt, LiveLogRun?.BoardChangedAt ?? default);
                 // A frame caught as a popup comes or goes (presence well below a plain Sandbox's 0.6-0.7) reads wrong where
                 // it's dim: not taken unless the next scan reads it alike (2026-10-28: a Warden's Treasure hinted over
                 // one at 0.22, two Ultimates read Normal and the Warden elsewhere).
-                if (settle == BoardSettle.Verdict.Unsettled && r.Loc is { Score: < FadePresence }) return;
+                if (settle == BoardSettle.Verdict.Unsettled && r.Loc is { Score: < FadePresence })
+                {
+                    if (viewing) ShowEye(false);
+                    return;
+                }
                 // A pick that covers the Sandbox plays on its latest reading, settled or not: the Warden's Treasure comes up
                 // with the Chromatic's sound, before a reading settles (every Treasure asked for the eye button). The old
                 // Sandbox still on screen after the log's change counts as seen before it: the pick asks for the eye button.
                 _hintSandbox = _sandbox.Clone();
                 // A look at the Sandbox from a pick (the eye button) comes after its animations: always the new one.
-                if (settle != BoardSettle.Verdict.Stale || LiveLogRun is { PickOpen: true }) _hintBoardAt = _lastBoardAt;
+                if (settle != BoardSettle.Verdict.Stale || viewing) _hintBoardAt = _lastBoardAt;
                 _hintRead = _lastRead?.Clone();
                 _hintText = r.Text;
                 _hintTextRun = _logRun;
@@ -753,6 +773,14 @@ public partial class ControlWindow : Window
                 _hintSandbox.Days ??= _run.LastDays;
                 // A run the log saw from its start: its Chromatic count, or the panel's when higher (a sound can go missing).
                 if (live is { FromStart: true }) _hintSandbox.Chromatic = Math.Max(_hintSandbox.Chromatic, live.ChromaticAtLeast);
+                // The Sandbox viewed from a pick is read now: back to the pick is the hint.
+                ShowEye(viewing, "the Sandbox is read, back to the pick (the eye button)");
+                if (viewing)
+                {
+                    _hints.Clear();
+                    ClearHint();
+                    return;
+                }
                 // A reading in the middle of an animation waits for the next scan (the hint shown stays); the old Sandbox
                 // still on screen after the log's bite, Chromatic or Prison Incident takes the hint away: it's for that one.
                 switch (settle)
@@ -763,20 +791,6 @@ public partial class ControlWindow : Window
                         _hints.Clear();
                         ClearHint();
                         return;
-                }
-                // The Sandbox viewed from a pick (the eye button): read now, back to the pick is the hint.
-                bool viewing = LiveLogRun is { PickOpen: true };
-                if (viewing != _eyeHint)
-                {
-                    _eyeHint = viewing;
-                    if (viewing) Log("Hint: the Sandbox is read, back to the pick (the eye button)");
-                    Dispatcher.BeginInvoke(RefreshOverlay);
-                }
-                if (viewing)
-                {
-                    _hints.Clear();
-                    ClearHint();
-                    return;
                 }
                 // Only a screen that says what it asks: the Consume target pick's banner, Destination cards read, or a
                 // decision card. Frames in between (cards sliding in, a day's banner) would be taken for the wrong phase.

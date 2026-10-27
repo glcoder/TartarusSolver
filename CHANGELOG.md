@@ -19,6 +19,8 @@ things.
   out is no such reading (a Treasure was hinted over one: two Ultimates read Normal, 9.9 Chromatic instead of 10).
   A look through the eye button always counts, and a Chromatic's flight to the panel is no change of its own (the
   eye button was asked for again and again: the cell was empty before the flight's sound).
+  On the Sandbox viewed from a pick, "back to the pick" is framed once a reading of it counts, not as it comes up
+  (a quick look could go back before the Sandbox was read).
 - The Hunt's target pick is hinted as one: its banner reads "Select an Objective" like the Sewer Ratway's, and the
   hint framed a cell to go to. After the Hunt card on the same day and cell, the best Hunt target is framed on its
   cell, from the Sandbox read with the cards (the pick dims the other cells, an Ultimate read Normal there). The
