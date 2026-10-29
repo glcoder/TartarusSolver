@@ -155,6 +155,9 @@ public sealed class PickCardRead
     public double Score { get; set; }
     /// <summary>The card's middle, in canvas units right of the screen's middle.</summary>
     public double X { get; set; }
+    /// <summary>The read name's middle in frame pixels: where the card really is, to measure the UI's scale by.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public double? NameX { get; set; }
 }
 
 /// <summary>Chromatic Inmates contained (at most 10).</summary>

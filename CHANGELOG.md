@@ -6,6 +6,10 @@ things.
 
 ## Unreleased
 
+- After a change of the game's resolution (windowed to fullscreen, say) the game may keep drawing its UI at the old
+  one's scale until Alt+Enter; the hints were then drawn too big or too small and off their cards and cells. The
+  scale is now measured: on a pick by where its cards' names stand, on the Sandbox by the scale it is found at; when
+  the game catches up, every few seconds a screen not read is tried at the window size's own scale again.
 - Cell reading: the network retrained on 840 hand-checked cells where two networks read differently; dim Inmates
   (Mammoth Ultimate, Lion Legendary / Ultimate and others) are no longer taken for Normal ones.
 - Update: the window keeps answering while Windows checks the new version before it starts (it stood still for

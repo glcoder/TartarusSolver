@@ -32,12 +32,84 @@ public sealed class LayoutScanner : ISandboxScanner
     public string Name => "layout+" + _cells.Name;
     public ICellReader CellReader => _cells;
 
+    // The UI's scale follows from the frame's size, except after the game's resolution changed: it may draw on at the
+    // old one's scale (2026-10-29: windowed 1920x1201 to fullscreen 2560x1440, the UI at 1.2 for 1.6, every frame
+    // drawn a third too big; a 4K player's frames were off until Alt+Enter). Until a Sandbox or a pick tells the scale,
+    // a frame of the new size that isn't the Sandbox at the size's own scale is tried at others.
+    private bool _scaleKnown;
+    private double? _oldK;
+    private DateTime _scaleSearchedAt;
+    /// <summary>The least presence that sets the UI's scale: Sandbox screens score 0.27 and up, others 0.06 at most.</summary>
+    private const float ScalePresence = 0.25f;
+    private static readonly TimeSpan ScaleSearchEvery = TimeSpan.FromSeconds(5);
+    /// <summary>The scales tried around a frame size's own, as its fractions.</summary>
+    private static readonly double[] ScaleSteps = Enumerable.Range(0, 35).Select(i => 0.5 + 0.03 * i).ToArray();
+
     public ScanResult Scan(Frame frame)
     {
+        if (_layout == null || _layout.Width != frame.Width || _layout.Height != frame.Height)
+        {
+            _oldK = _layout?.K;
+            _layout = new ScreenLayout(frame.Width, frame.Height);
+            _scaleKnown = false;
+            _scaleSearchedAt = default;
+        }
+        var r = ScanAt(frame, _layout);
+        if ((PickScale(r) ?? SandboxScale(frame, r)) is double k)
+        {
+            _layout = new ScreenLayout(frame.Width, frame.Height, k);
+            _scaleKnown = true;
+            var again = ScanAt(frame, _layout);
+            (again.Notes ??= []).Add($"The game's UI is drawn at scale {k / ScreenLayout.DefaultK(frame.Width, frame.Height):0.00} of this frame size's.");
+            return again;
+        }
+        if (r.Ok || r.Pick != null) _scaleKnown = true;
+        return r;
+    }
+
+    /// <summary>
+    /// The scale a pick's side cards stand at, when it isn't the layout's: their names' middles measure it (to a few
+    /// percent; near the old frame size's scale, that one).
+    /// </summary>
+    private double? PickScale(ScanResult r)
+    {
+        if (r.Pick is not { } pick || r.Layout is not { } layout) return null;
+        var ks = pick.Cards.Where(c => c.Id != null && c.NameX != null && Math.Abs(c.X) >= 100)
+            .Select(c => (c.NameX!.Value - layout.Width / 2.0) / c.X).ToList();
+        if (ks.Count == 0) return null;
+        double k = ks.Average();
+        if (_oldK is double old && Math.Abs(k / old - 1) < 0.06) k = old;
+        return Math.Abs(k / layout.K - 1) > 0.05 && k > 0 ? k : null;
+    }
+
+    /// <summary>
+    /// The scale the Sandbox shows at when it doesn't at the layout's: the presence's best among the old frame size's
+    /// scale and a range around this one's; once a scale is known, only the size's own (the game may have caught up:
+    /// 2026-10-29, a run's first pick at the size's own scale went unread at the old one's, a pick too then).
+    /// Not more often than <see cref="ScaleSearchEvery"/>.
+    /// </summary>
+    private double? SandboxScale(Frame frame, ScanResult r)
+    {
+        double own = ScreenLayout.DefaultK(frame.Width, frame.Height);
+        if (r.Ok || r.Pick != null || r.Theme != null || _scaleKnown && r.Layout!.K == own
+            || DateTime.UtcNow - _scaleSearchedAt < ScaleSearchEvery) return null;
+        _scaleSearchedAt = DateTime.UtcNow;
+        if (_scaleKnown)
+        {
+            var ownLayout = new ScreenLayout(frame.Width, frame.Height);
+            bool board = Presence is { } presence && presence.Score(frame, ownLayout) >= presence.Threshold;
+            return board || (ReadPick(frame, ownLayout) ?? ReadTreasure(frame, ownLayout)) != null ? own : null;
+        }
+        if (Presence == null) return null;
+        var tried = ScaleSteps.Select(f => f * own).Append(_oldK ?? own).Where(k => Math.Abs(k / r.Layout!.K - 1) > 0.02);
+        var (best, score) = tried.Select(k => (k, Presence.Score(frame, new ScreenLayout(frame.Width, frame.Height, k)))).MaxBy(t => t.Item2);
+        return score >= ScalePresence ? best : null;
+    }
+
+    private ScanResult ScanAt(Frame frame, ScreenLayout layout)
+    {
         var sw = Stopwatch.StartNew();
-        if (_layout == null || _layout.Width != frame.Width || _layout.Height != frame.Height) _layout = new ScreenLayout(frame.Width, frame.Height);
         _ocr.ApplyLanguage();
-        var layout = _layout;
 
         var reading = Task.Run(() => ReadText(frame, layout));
         ScanResult r;
@@ -226,14 +298,15 @@ public sealed class LayoutScanner : ISandboxScanner
     /// </summary>
     private PickCardRead ReadCard(Frame frame, ScreenLayout layout, CanvasRect region, int index, double x, Func<string, (string Id, double Score)> match)
     {
-        var lines = _ocr.Read(frame, layout.ToPixels(region)).OrderBy(l => l.Box.Y0).Select(l => l.Text).ToList();
-        var candidates = lines.Concat(lines.Zip(lines.Skip(1), (a, b) => a + " " + b));
-        var card = new PickCardRead { Index = index, X = x, Text = string.Join(" ", lines) };
-        foreach (string text in candidates)
+        var lines = _ocr.Read(frame, layout.ToPixels(region)).OrderBy(l => l.Box.Y0).ToList();
+        var candidates = lines.Select(l => (l.Text, X: l.Box.CenterX))
+            .Concat(lines.Zip(lines.Skip(1), (a, b) => (a.Text + " " + b.Text, X: (a.Box.CenterX + b.Box.CenterX) / 2)));
+        var card = new PickCardRead { Index = index, X = x, Text = string.Join(" ", lines.Select(l => l.Text)) };
+        foreach (var (text, nameX) in candidates)
         {
             var (id, score) = match(text);
             if (score <= card.Score) continue;
-            (card.Score, card.Text) = (score, text);
+            (card.Score, card.Text, card.NameX) = (score, text, nameX);
             card.Id = score >= PickNameScore ? id : null;
         }
         return card;

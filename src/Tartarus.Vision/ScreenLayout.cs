@@ -24,11 +24,13 @@ public sealed class ScreenLayout
     // The Sandbox in canvas units: js/scan.js's reference homography H0 scaled and shifted (measured).
     private const double SandboxScale = 1.21194, SandboxX = 2.44, SandboxY = -0.06;
 
-    public ScreenLayout(int width, int height)
+    /// <param name="k">The game's UI scale if known otherwise (<see cref="DefaultK"/> by default): after a change of
+    /// resolution the game may keep drawing at the old one's scale.</param>
+    public ScreenLayout(int width, int height, double? k = null)
     {
         Width = width;
         Height = height;
-        K = Math.Min(width, height * 16.0 / 9.0) / CanvasWidth;
+        K = k ?? DefaultK(width, height);
         Sandbox = new SandboxLoc
         {
             S = SandboxScale * K,
@@ -42,6 +44,8 @@ public sealed class ScreenLayout
     public int Height { get; }
     /// <summary>Pixels per canvas unit.</summary>
     public double K { get; }
+    /// <summary>The UI scale the game draws a frame of this size at: the 16:9 canvas fitted in.</summary>
+    public static double DefaultK(int width, int height) => Math.Min(width, height * 16.0 / 9.0) / CanvasWidth;
     /// <summary>The Sandbox's placement for <see cref="SandboxGeometry"/>.</summary>
     public SandboxLoc Sandbox { get; }
 
