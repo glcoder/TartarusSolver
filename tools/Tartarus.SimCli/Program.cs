@@ -57,6 +57,8 @@ return args[0] switch
     "latency" => Latency(),
     "levels" => Levels(),
     "objcheck" => ObjCheck(),
+    "obscheck" => ObsCheck(),
+    "opened" => OpenedCommand(),
     "calib" => Calib(),
     _ => Fail($"unknown command {args[0]}"),
 };
@@ -238,6 +240,22 @@ int ObjCheck()
     // objcheck [--runs N] [--policy vn:1024:3:p] [--seed S]: the search's values before a done Objective and on its pick.
     string policy = Opt("--policy") ?? "vn:1024:3:p";
     Calibration.Run(engine, seed => (SearchPolicy)MakePolicy(seed, policy), IntOpt("--runs", 2000), (ulong)IntOpt("--seed", 1));
+    return 0;
+}
+
+int ObsCheck()
+{
+    // obscheck [--runs N] [--policy vn:256:3:p] [--seed S]: the search's values on states made of what the screen shows, against the engine's own.
+    string policy = Opt("--policy") ?? "vn:256:3:p";
+    ObservedCheck.Run(engine, seed => (SearchPolicy)MakePolicy(seed, policy), IntOpt("--runs", 1000), (ulong)IntOpt("--seed", 1));
+    return 0;
+}
+
+int OpenedCommand()
+{
+    // opened [--runs N] [--policy vn:64:3:p] [--seed S]: the rarities found behind Unopened cells in runs the search plays.
+    string policy = Opt("--policy") ?? "vn:64:3:p";
+    ObservedCheck.Opened(engine, seed => (SearchPolicy)MakePolicy(seed, policy), IntOpt("--runs", 1000), (ulong)IntOpt("--seed", 1));
     return 0;
 }
 
