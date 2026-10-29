@@ -6,6 +6,8 @@ things.
 
 ## Unreleased
 
+- Cell reading: the network retrained on 840 hand-checked cells where two networks read differently; dim Inmates
+  (Mammoth Ultimate, Lion Legendary / Ultimate and others) are no longer taken for Normal ones.
 - Update: the window keeps answering while Windows checks the new version before it starts (it stood still for
   seconds and sent a false hang report).
 
