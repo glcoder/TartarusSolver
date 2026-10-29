@@ -11,6 +11,8 @@ using Tartarus.Vision;
 /// next review skips. A list of all disagreements, without the buttons, is written to review/index.html.
 /// --flips: only what may move a hint, on plain Sandbox screens: a cell read otherwise for one frame (an Inmate in it
 /// or around it, not Unopened, Empty and covered alone) and cells the network read unsurely.
+/// --cells &lt;file.json&gt;: the cells listed ([{frame, cell, old, new}], two networks' readings that differ), on any
+/// screen: "the network is right" puts in the reading of the two that isn't the label's.
 /// </summary>
 static class Review
 {
@@ -26,13 +28,14 @@ static class Review
         bool flips = args.Contains("--flips");
         bool all = args.Contains("--all"), serve = !args.Contains("--no-serve"), suspect = args.Contains("--suspect") || flips, red = args.Contains("--red"), mouth = args.Contains("--mouth") || suspect, covered = args.Contains("--covered"), marks = args.Contains("--marks"), found = args.Contains("--found"), nests = args.Contains("--nests");
         string? since = opt(args, "--since");
+        var listed = opt(args, "--cells") is { } cellsFile ? Listed(cellsFile) : null;
         int port = int.TryParse(opt(args, "--port"), out var p) ? p : 8765;
         string outDir = Path.Combine(ds.Root, "review"), imgDir = Path.Combine(outDir, "img");
         Directory.CreateDirectory(imgDir);
         foreach (var f in Directory.EnumerateFiles(imgDir, "*.png")) File.Delete(f);
 
         Console.WriteLine("reading the frames through the networks (the page starts after that, about a minute)");
-        var (items, frames, cells, wardens) = Collect(ds, imgDir, all, suspect, red, mouth, covered, marks, found, nests, since);
+        var (items, frames, cells, wardens) = Collect(ds, imgDir, all, suspect, red, mouth, covered, marks, found, nests, since, listed);
         if (flips)
         {
             static bool Inmate(string cell) => !(cell.StartsWith("Unopened") || cell.StartsWith("Empty") || cell.StartsWith("Covered"));
@@ -76,7 +79,8 @@ static class Review
     // network sees one, and the cells that could carry one it doesn't see (Unopened ones while Squirming Iron Box is
     // held, Mammoths while Iron Tongs of Lust, any Inmate while the Blood-Stained Trap); a cell shown again only when its
     // reading changed since its last showing.
-    static (List<Item> Items, int Frames, int Cells, int Wardens) Collect(Dataset ds, string imgDir, bool all, bool suspect, bool red = false, bool mouth = false, bool covered = false, bool marks = false, bool found = false, bool nests = false, string? since = null)
+    static (List<Item> Items, int Frames, int Cells, int Wardens) Collect(Dataset ds, string imgDir, bool all, bool suspect, bool red = false, bool mouth = false, bool covered = false, bool marks = false, bool found = false, bool nests = false, string? since = null,
+        Dictionary<string, List<(int Cell, string Old, string New)>>? listed = null)
     {
         var lastShown = new Dictionary<int, string>();
         var engine = new Tartarus.Rules.Engine();
@@ -94,8 +98,30 @@ static class Review
             // --red alone: only the red frames carry-red labeled; with --mouth the other frames still give their mouths.
             bool redFrame = ds.MetaOf(id)?.CarriedCells != null;
             if (red && !redFrame && !mouth) continue;
+            if (listed != null && !listed.ContainsKey(id)) continue;
             var frame = ImageIO.Load(framePath);
             var layout = new ScreenLayout(frame.Width, frame.Height);
+            // --cells: the listed cells alone, on any screen (a dim or fading one is where networks part).
+            if (listed != null)
+            {
+                var have = EditableSandbox.FromLabels(labels);
+                var known = ds.MetaOf(id);
+                frames++;
+                foreach (var (n, older, newer) in listed[id])
+                {
+                    if (!all && known?.EditedCells.Contains(n) == true) continue;
+                    cells++;
+                    var other = have[n].Clone();
+                    string alt = Reading(have[n]) == older ? newer : older;
+                    SetReading(other, alt);
+                    var (lx, ly, lk) = layout.Cell(n);
+                    string limg = $"{id}_c{n:00}.png";
+                    ImageIO.SavePng(CellCrops.CropBox(frame, lx - 90 * lk, ly - 140 * lk, lx + 110 * lk, ly + 40 * lk, 400, 360), Path.Combine(imgDir, limg));
+                    items.Add(new Item(items.Count, file, id, n, SandboxText.CellShort(have[n]), SandboxText.CellShort(other), have[n].Clone(), other, 0, 0, false, limg,
+                        $"сети расходятся: старая — {older}, новая — {newer}; «права сеть» запишет {alt}"));
+                }
+                continue;
+            }
             if (presence != null && presence.Score(frame, layout) < presence.Threshold) continue;
             string scanPath = Path.Combine(ds.Root, "scans", id + ".json");
             var scan = File.Exists(scanPath) ? ScanJson.Parse(File.ReadAllText(scanPath), "file") : null;
@@ -267,6 +293,44 @@ static class Review
 
     // A cell that reads the same in the frames just before and after (within 20 s) but not in this one: the odd one out.
     const string FlipNote = "подозрение: в кадрах до и после — ";
+
+    /// <summary>--cells' list by frame id.</summary>
+    static Dictionary<string, List<(int Cell, string Old, string New)>> Listed(string path)
+    {
+        var map = new Dictionary<string, List<(int, string, string)>>();
+        foreach (var e in JsonDocument.Parse(File.ReadAllText(path)).RootElement.EnumerateArray())
+        {
+            string frame = e.GetProperty("frame").GetString()!;
+            if (!map.TryGetValue(frame, out var list)) map[frame] = list = [];
+            list.Add((e.GetProperty("cell").GetInt32(), e.GetProperty("old").GetString()!, e.GetProperty("new").GetString()!));
+        }
+        return map;
+    }
+
+    /// <summary>A cell as a network's reading is written: "Lion Ultimate", "Unopened ?Rare", "Empty", "Covered".</summary>
+    static string Reading(CellLabel c) => c.Covered ? "Covered" : c.Kind switch
+    {
+        CellKind.Inmate => $"{Codes.Name(c.Code)} {c.Rarity}",
+        CellKind.Unopened => "Unopened" + (c.VisibleRarity is { } r ? $" ?{r}" : ""),
+        _ => "Empty",
+    };
+
+    static void SetReading(CellLabel c, string reading)
+    {
+        c.Covered = reading == "Covered";
+        if (c.Covered) return;
+        if (reading == "Empty") c.Kind = CellKind.Empty;
+        else if (reading.StartsWith("Unopened", StringComparison.Ordinal))
+        {
+            c.Kind = CellKind.Unopened;
+            c.VisibleRarity = reading.Contains('?') ? Enum.Parse<Rarity>(reading[(reading.IndexOf('?') + 1)..]) : null;
+        }
+        else
+        {
+            var parts = reading.Split(' ');
+            (c.Kind, c.Code, c.Rarity) = (CellKind.Inmate, Codes.Parse(parts[0]), Enum.Parse<Rarity>(parts[1]));
+        }
+    }
 
     static void AddFlips(List<(string Id, string File, string Path, DateTime At, EditableSandbox Want, EditableSandbox Got, bool Plain, SampleMeta? Meta)> frames, List<Item> items, string imgDir, bool all)
     {
