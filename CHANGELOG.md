@@ -4,6 +4,11 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## Unreleased
+
+- Update: the window keeps answering while Windows checks the new version before it starts (it stood still for
+  seconds and sent a false hang report).
+
 ## 0.7.18 — 2026-10-28
 
 - Steadier hints: a new position on the Sandbox is hinted once two scans in a row read it alike, so a frame in the

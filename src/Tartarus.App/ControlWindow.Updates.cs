@@ -105,7 +105,11 @@ public partial class ControlWindow
             var progress = new Progress<double>(p => UpdateButton.Content = $"Downloading… {p * 100:0}%");
             string app = await Updates.DownloadAsync(release, progress);
             Log($"Update: {release.Asset} downloaded and checked, installing");
-            Updates.StartInstall(app, Environment.GetCommandLineArgs().Skip(1));
+            UpdateButton.Content = "Installing…";
+            // Windows may check the fresh exe for seconds before it starts (2026-10-28, a player's Sentry hang): off the
+            // UI thread, so the window keeps answering.
+            var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
+            await Task.Run(() => Updates.StartInstall(app, args));
             Application.Current.Shutdown();
         }
         catch (Exception ex)
