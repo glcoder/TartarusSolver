@@ -4,7 +4,7 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
-## Unreleased
+## 0.7.19 — 2026-10-29
 
 - After a change of the game's resolution (windowed to fullscreen, say) the game may keep drawing its UI at the old
   one's scale until Alt+Enter; the hints were then drawn too big or too small and off their cards and cells. The
