@@ -31,6 +31,8 @@ public partial class ControlWindow : Window
     private Dataset _dataset;
 
     private WindowCapture? _capture;
+    // A capture being set up off the UI thread: no second one meanwhile.
+    private bool _startingCapture;
     private WindowInfo? _target;
 
     // What the overlay shows: the last scanned frame, its scan, and its labels (edited by hand in edit mode).
@@ -239,18 +241,22 @@ public partial class ControlWindow : Window
     private void TryAutoAttach()
     {
         CheckGameLanguage();
-        if (_capture != null || AutoAttachCheck.IsChecked != true) return;
+        if (_capture != null || _startingCapture || AutoAttachCheck.IsChecked != true) return;
         var pattern = new Regex(_settings.WindowTitle);
         var game = Win32Windows.FindGame(pattern) ?? default;
         if (game.Hwnd != IntPtr.Zero && !Win32Windows.IsMinimized(game.Hwnd)) StartCapture(game);
     }
 
-    private void StartCapture(WindowInfo w)
+    private async void StartCapture(WindowInfo w)
     {
+        if (_startingCapture) return;
         StopCapture();
+        _startingCapture = true;
         try
         {
-            var capture = new WindowCapture(w.Hwnd);
+            // Off the UI thread: on a Windows Insider build (28000) the capture item's Closed event never got subscribed
+            // to from it, and the window stood still at every start (2026-10-30, a player's hang reports).
+            var capture = await Task.Run(() => new WindowCapture(w.Hwnd));
             capture.Closed += () => Dispatcher.BeginInvoke(() =>
             {
                 if (_capture != capture) return;
@@ -269,11 +275,16 @@ public partial class ControlWindow : Window
         {
             Log($"Could not start capturing \"{w.Title}\": {ex.Message}");
         }
+        finally
+        {
+            _startingCapture = false;
+        }
     }
 
     private void StopCapture()
     {
-        _capture?.Dispose();
+        // Off the UI thread too: closing the capture once hung in Windows' code (2026-10-30, Sentry, an Insider build).
+        if (_capture is { } old) Task.Run(old.Dispose);
         _capture = null;
         _target = null;
         CaptureButton.Content = "Capture ▶";

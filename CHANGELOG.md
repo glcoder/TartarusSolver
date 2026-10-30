@@ -4,6 +4,16 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## Unreleased
+
+- Warden's Treasure on game clients whose log has only page names: a look at the Sandbox with the eye button no
+  longer counts as a new Chromatic and a change of the Sandbox, so the pick stops asking for the eye button again and
+  again and the Chromatic count stays right; a look away from an instrument pick is no new pick either.
+- Re-roll is no longer hinted after the last one was used on such clients (the counter goes away with it; other cards
+  on the same pick now count as a Re-roll made).
+- Windows 10 1903 / 1909: capturing works (it failed on a setting those versions don't have).
+- The capture starts and stops off the window's thread: on a Windows Insider build it stood still at every start.
+
 ## 0.7.20 — 2026-10-30
 
 - Cell reading: the network retrained with about 200 more hand-checked cells; an Unopened cell's Legendary glow is

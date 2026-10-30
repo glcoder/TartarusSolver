@@ -46,7 +46,7 @@ public sealed unsafe class WindowCapture : IDisposable
         _pool = Direct3D11CaptureFramePool.CreateFreeThreaded(_winrtDevice, Format, 2, _poolSize);
         _pool.FrameArrived += OnFrameArrived;
         _session = _pool.CreateCaptureSession(_item);
-        _session.IsCursorCaptureEnabled = false;
+        TryHideCursor(_session);
         TryDisableBorder(_session);
         _session.StartCapture();
     }
@@ -198,6 +198,17 @@ public sealed unsafe class WindowCapture : IDisposable
         _winrtDevice.Dispose();
         _context.Dispose();
         _device.Dispose();
+    }
+
+    private static void TryHideCursor(GraphicsCaptureSession session)
+    {
+        // Windows 10 2004 and later; before it the property doesn't exist (an invalid cast, and no capture at all on
+        // 1903: a player's report, 2026-10-30) and the cursor just stays in the frames.
+        try
+        {
+            session.IsCursorCaptureEnabled = false;
+        }
+        catch (InvalidCastException) { }
     }
 
     private static void TryDisableBorder(GraphicsCaptureSession session)
