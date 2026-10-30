@@ -4,6 +4,15 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.24 — 2026-10-31
+
+- A pick the game clicks for the player ("Quick Decision") now counts as taken: the Sandbox no longer asks to go
+  back to it for the rest of the run (the eye button framed instead of the Destination hinted); and a new day closes
+  any pick still counted open.
+- The eye button no longer flashes as a Warden's Treasure comes up or is taken: the game's log tells the pick a moment
+  after the screen, so the eye button's own clicks now say when the Sandbox is a look from a pick.
+- The bug report window closed while its report was being sent no longer ends in an error.
+
 ## 0.7.23 — 2026-10-30
 
 - Opulence: the Chromatic count no longer goes up with each of a Warden's Treasure's three picks, nor with a pick the
