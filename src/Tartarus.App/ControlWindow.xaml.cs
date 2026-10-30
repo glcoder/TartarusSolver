@@ -389,6 +389,8 @@ public partial class ControlWindow : Window
     // The last counter read: in which run, how many it showed, the Re-rolls the log had seen clicked by then, and the
     // pick it was read on (the log's count of instrument picks, the cards offered).
     private (LoggedRun Run, int Left, int Used, int Pick, string Cards)? _rerollsRead;
+    // The last pick whose cards all read: its kind and cards.
+    private (string Kind, List<string> Ids)? _lastWholePick;
     // The last Sandbox read before the Consume target pick's red screen.
     private Vision.Ocr.ScreenText? _textBeforeRed;
 
@@ -903,12 +905,19 @@ public partial class ControlWindow : Window
                     if (boardStale) Log("Hint: the Sandbox changed under the pick screen, look at it (the eye button)");
                     RefreshOverlay();
                 }
+                // A card read whole a moment ago that doesn't read now (the one clicked grows and its name shrinks): the
+                // hint for the whole pick stays, not one for the cards left (2026-10-30: a weaker instrument hinted for
+                // 4 s after the best one was clicked).
+                var known = pick.Cards.Where(c => c.Id != null).Select(c => c.Id!).ToList();
+                bool cardLost = known.Count < pick.Cards.Count && _lastWholePick is { } whole && whole.Kind == pick.Kind && known.All(whole.Ids.Contains);
+                if (known.Count == pick.Cards.Count) _lastWholePick = (pick.Kind, known);
                 // No pick hint on an old Sandbox: the eye button first.
                 if (boardStale)
                 {
                     _hints.Clear();
                     ClearHint();
                 }
+                else if (cardLost) { }
                 else if (under != null)
                 {
                     var text = under == _hintSandbox ? _hintText : startText;

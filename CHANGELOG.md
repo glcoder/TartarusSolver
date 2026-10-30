@@ -13,6 +13,8 @@ things.
   on the same pick now count as a Re-roll made).
 - Windows 10 1903 / 1909: capturing works (it failed on a setting those versions don't have).
 - The capture starts and stops off the window's thread: on a Windows Insider build it stood still at every start.
+- A pick card clicked (it grows and its name shrinks) and read for a moment as nothing known no longer turns the hint
+  to the best of the other cards: the hint for the whole pick stays.
 
 ## 0.7.20 — 2026-10-30
 
