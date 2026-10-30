@@ -29,7 +29,8 @@ public partial class ReportWindow : Window
         StatusText.Visibility = Visibility.Visible;
         string comment = CommentBox.Text;
         Result = await Task.Run(() => BugReports.SendAsync(_report, comment));
-        DialogResult = true;
+        // Closed by its title bar's button while sending: no dialog left to answer (a crash on 0.7.21).
+        if (IsVisible) DialogResult = true;
     }
 
     // Shift+Enter sends; Enter alone is a new line.
