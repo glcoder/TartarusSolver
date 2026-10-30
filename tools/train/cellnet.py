@@ -86,26 +86,36 @@ def augment(x, rng):
 
 # ---------- semi-synthetic marks ----------
 
-PREY_ICON = Path(__file__).resolve().parents[2] / "game_art/s16/Art/UIV2/S16Gameplay/UI/Textures/NoAtlas/UI_T_V2_S16BoardCell_039.png"
+ICONS = Path(__file__).resolve().parents[2] / "game_art/s16/Art/UIV2/S16Gameplay/UI/Textures/NoAtlas"
+PREY_ICON = ICONS / "UI_T_V2_S16BoardCell_039.png"
+TUSK_ICON = ICONS / "UI_T_V2_S16BoardCell_040.png"
+# Where the game draws a mark in the 84x96 crop: the icon's scale and its top left, fitted on the real marked cells
+# (Tusk: template matching over 120 of them, 2026-10-30; spread under a pixel).
+MARKS = {"prey": (PREY_ICON, (0.46, 0.52), (19, 62)), "tusk": (TUSK_ICON, (0.43, 0.47), (21, 63))}
 
 
-def synthetic_prey(tr, n, rng, icon_path=PREY_ICON):
-    """n Inmate cells without Prey, copied with the game's Prey icon laid where the game draws it (top left at 19,62
-    of the 84x96 crop, about half the icon's size, fitted on the real Prey cells), a little off in size, place and
-    brightness (the mark dims under a popup like the rest of the frame); appended to the training set as Prey."""
+def synthetic_mark(tr, n, rng, flag):
+    """n Inmate cells without the mark, copied with the game's icon for it laid where the game draws it (MARKS), a
+    little off in size, place and brightness (the mark dims under a popup like the rest of the frame); appended to the
+    training set as marked. Codes are drawn evenly: a Tusk stays on its cell under any Inmate, and the real ones are
+    nearly all Mammoths (2026-10-30: the Lions' were missed)."""
     images, cells, kinds, codes, rarities, visible, flags = tr
-    p = FLAGS.index("prey")
+    p = FLAGS.index(flag)
     pool = [i for i in range(len(kinds)) if kinds[i] == KINDS.index("inmate") and flags[i, p] == 0]
     if not pool or n <= 0:
         return tr
+    by_code = {}
+    for i in pool:
+        by_code.setdefault(int(codes[i]), []).append(i)
+    icon_path, (s_lo, s_hi), (x0, y0) = MARKS[flag]
     icon = Image.open(icon_path).convert("RGBA")
-    picked = [rng.choice(pool) for _ in range(n)]
+    picked = [rng.choice(by_code[rng.choice(sorted(by_code))]) for _ in range(n)]
     made = []
     for i in picked:
-        s = rng.uniform(0.46, 0.52)
+        s = rng.uniform(s_lo, s_hi)
         w, h = round(icon.width * s), round(icon.height * s)
         mark = np.asarray(icon.resize((w, h), Image.LANCZOS), dtype=np.float32) / 255.0
-        x, y = 19 + rng.randint(-2, 2), 62 + rng.randint(-2, 2)
+        x, y = x0 + rng.randint(-2, 2), y0 + rng.randint(-2, 2)
         img = images[i].copy()
         alpha = mark[:, :, 3:4]
         region = img[y:y + h, x:x + w]
@@ -113,7 +123,7 @@ def synthetic_prey(tr, n, rng, icon_path=PREY_ICON):
         made.append(np.clip(img, 0, 1))
     f = flags[picked].copy()
     f[:, p] = 1
-    print(f"semi-synthetic Prey: {n} cells")
+    print(f"semi-synthetic {flag}: {n} cells")
     return (np.concatenate([images, np.stack(made)]), np.concatenate([cells, cells[picked]]), np.concatenate([kinds, kinds[picked]]),
             np.concatenate([codes, codes[picked]]), np.concatenate([rarities, rarities[picked]]), np.concatenate([visible, visible[picked]]),
             np.concatenate([flags, f]))
@@ -210,7 +220,7 @@ def is_red(r):
     return r.get("red", "0") == "1"
 
 
-def train_cells(root, out, epochs, seed, red_weight=4, synthetic=0):
+def train_cells(root, out, epochs, seed, red_weight=4, synthetic_prey=0, synthetic_tusk=0):
     # Only labels worth learning: plain board screens or cells checked by hand (see TrainingExport).
     rows = [r for r in csv.DictReader(open(root / "cells.csv", newline="")) if r.get("trusted", "1") == "1"]
     train_rows, val_rows = split_by_frame(rows, 0.15, seed)
@@ -223,7 +233,8 @@ def train_cells(root, out, epochs, seed, red_weight=4, synthetic=0):
 
     torch.manual_seed(seed)
     rng = random.Random(seed)
-    tr = synthetic_prey(tr, synthetic, rng)
+    tr = synthetic_mark(tr, synthetic_prey, rng, "prey")
+    tr = synthetic_mark(tr, synthetic_tusk, rng, "tusk")
     n_train = len(tr[2])
     print(f"real Prey cells: {sum(r.get('prey') == '1' for r in train_rows)} train, {sum(r.get('prey') == '1' for r in val_rows)} val")
     model = CellNet().to(DEV)
@@ -418,10 +429,11 @@ def main():
     ap.add_argument("--red-weight", type=int, default=4, help="times each red (Consume pick) cell counts; 0 leaves them out")
     ap.add_argument("--threads", type=int, default=4, help="CPU threads (leave some to the game)")
     ap.add_argument("--synthetic-prey", type=int, default=0, help="Inmate cells given the game's Prey icon, added to training (the real ones are few)")
+    ap.add_argument("--synthetic-tusk", type=int, default=0, help="the same with the Tusk icon, Codes drawn evenly (the real ones are nearly all Mammoths)")
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
     if a.only != "arrows":
-        train_cells(a.data, a.out, a.epochs, a.seed, a.red_weight, a.synthetic_prey)
+        train_cells(a.data, a.out, a.epochs, a.seed, a.red_weight, a.synthetic_prey, a.synthetic_tusk)
     if a.only != "cells":
         train_arrows(a.data, a.out, max(10, a.epochs // 2), a.seed)
 

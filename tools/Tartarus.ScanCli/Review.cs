@@ -173,9 +173,10 @@ static class Review
                     if (want[n].Covered || got[n].Covered || (!all && meta?.EditedCells.Contains(n) == true)) continue;
                     var held = want.Instruments;
                     bool seen = got[n].Nest || got[n].Tusk || got[n].Prey;
+                    // A Tusk mark is the cell's: it stays under whoever comes in after the Mammoth (2026-10-30: on a
+                    // Wolf and a Lion, never read).
                     bool could = held.Contains("ironbox") && got[n].Kind == CellKind.Unopened
-                        || held.Contains("tongs") && got[n].Kind == CellKind.Inmate && got[n].Code == Code.Mammoth
-                        || held.Contains("trap") && got[n].Kind == CellKind.Inmate;
+                        || (held.Contains("tongs") || held.Contains("trap")) && got[n].Kind == CellKind.Inmate;
                     if (!seen && !could) continue;
                     string sig = SandboxText.CellShort(got[n]);
                     if (lastShown.TryGetValue(n, out var before) && before == sig) continue;
@@ -188,17 +189,17 @@ static class Review
                              : "может быть Rat Nest / Tusk / Prey: нет отметки — «права разметка» (1); есть — «ни то, ни другое» (3) и поставь флаг"));
                     continue;
                 }
-                // marks: the Inmates that may carry a mark the networks haven't learned yet — each Mammoth while Iron
-                // Tongs of Lust is held (Tusk), each Inmate while the Blood-Stained Trap is (Prey).
+                // marks: the Inmates that may carry a mark the networks haven't learned yet — each Inmate while Iron
+                // Tongs of Lust is held (Tusk: the cell's, whoever is in it) or the Blood-Stained Trap is (Prey).
                 if (marks)
                 {
                     bool tongs = want.Instruments.Contains("tongs"), trap = want.Instruments.Contains("trap");
-                    if (want[n].Kind != CellKind.Inmate || want[n].Covered || !(tongs && want[n].Code == Code.Mammoth || trap)) continue;
+                    if (want[n].Kind != CellKind.Inmate || want[n].Covered || !(tongs || trap)) continue;
                     if (!all && meta?.EditedCells.Contains(n) == true) continue;
                     var (mx, my, mk) = layout.Cell(n);
                     string mimg = $"{id}_c{n:00}.png";
                     ImageIO.SavePng(CellCrops.CropBox(frame, mx - 90 * mk, my - 140 * mk, mx + 110 * mk, my + 40 * mk, 400, 360), Path.Combine(imgDir, mimg));
-                    string what = tongs && want[n].Code == Code.Mammoth ? (trap ? "Tusk (бивень) или Prey" : "Tusk (бивень)") : "Prey";
+                    string what = tongs ? (trap ? "Tusk (бивень) или Prey" : "Tusk (бивень)") : "Prey";
                     items.Add(new Item(items.Count, file, id, n, SandboxText.CellShort(want[n]), b, want[n].Clone(), got[n].Clone(), 0, 0, plain, mimg,
                         $"есть ли метка {what}? Нет — «права разметка» (1); есть — «ни то, ни другое» (3) и флаг {what.Split(' ')[0]}"));
                     continue;

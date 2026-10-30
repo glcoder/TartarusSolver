@@ -64,18 +64,20 @@ public static class TrainingExport
                 foreach (var c in scan.Cells)
                     if (c.N > 0 && sandbox.Cells[c.N].Kind == CellKind.Unopened && c.VisibleRarity is { } s)
                         (sandbox.Cells[c.N].VisibleRarity, sandbox.Cells[c.N].ScratchMarks) = (s.Rarity, s.ScratchMarks);
+            string metaPath = Path.Combine(ds.Root, "meta", id + ".json");
+            var meta = File.Exists(metaPath) ? JsonSerializer.Deserialize(File.ReadAllText(metaPath), VisionJson.Default.SampleMeta) : null;
+            foreach (int n in meta?.EditedCells ?? []) sandbox[n].Edited = true;
             // The small mouth over an Inmate means "has a target": by the rules, from the labeled Sandbox and instruments,
-            // rather than the older marks (which missed it on red and orange glows).
+            // rather than the older marks (which missed it on red and orange glows). A cell checked by hand keeps the
+            // mouth as seen: the game draws none over the Warden's Inmate, and it pulses (2026-10-30: the rules' own
+            // differed from 205 of 2099 checked Inmates, the network's from 38).
             var rules = Rules.FromObservation(GameObservation.From(sandbox), 1);
             for (int n = 2; n <= 16; n++)
-                if (sandbox[n].Kind == CellKind.Inmate) sandbox[n].Consumable = Tartarus.Rules.Engine.HasTarget(rules, n - 1);
+                if (sandbox[n].Kind == CellKind.Inmate && !sandbox[n].Edited) sandbox[n].Consumable = Tartarus.Rules.Engine.HasTarget(rules, n - 1);
             // The scanner's reading is a fair label on a plain Sandbox screen (the day counter read); over a
             // Consume pick's red, a fade or a day's banner it isn't, until someone checks it by hand. Nor is the cell
             // networks' own reading: learning from it would only teach them their mistakes again.
-            string metaPath = Path.Combine(ds.Root, "meta", id + ".json");
-            var meta = File.Exists(metaPath) ? JsonSerializer.Deserialize(File.ReadAllText(metaPath), VisionJson.Default.SampleMeta) : null;
             bool plain = scan.Days != null && meta?.Scanner?.Contains("cnn", StringComparison.Ordinal) != true;
-            foreach (int n in meta?.EditedCells ?? []) sandbox[n].Edited = true;
             var carried = meta?.CarriedCells ?? [];
             var marked = meta?.MarkCells ?? [];
 

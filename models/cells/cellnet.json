@@ -35,12 +35,12 @@
     "prey"
   ],
   "flagCounts": {
-    "consumable": 3528,
-    "nest": 42,
-    "incident": 955,
-    "scratch_marks": 284,
-    "tusk": 112,
-    "prey": 20
+    "consumable": 4065,
+    "nest": 29,
+    "incident": 986,
+    "scratch_marks": 290,
+    "tusk": 255,
+    "prey": 16
   },
   "minFlagExamples": 20,
   "outputs": [
@@ -59,5 +59,5 @@
     "cell": 16,
     "scale": "RGB 0..1"
   },
-  "trained": "2026-10-30 03:36"
+  "trained": "2026-10-30 17:33"
 }
