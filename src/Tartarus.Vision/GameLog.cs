@@ -205,7 +205,7 @@ public sealed partial class GameLog
         // (2026-10-28: the eye button asked for again and again over a Warden's Treasure).
         else if (line.Contains("AudioEnum  == UI_S16_Premium_Quality_Fly", StringComparison.Ordinal)) { }
         else if (line.Contains("AudioEnum  == UI_S16_Premium_Quality", StringComparison.Ordinal)) (run.Chromatic, run.BoardChangedAt) = (run.Chromatic + 1, LocalTime(line));
-        else if (line.Contains("Anim_Archive_LightUp", StringComparison.Ordinal)) run.PanelLights++;
+        else if (line.Contains("Anim_Archive_LightUp", StringComparison.Ordinal)) (run.PanelLights, _panelLights) = (run.PanelLights + 1, true);
         else if (line.Contains("] S16BoardEventPop Run", StringComparison.Ordinal)) (run.Incidents, run.BoardChangedAt) = (run.Incidents + 1, LocalTime(line));
         // A bite closes what the red sound opened as far as the log can tell (a chain's later picks have no sound of their own).
         else if (line.Contains("AudioEnum  == UI_S16_Own_Eat", StringComparison.Ordinal)) (run.Consumes, run.ConsumePick, run.BoardChangedAt) = (run.Consumes + 1, false, LocalTime(line));
@@ -226,6 +226,10 @@ public sealed partial class GameLog
     private bool _dayCounter;
     // Pages: the entry screen or a run's result was the last seen (true), a run's page (false), nothing yet (null).
     private bool? _pageLobby;
+    // The log tells each Chromatic's panel slot lighting up (a missing animation's warning, just before its pick).
+    private bool _panelLights;
+    // The last page event was the instrument pick closing: opened again right after, it's the eye button's look.
+    private bool _relicClosed;
 
     /// <summary>
     /// A page the game opens or closes ("Page@ OpenView S16BoardNewDayPop", "Page@ CloseView 3535_S16BoardColoredPopCtrl").
@@ -238,6 +242,8 @@ public sealed partial class GameLog
         bool open = line.Contains("Page@ OpenView ", StringComparison.Ordinal);
         if (!open && !line.Contains("Page@ CloseView ", StringComparison.Ordinal)) return false;
         bool Is(string page) => line.Contains(page, StringComparison.Ordinal);
+        bool relicClosed = _relicClosed;
+        _relicClosed = !open && Is("_S16BoardRelicPopCtrl");
         if (open && (Is("S16GamePlayEntry") || Is("S16GamePlayCheckOut")))
         {
             _pageLobby = true;
@@ -260,7 +266,14 @@ public sealed partial class GameLog
             if (theme) run.ThemeShown = true;
             else if (Is("S16BoardNewDayPop")) (run.Day, run.DayStartConsumes, run.ConsumePick) = (run.Day + 1, run.Consumes, false);
             else if (Is("S16BoardEventPop")) (run.Incidents, run.BoardChangedAt) = (run.Incidents + 1, LocalTime(line));
+            // Closed and opened again with no page between: the same pick after a look at the Sandbox.
+            else if (Is("S16BoardRelicPop") && relicClosed) run.PickOpen = true;
             else if (Is("S16BoardRelicPop")) (run.InstrumentPicks, run.PickOpen) = (run.InstrumentPicks + 1, true);
+            // The eye button closes the Warden's Treasure and opens it again: no slot lit since, it's the same pick, and
+            // the close before was a look, not a reward taken (2026-10-30, a 4K player's reports: every look counted a
+            // Chromatic and a change of the Sandbox, and the pick asked for the eye button again and again).
+            else if (Is("S16BoardColoredPop") && _panelLights && run.PanelLights <= run.Chromatic)
+                (run.Treasures, run.PickOpen, run.TreasureOpen) = (Math.Max(0, run.Treasures - 1), true, true);
             else if (Is("S16BoardColoredPop")) (run.Chromatic, run.PickOpen, run.TreasureOpen, run.BoardChangedAt) = (run.Chromatic + 1, true, true, LocalTime(line));
             else return false;
         }

@@ -120,6 +120,44 @@ public class GameLogTests
     }
 
     [Fact]
+    public void A_look_at_the_Sandbox_from_a_Warden_s_Treasure_is_no_new_Chromatic()
+    {
+        // 2026-10-30, a 4K player's reports: the eye button closes the pick's page and opens it again; every look
+        // counted a Chromatic and a change of the Sandbox, and the pick asked for the eye button again and again.
+        var log = new GameLog();
+        foreach (var line in new[]
+        {
+            Page("04.45.07", "OpenView S16GamePlayEntry"),
+            Page("04.46.04", "OpenView S16BoardRelicPop"),
+            Page("04.46.08", "CloseView 3482_S16BoardRelicPopCtrl"),
+        }.Concat(Chromatic("04.50.00").Take(2))) log.Feed(line);
+        var run = Assert.Single(log.Runs);
+        var shown = run.BoardChangedAt;
+        for (int look = 0; look < 3; look++)
+        {
+            log.Feed(Page($"04.50.{10 + look * 5:00}", "CloseView 3535_S16BoardColoredPopCtrl"));
+            log.Feed(Page($"04.50.{12 + look * 5:00}", "OpenView S16BoardColoredPop"));
+        }
+        Assert.True(run is { Chromatic: 1, Treasures: 0, PickOpen: true, TreasureOpen: true });
+        Assert.Equal(shown, run.BoardChangedAt);
+        log.Feed(Page("04.51.00", "CloseView 3535_S16BoardColoredPopCtrl"));
+        Assert.True(run is { Chromatic: 1, Treasures: 1, PickOpen: false });
+        // The next Chromatic lights its slot first: a new pick.
+        foreach (var line in Chromatic("04.52.00")) log.Feed(line);
+        Assert.True(run is { Chromatic: 2, Treasures: 2, ChromaticAtLeast: 2 });
+        Assert.True(run.BoardChangedAt > shown);
+
+        // The Objective's instrument pick looked away from and back to is still the one pick.
+        foreach (var line in new[]
+        {
+            Page("04.53.00", "OpenView S16BoardRelicPop"),
+            Page("04.53.10", "CloseView 3600_S16BoardRelicPopCtrl"),
+            Page("04.53.12", "OpenView S16BoardRelicPop"),
+        }) log.Feed(line);
+        Assert.True(run is { InstrumentPicks: 2, PickOpen: true });
+    }
+
+    [Fact]
     public void A_log_with_the_day_counter_goes_by_it_not_by_pages()
     {
         var log = new GameLog();

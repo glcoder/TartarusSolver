@@ -375,8 +375,9 @@ public partial class ControlWindow : Window
     private bool _logRunFinished;
     // Re-rolls the run has left, as the last instrument pick showed them (shared by every pick of the run).
     private int? _rerolls;
-    // The last counter read: in which run, how many it showed, and the Re-rolls the log had seen clicked by then.
-    private (LoggedRun Run, int Left, int Used)? _rerollsRead;
+    // The last counter read: in which run, how many it showed, the Re-rolls the log had seen clicked by then, and the
+    // pick it was read on (the log's count of instrument picks, the cards offered).
+    private (LoggedRun Run, int Left, int Used, int Pick, string Cards)? _rerollsRead;
     // The last Sandbox read before the Consume target pick's red screen.
     private Vision.Ocr.ScreenText? _textBeforeRed;
 
@@ -873,8 +874,14 @@ public partial class ControlWindow : Window
                 // (its dim text doesn't read on every frame), else none: a run may have no Re-roll at all (Cage Fight).
                 if (pick.Kind == PickRead.Instrument)
                 {
-                    if (pick.Rerolls is int read && _logRun != null) _rerollsRead = (_logRun, read, _logRun.RerollsUsed);
-                    _rerolls = pick.Rerolls ?? (_rerollsRead is { } seen && seen.Run == _logRun ? Math.Max(0, seen.Left - (seen.Run.RerollsUsed - seen.Used)) : 0);
+                    string cards = string.Join(",", pick.Cards.Select(c => c.Id));
+                    if (pick.Rerolls is int read && _logRun != null) _rerollsRead = (_logRun, read, _logRun.RerollsUsed, _logRun.InstrumentPicks, cards);
+                    // The last Re-roll takes its counter away, and a log of pages has no clicks: other cards on the same
+                    // pick are a Re-roll made (2026-10-30, a player's report: Re-roll hinted with none left).
+                    int Used((LoggedRun Run, int Left, int Used, int Pick, string Cards) seen) =>
+                        Math.Max(seen.Run.RerollsUsed - seen.Used,
+                            seen.Run.InstrumentPicks == seen.Pick && pick.Cards.Count == 3 && pick.Cards.All(c => c.Id != null) && cards != seen.Cards ? 1 : 0);
+                    _rerolls = pick.Rerolls ?? (_rerollsRead is { } seen && seen.Run == _logRun ? Math.Max(0, seen.Left - Used(seen)) : 0);
                 }
                 // The Sandbox changed under the pick since it was last seen (a chain, Chromatics leaving it): the hint is
                 // for the old one until the player looks at it (the game's eye button) and it's read again.
