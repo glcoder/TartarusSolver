@@ -4,7 +4,7 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
-## Unreleased
+## 0.7.21 — 2026-10-30
 
 - Warden's Treasure on game clients whose log has only page names: a look at the Sandbox with the eye button no
   longer counts as a new Chromatic and a change of the Sandbox, so the pick stops asking for the eye button again and
