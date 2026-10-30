@@ -4,6 +4,19 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.22 — 2026-10-30
+
+- The eye button's ring no longer stays on the screen after a run: it rang on in the Hideout when the run ended
+  right after a Warden's Treasure.
+- Windows 10: frames are cut to the game's picture again; Windows 10 captures the whole window rectangle, title bar
+  and borders included, and nothing was read in a window the game didn't fill.
+- A game window resized by its edges may keep the picture it drew before, too big for it and cut off on the right:
+  the overlay now says so (set the window size in the game's settings, or press Alt+Enter twice), and a 16:9 picture
+  left at the top left is read as such.
+- Tusk marks: the cell network retrained with about 170 more hand-checked ones, on Wolves, Lions and Rats too (the
+  mark is the cell's and stays under whoever comes in after the Mammoth); before, it found about half of them and
+  flickered on and off on the same cell.
+
 ## 0.7.21 — 2026-10-30
 
 - Warden's Treasure on game clients whose log has only page names: a look at the Sandbox with the eye button no
