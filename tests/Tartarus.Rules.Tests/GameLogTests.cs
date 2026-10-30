@@ -54,6 +54,44 @@ public class GameLogTests
     }
 
     [Fact]
+    public void The_eye_button_s_look_lasts_from_its_click_to_the_way_back()
+    {
+        // 2026-10-31: the pick's popup reaches the log a moment after the screen, so "back to the pick" flashed over the
+        // Sandbox as each Warden's Treasure came up and was taken; the eye button's own clicks say when it's a look.
+        var log = new GameLog();
+        log.Feed("[2026.10.30-21.05.01:741][  1]TLGame: Display: [Game] UIButton@ normal-click Btn_S16GamePlay_Start");
+        log.Feed("[2026.10.30-21.05.02:000][  1]TLLua: Display: [Game] [S16LastDay] check cur=0 max=20");
+        log.Feed("[2026.10.30-21.11.51:134][ 43]TLLua: Display: [Game] S16BoardColoredPop Run");
+        var run = Assert.Single(log.Runs);
+        Assert.True(run is { PickOpen: true, Looking: false });
+        log.Feed("[2026.10.30-21.11.55:814][809]TLGame: Display: [Game] UIButton@ normal-click S16ViewBoardBtn_ColoredPop");
+        Assert.True(run.Looking);
+        log.Feed("[2026.10.30-21.11.56:958][ 18]TLLua: Display: [Game] S16BoardColoredPop Run");
+        log.Feed("[2026.10.30-21.11.56:962][ 18]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_ViewReturn");
+        Assert.True(run is { PickOpen: true, Looking: false });
+        log.Feed("[2026.10.30-21.11.59:542][436]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_ColoredPop_Confirm");
+        Assert.True(run is { PickOpen: false } && run.PickTakenAt == run.BoardChangedAt && run.PickTakenAt != default);
+    }
+
+    [Fact]
+    public void A_pick_the_game_clicks_for_the_player_is_closed()
+    {
+        // 2026-10-31, a player's report: the first instrument pick taken by "sim-click" stayed open, and every Sandbox
+        // read asked to go back to it (the eye button framed instead of the Destination hinted).
+        var log = new GameLog();
+        log.Feed("[2026.10.30-20.45.14:903][859]TLGame: Display: [Game] UIButton@ normal-click Btn_S16GamePlay_Start");
+        log.Feed("[2026.10.30-20.45.19:174][533]TLLua: Display: [Game] [S16LastDay] check cur=0 max=20 played=false");
+        log.Feed("[2026.10.30-20.45.19:182][533]TLLua: Display: [Game] S16BoardRelicPop Run");
+        log.Feed("[2026.10.30-20.45.22:285][ 30]TLGame: Display: [Game] UIButton@ sim-click Btn_S16Board_RelicPop_Confirm");
+        var run = Assert.Single(log.Runs);
+        Assert.False(run.PickOpen);
+        // Whatever closed it, a new day has no pick open.
+        log.Feed("[2026.10.30-20.46.00:000][  1]TLLua: Display: [Game] S16BoardRelicPop Run");
+        log.Feed("[2026.10.30-20.46.05:000][  1]TLLua: Display: [Game] [S16LastDay] check cur=1 max=20 played=false");
+        Assert.False(run.PickOpen);
+    }
+
+    [Fact]
     public void A_Chromatic_s_flight_is_no_change_of_its_own()
     {
         // 2026-10-28: the cell was empty before the flight's sound; a reading after it like those before passed for the

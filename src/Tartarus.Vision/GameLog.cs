@@ -39,6 +39,10 @@ public sealed class LoggedRun
     public bool PickOpen { get; set; }
     /// <summary>The open pick is a Warden's Treasure (a Chromatic brought it).</summary>
     public bool TreasureOpen { get; set; }
+    /// <summary>The Sandbox is viewed from a pick: the eye button clicked, not yet the way back (logs with clicks only).</summary>
+    public bool Looking { get; set; }
+    /// <summary>When a pick's Confirm was last clicked (logs with clicks only), local time.</summary>
+    public DateTime PickTakenAt { get; set; }
     /// <summary>
     /// The Chromatics the log vouches for: their sounds or their panel slots lit, one each, whichever is most; at most
     /// 10. Not the Warden's Treasures taken: Opulence gives three picks of one, and a pick the server didn't answer
@@ -168,6 +172,7 @@ public sealed partial class GameLog
     }
 
     /// <summary>Takes one line of the log. Returns true when it changed what's known of the current run.</summary>
+    /// <remarks>Clicks are "normal-click", or "sim-click" when the game clicks for the player: both are matched.</remarks>
     public bool Feed(string line)
     {
         if (!line.Contains("S16", StringComparison.Ordinal)) return false;
@@ -175,7 +180,7 @@ public sealed partial class GameLog
         // Another client's log: the game's pages, no sounds, clicks or day counter. Not where the counter shows.
         if (line.Contains("Page@ ", StringComparison.Ordinal)) return !_dayCounter && FeedPage(line);
         // A new run: its Start button (then the objective, the Sandbox, day 0 and the first instrument pick).
-        if (line.Contains("normal-click Btn_S16GamePlay_Start", StringComparison.Ordinal))
+        if (line.Contains("-click Btn_S16GamePlay_Start", StringComparison.Ordinal))
         {
             Runs.Add(new LoggedRun { Start = Time(line) ?? DateTime.Now, FromStart = true });
             return true;
@@ -190,7 +195,10 @@ public sealed partial class GameLog
             // without a Start button; day 0 is a start all the same.
             if (Current == null || day < Current.Day)
                 Runs.Add(new LoggedRun { Start = Time(line) ?? DateTime.Now, FromStart = day == 0 });
-            if (day > Current!.Day) (Current.DayStartConsumes, Current.ConsumePick) = (Current.Consumes, false);
+            // A new day: no pick is open any more, whatever click closed it (2026-10-31: an instrument pick taken by
+            // "sim-click" stayed open for the whole run, and the Sandbox asked to go back to it).
+            if (day > Current!.Day)
+                (Current.DayStartConsumes, Current.ConsumePick, Current.PickOpen, Current.TreasureOpen, Current.Looking) = (Current.Consumes, false, false, false, false);
             Current.Day = Math.Max(Current.Day, day);
             Current.MaxDays = max;
             return true;
@@ -199,7 +207,9 @@ public sealed partial class GameLog
         if (run == null) return false;
         if (line.Contains("AudioEnum  == UI_S16_Eating_red_screen", StringComparison.Ordinal)) run.ConsumePick = true;
         else if (line.Contains("AudioEnum  == UI_S16_Click_Cancel", StringComparison.Ordinal) || line.Contains("] S16BoardNewDayPop Run", StringComparison.Ordinal)) run.ConsumePick = false;
-        else if (line.Contains("normal-click Btn_S16Board_RelicPop_Reroll", StringComparison.Ordinal)) run.RerollsUsed++;
+        else if (line.Contains("-click Btn_S16Board_RelicPop_Reroll", StringComparison.Ordinal)) run.RerollsUsed++;
+        else if (line.Contains("-click S16ViewBoardBtn_", StringComparison.Ordinal)) run.Looking = true;
+        else if (line.Contains("-click Btn_S16Board_ViewReturn", StringComparison.Ordinal)) run.Looking = false;
         // A Chromatic: its sound as it reaches the rarity, one each (the flight to the panel after it plays once for two
         // that come at once), and its panel slot lighting up. The flight's sound is no change of its own: the cell is
         // often empty by then, and a reading after it like those before looked like the old Sandbox still on screen
@@ -212,10 +222,10 @@ public sealed partial class GameLog
         else if (line.Contains("AudioEnum  == UI_S16_Own_Eat", StringComparison.Ordinal)) (run.Consumes, run.ConsumePick, run.BoardChangedAt) = (run.Consumes + 1, false, LocalTime(line));
         else if (line.Contains("] S16BoardRelicPop Run", StringComparison.Ordinal)) (run.InstrumentPicks, run.PickOpen) = (run.InstrumentPicks + 1, true);
         else if (line.Contains("] S16BoardColoredPop Run", StringComparison.Ordinal)) (run.PickOpen, run.TreasureOpen) = (true, true);
-        else if (line.Contains("normal-click Btn_S16Board_RelicPop_Confirm", StringComparison.Ordinal)) run.PickOpen = false;
+        else if (line.Contains("-click Btn_S16Board_RelicPop_Confirm", StringComparison.Ordinal)) (run.PickOpen, run.Looking, run.PickTakenAt) = (false, false, LocalTime(line));
         // A Warden's Treasure taken works on the Sandbox at once (opens cells, raises rarities): a second one that comes
         // right after (two Chromatics at once) is picked over another Sandbox than the first.
-        else if (line.Contains("normal-click Btn_S16Board_ColoredPop_Confirm", StringComparison.Ordinal)) (run.Treasures, run.PickOpen, run.TreasureOpen, run.BoardChangedAt) = (run.Treasures + 1, false, false, LocalTime(line));
+        else if (line.Contains("-click Btn_S16Board_ColoredPop_Confirm", StringComparison.Ordinal)) (run.Treasures, run.PickOpen, run.TreasureOpen, run.Looking, run.BoardChangedAt, run.PickTakenAt) = (run.Treasures + 1, false, false, false, LocalTime(line), LocalTime(line));
         else if (line.Contains("AudioEnum  == UI_S16_Prison_Task_Done", StringComparison.Ordinal)) run.ObjectiveDone = true;
         // The result screen; it may come up twice for one run.
         else if (line.Contains("] S16GamePlayCheckOut Run", StringComparison.Ordinal)) (run.End, run.Finished) = (run.End ?? Time(line), true);

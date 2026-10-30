@@ -755,7 +755,10 @@ public partial class ControlWindow : Window
             // search, nor a base for the pick that may follow; the last whole one stays.
             // The Sandbox viewed from a pick (the eye button): back to the pick is the hint once a reading of it counts,
             // not as the Sandbox comes up (a quick look went back before it was read, and the pick asked again).
-            bool viewing = LiveLogRun is { PickOpen: true };
+            // A log with clicks says when the eye button was clicked: the pick's own comings and goings reach the log
+            // a moment after the screen (2026-10-31: "back to the pick" flashed over the Sandbox as a Warden's Treasure
+            // came up and as it was taken).
+            bool viewing = LiveLogRun is { PickOpen: true } open && (open.Paged || open.Looking);
             if (r.Ok && _sandbox != null && !WholeBoard(_sandbox))
             {
                 if (viewing) ShowEye(false);
@@ -903,7 +906,10 @@ public partial class ControlWindow : Window
                 }
                 // The Sandbox changed under the pick since it was last seen (a chain, Chromatics leaving it): the hint is
                 // for the old one until the player looks at it (the game's eye button) and it's read again.
-                bool boardStale = under == _hintSandbox && LiveLogRun is { } logged2 && logged2.BoardChangedAt > _hintBoardAt;
+                // A pick still on screen after the log's Confirm is going away: the change its Confirm made is no reason to
+                // look (2026-10-31: every Warden's Treasure taken flashed the eye button).
+                bool boardStale = under == _hintSandbox && LiveLogRun is { } logged2 && logged2.BoardChangedAt > _hintBoardAt
+                    && !(logged2 is { PickOpen: false } && logged2.PickTakenAt >= logged2.BoardChangedAt);
                 if (boardStale != _eyeHint)
                 {
                     _eyeHint = boardStale;
