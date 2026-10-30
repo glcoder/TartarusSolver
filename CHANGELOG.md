@@ -4,6 +4,12 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.23 — 2026-10-30
+
+- Opulence: the Chromatic count no longer goes up with each of a Warden's Treasure's three picks, nor with a pick the
+  game shows again when the server is slow to answer (4 Chromatics were taken for a full panel, and the hints played
+  as if it were).
+
 ## 0.7.22 — 2026-10-30
 
 - The eye button's ring no longer stays on the screen after a run: it rang on in the Hideout when the run ended
