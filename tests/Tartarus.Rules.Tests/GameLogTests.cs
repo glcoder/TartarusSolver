@@ -35,6 +35,25 @@ public class GameLogTests
     }
 
     [Fact]
+    public void Opulence_s_three_picks_of_one_Warden_s_Treasure_are_one_Chromatic()
+    {
+        // 2026-10-30, a report: Opulence, and the server slow to answer (picks came up again); 12 Confirms for 4
+        // Chromatics were read as 10, and the hints played as if the Chromatic panel were full.
+        var log = new GameLog();
+        log.Feed("[2026.10.30-18.58.31:493][845]TLGame: Display: [Game] UIButton@ normal-click Btn_S16GamePlay_Start");
+        log.Feed("[2026.10.30-18.58.32:000][  1]TLLua: Display: [Game] [S16LastDay] check cur=0 max=20");
+        log.Feed("[2026.10.30-19.13.42:383][221]TLLua: Display: [Game] AudioMgr@PlayAudio  AudioEnum  == UI_S16_Premium_Quality");
+        log.Feed("[2026.10.30-19.13.43:068][330]TLShipping: Display: [Game] AnimationMgr@ Animation not found! Name = Anim_Archive_LightUp, Id = 51531_S16BoardArchiveCell_000002024D29EFC8_Anim_Archive_LightUp");
+        for (int i = 0; i < 5; i++)
+        {
+            log.Feed($"[2026.10.30-19.13.{43 + 2 * i}:393][374]TLLua: Display: [Game] S16BoardColoredPop Run");
+            log.Feed($"[2026.10.30-19.13.{44 + 2 * i}:451][177]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_ColoredPop_Confirm");
+        }
+        var run = Assert.Single(log.Runs);
+        Assert.Equal((1, 1), (run.Chromatic, run.ChromaticAtLeast));
+    }
+
+    [Fact]
     public void A_Chromatic_s_flight_is_no_change_of_its_own()
     {
         // 2026-10-28: the cell was empty before the flight's sound; a reading after it like those before passed for the

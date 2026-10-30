@@ -40,10 +40,11 @@ public sealed class LoggedRun
     /// <summary>The open pick is a Warden's Treasure (a Chromatic brought it).</summary>
     public bool TreasureOpen { get; set; }
     /// <summary>
-    /// The Chromatics the log vouches for: their sounds, their panel slots lit, or the Warden's Treasures they brought,
-    /// one each (the open one counted), whichever is most; at most 10.
+    /// The Chromatics the log vouches for: their sounds or their panel slots lit, one each, whichever is most; at most
+    /// 10. Not the Warden's Treasures taken: Opulence gives three picks of one, and a pick the server didn't answer
+    /// comes up again (2026-10-30: 12 Confirms for 4 Chromatics read as 10).
     /// </summary>
-    public int ChromaticAtLeast => Math.Min(10, Math.Max(Math.Max(Chromatic, PanelLights), Treasures + (TreasureOpen ? 1 : 0)));
+    public int ChromaticAtLeast => Math.Min(10, Math.Max(Chromatic, PanelLights));
     /// <summary>The Chromatic panel's slots lit up (an animation the log names): one per Chromatic.</summary>
     public int PanelLights { get; set; }
     /// <summary>
