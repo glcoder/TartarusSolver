@@ -16,7 +16,11 @@ public sealed class RunStatistics
     public int Runs { get; set; }
     public int Chromatic { get; set; }
     public double Seconds { get; set; }
-    /// <summary>The last runs counted, by their start: every start of the app reads the game's log again.</summary>
+    /// <summary>
+    /// The last runs counted, by their start and their end: every start of the app reads the game's log again. A run
+    /// the game was restarted in has another start in the new log (its first day there) than the app saw live, but
+    /// the same end (2026-10-30: one run counted twice).
+    /// </summary>
     public List<DateTime> Counted { get; set; } = [];
 
     [System.Text.Json.Serialization.JsonIgnore]
@@ -45,12 +49,13 @@ public sealed class RunStatistics
     /// <summary>Counts a run the log saw whole to its end, once; true when it was counted now.</summary>
     public bool Add(LoggedRun run)
     {
-        if (run is not { Finished: true, FromStart: true, End: { } end } || run.Start < Since || Counted.Contains(run.Start)) return false;
+        if (run is not { Finished: true, FromStart: true, End: { } end } || run.Start < Since || Counted.Contains(run.Start) || Counted.Contains(end)) return false;
         Runs++;
         Chromatic += run.ChromaticAtLeast;
         Seconds += Math.Max(0, (end - run.Start).TotalSeconds);
         Counted.Add(run.Start);
-        if (Counted.Count > 100) Counted.RemoveRange(0, Counted.Count - 100);
+        Counted.Add(end);
+        if (Counted.Count > 200) Counted.RemoveRange(0, Counted.Count - 200);
         Save();
         return true;
     }

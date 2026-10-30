@@ -4,6 +4,13 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## Unreleased
+
+- Cell reading: the network retrained with about 200 more hand-checked cells; an Unopened cell's Legendary glow is seen again
+  (0.7.19's network took such cells for plain Unopened ones on a bright Sandbox), a red glow on one is Ultimate, not
+  Normal, and an Ultimate Lion is no longer taken for a Consumable one so often.
+- Statistics: a run the game was restarted in (a new log file) is no longer counted again when the app starts next.
+
 ## 0.7.19 — 2026-10-29
 
 - After a change of the game's resolution (windowed to fullscreen, say) the game may keep drawing its UI at the old
