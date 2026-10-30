@@ -410,6 +410,11 @@ public partial class ControlWindow : Window
             KeptInstruments = stale ? new HashSet<int>() : new HashSet<int>(_run.Kept),
             Hint = stale || !_settings.Hints ? null : _hint,
             Status = stale ? "Tartarus: the window's size changed, a new scan is needed" : _status,
+            // The game keeps the picture it drew before its window was resized by the edges: its layout is only
+            // guessed (2026-10-30, a player's report: nothing read).
+            Warning = _scan?.Notes?.Any(n => n.StartsWith(Vision.GamePicture.Note, StringComparison.Ordinal)) == true
+                ? "The game's picture doesn't fill its window: set the window size in the game's settings, or press Alt+Enter twice"
+                : null,
             EyeHint = !stale && _settings.Hints && _eyeHint,
             HintsOnly = _settings.Hints && _settings.HintsOnly,
             HintLine = _settings.Debug,
@@ -946,6 +951,9 @@ public partial class ControlWindow : Window
             {
                 _hints.Clear();
                 ClearHint();
+                // Neither the Sandbox nor a pick: no eye button to ring either (2026-10-30: rung on in the Hideout for
+                // half an hour after the run's last Warden's Treasure).
+                ShowEye(false);
             }
         }
         catch (Exception ex)

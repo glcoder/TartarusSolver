@@ -47,6 +47,14 @@ public sealed class LayoutScanner : ISandboxScanner
 
     public ScanResult Scan(Frame frame)
     {
+        var picture = GamePicture.Of(frame);
+        var r = ScanPicture(picture);
+        if (picture != frame) (r.Notes ??= []).Add($"{GamePicture.Note} {picture.Height} rows tall at the top left of the {frame.Width}x{frame.Height} window, read as {picture.Width}x{picture.Height}.");
+        return r;
+    }
+
+    private ScanResult ScanPicture(Frame frame)
+    {
         if (_layout == null || _layout.Width != frame.Width || _layout.Height != frame.Height)
         {
             _oldK = _layout?.K;

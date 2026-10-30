@@ -117,12 +117,14 @@ public sealed unsafe class WindowCapture : IDisposable
             int fh = Math.Min(_latest.ContentSize.Height, (int)desc.Height);
             if (fw <= 0 || fh <= 0) return null;
 
-            // The frame shows the window's visible bounds; the client area sits inside at some offset.
+            // The frame shows the window's visible bounds at its top left; the client area sits inside at some offset.
+            // Windows 10 makes the frame the size of the whole window rectangle, its invisible resize borders too, with
+            // the rest empty (2026-10-30, a player's report: title bar and all in the frame, nothing read).
             var visible = Win32Windows.VisibleBounds(Hwnd);
             int x0 = 0, y0 = 0, w = fw, h = fh;
             LastBounds = new PixelRect(visible.Left, visible.Top, visible.Left + fw, visible.Top + fh);
             if (CropToClient && Win32Windows.ClientBounds(Hwnd) is { IsEmpty: false } client
-                && visible.Width == fw && visible.Height == fh)
+                && visible.Width <= fw && visible.Height <= fh)
             {
                 int cx = client.Left - visible.Left, cy = client.Top - visible.Top;
                 if (cx >= 0 && cy >= 0 && cx + client.Width <= fw && cy + client.Height <= fh)
