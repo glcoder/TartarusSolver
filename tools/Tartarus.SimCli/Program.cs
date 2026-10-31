@@ -32,8 +32,10 @@ if (args.Length == 0)
 }
 // Long runs give way to the game and the hint app; timings are measured at normal priority.
 if (args[0] is not ("latency" or "levels")) Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
-// --reroll-percent P: % of runs with the Re-roll (the rules' default: the Pactspirit's 50).
-var engine = new Engine(Opt("--reroll-percent") is { } rerollPercent ? RuleOptions.Default with { RerollPercent = double.Parse(rerollPercent, CultureInfo.InvariantCulture) } : null);
+// --reroll-percent P: % of runs with the Re-roll (the rules' default: the Pactspirit's 50). --rules R: the game the runs play
+// (Rules below); compare's --rules-a R / --rules-b R: the rules a side's search plays its playouts by (default the runs').
+var baseRules = Opt("--reroll-percent") is { } rerollPercent ? RuleOptions.Default with { RerollPercent = double.Parse(rerollPercent, CultureInfo.InvariantCulture) } : RuleOptions.Default;
+var engine = new Engine(Rules(Opt("--rules"), baseRules));
 var weights = LoadWeights();
 var globalWeights = weights;
 var valueNet = Opt("--net") is { } netPath ? ValueNet.Load(netPath) : ValueNet.Find() is { } found ? ValueNet.Load(found) : null;
@@ -58,6 +60,7 @@ return args[0] switch
     "levels" => Levels(),
     "objcheck" => ObjCheck(),
     "obscheck" => ObsCheck(),
+    "drift" => DriftCommand(),
     "opened" => OpenedCommand(),
     "calib" => Calib(),
     _ => Fail($"unknown command {args[0]}"),
@@ -70,14 +73,33 @@ int Fail(string message)
 }
 
 string? Opt(string name) => Array.IndexOf(args, name) is int i and >= 0 && i + 1 < args.Length ? args[i + 1] : null;
+
+// Rules R: "fewer=P;replace=w0,w1,w2,w3,w4" over the base: P % of mornings one Destination short, the Replace rarity weights
+// (Normal .. Ultimate); "default" the rules as shipped.
+RuleOptions Rules(string? spec, RuleOptions over)
+{
+    if (spec is null or "default") return over;
+    foreach (var part in spec.Split(';', StringSplitOptions.RemoveEmptyEntries))
+    {
+        var kv = part.Split('=', 2);
+        over = kv[0] switch
+        {
+            "fewer" => over with { FewerDestinationsPercent = double.Parse(kv[1], CultureInfo.InvariantCulture) },
+            "replace" => over with { ReplaceWeights = kv[1].Split(',').Select(x => double.Parse(x, CultureInfo.InvariantCulture)).ToArray() },
+            _ => throw new ArgumentException($"unknown rule {kv[0]}"),
+        };
+    }
+    return over;
+}
 int IntOpt(string name, int fallback) => int.TryParse(Opt(name), out int v) ? v : fallback;
 
-IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWeights? w = null, ValueNet? policy = null, ValueNet? instruments = null)
+IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWeights? w = null, ValueNet? policy = null, ValueNet? instruments = null, Engine? rules = null)
 {
+    var searchEngine = rules ?? engine;
     string p = spec ?? Opt("--policy") ?? "random";
     net ??= valueNet;
     var weights = w ?? globalWeights;
-    if (p.StartsWith("mc:", StringComparison.Ordinal)) return new SearchPolicy(engine, int.Parse(p[3..]), weights, threads: 1);
+    if (p.StartsWith("mc:", StringComparison.Ordinal)) return new SearchPolicy(searchEngine, int.Parse(p[3..]), weights, threads: 1);
     // vn:N[:D[:R]]: the search with the value network at the leaves, D days on (default 3, the best of 1-6); R the
     // playouts' own moves by the network too (0 never, 1 the morning's Destination, 2 every decision), or p: by the
     // policy network (--policy-net). A last ":peek": the playouts' moves see the doors their world has drawn (before 0.7.10).
@@ -86,7 +108,7 @@ IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWe
     {
         var parts = p.Split(':');
         bool byPolicy = parts.Length > 3 && parts[3] is "p" or "pi";
-        return new SearchPolicy(engine, int.Parse(parts[1]), weights, threads: 1, net: net ?? throw new InvalidOperationException("no value network (models/solver/value.bin, --net)"),
+        return new SearchPolicy(searchEngine, int.Parse(parts[1]), weights, threads: 1, net: net ?? throw new InvalidOperationException("no value network (models/solver/value.bin, --net)"),
             leafDays: parts.Length > 2 ? int.Parse(parts[2]) : 3, rolloutNet: parts.Length > 3 && !byPolicy && parts[3] != "peek" ? int.Parse(parts[3]) : 0,
             policy: byPolicy ? PolicyNet(policy) : null, policyInstruments: parts.Length > 3 && parts[3] == "pi", instrumentPolicy: instruments ?? instrumentNet, peek: parts[^1] == "peek", twoPly: parts[0] == "tp");
     }
@@ -211,6 +233,9 @@ int Compare()
     var instrumentsB = Opt("--instrument-net-b") is { } ib ? ValueNet.Load(ib) : null;
     var wA = Opt("--weights-a") is { } wa ? WeightsFile.Read(File.ReadAllText(wa)) : weights;
     var wB = Opt("--weights-b") is { } wb ? WeightsFile.Read(File.ReadAllText(wb)) : weights;
+    // A side's search may play its playouts by other rules than the runs' (--rules-a, --rules-b over --reroll-percent alone).
+    var rulesA = Opt("--rules-a") is { } ra ? new Engine(Rules(ra, baseRules)) : null;
+    var rulesB = Opt("--rules-b") is { } rb ? new Engine(Rules(rb, baseRules)) : null;
     var ua = new double[runs];
     var ub = new double[runs];
     var ca = new double[runs];
@@ -220,10 +245,10 @@ int Compare()
     {
         ulong seed = seed0 * 1_000_003 + (ulong)r;
         var s = engine.NewRun(seed);
-        Runs.PlayOut(engine, ref s, MakePolicy(seed, a, netA, wA, policyA, instrumentsA));
+        Runs.PlayOut(engine, ref s, MakePolicy(seed, a, netA, wA, policyA, instrumentsA, rulesA));
         (ua[r], ca[r]) = (RunScore.Of(s).Utility, RunScore.Of(s).Chromatic);
         s = engine.NewRun(seed);
-        Runs.PlayOut(engine, ref s, MakePolicy(seed, b, netB, wB, policyB, instrumentsB));
+        Runs.PlayOut(engine, ref s, MakePolicy(seed, b, netB, wB, policyB, instrumentsB, rulesB));
         (ub[r], cb[r]) = (RunScore.Of(s).Utility, RunScore.Of(s).Chromatic);
     });
     var (mean, se) = Tuning.Paired(ub, ua);
@@ -240,6 +265,14 @@ int ObjCheck()
     // objcheck [--runs N] [--policy vn:1024:3:p] [--seed S]: the search's values before a done Objective and on its pick.
     string policy = Opt("--policy") ?? "vn:1024:3:p";
     Calibration.Run(engine, seed => (SearchPolicy)MakePolicy(seed, policy), IntOpt("--runs", 2000), (ulong)IntOpt("--seed", 1));
+    return 0;
+}
+
+int DriftCommand()
+{
+    // drift [--runs N] [--policy vn:1024:3:p] [--seed S]: the shown Chromatic's step between decisions, by the next one's kind.
+    string policy = Opt("--policy") ?? "vn:1024:3:p";
+    Calibration.Drift(engine, seed => (SearchPolicy)MakePolicy(seed, policy), IntOpt("--runs", 1000), (ulong)IntOpt("--seed", 1));
     return 0;
 }
 

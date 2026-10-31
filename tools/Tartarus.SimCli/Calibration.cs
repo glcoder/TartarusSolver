@@ -132,6 +132,64 @@ internal static class Calibration
         }
     }
 
+    /// <summary>
+    /// tartarus-sim drift: the shown Chromatic's step from one decision to the next, by what the next decision is (as
+    /// dataset/exp/obscheck/drift.py tells it from the app's log): next to the real runs' steps, a kind whose step the
+    /// simulator doesn't share is where the game and the rules part.
+    /// </summary>
+    public static void Drift(Engine engine, Func<ulong, SearchPolicy> search, int runs, ulong seed0)
+    {
+        var gate = new object();
+        var steps = new Dictionary<string, List<double>>();
+        var runStats = new List<(int Chromatic, int Incidents, int Consumes, int Replaces)>();
+        int done = 0;
+        var sw = Stopwatch.StartNew();
+        Parallel.For(0, runs, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, r =>
+        {
+            ulong seed = seed0 * 1_000_003 + (ulong)r;
+            var s = engine.NewRun(seed);
+            var p = search(seed);
+            Span<GameAction> legal = stackalloc GameAction[Engine.MaxActions];
+            var mine = new List<(string Kind, double Step)>();
+            double? prev = null;
+            while (!s.Ended)
+            {
+                int k = engine.Legal(s, legal);
+                string kind = s.PendingCount > 0
+                    ? s.Pending[0].Kind switch
+                    {
+                        PendingKind.Instrument => "instrument pick",
+                        PendingKind.Treasure => s.Theme == Theme.Opulence ? "treasure pick (Opulence)" : "treasure pick",
+                        _ => "other pending",
+                    }
+                    : s.Phase == Phase.Move ? "Move (new day)" : "Act";
+                var action = p.Choose(engine, s, legal[..k]);
+                if (p.LastResult?.Best is { } best)
+                {
+                    if (prev is { } v && v < 9.95) mine.Add((kind, best.Chromatic - v));
+                    prev = best.Chromatic;
+                }
+                engine.Apply(ref s, action);
+            }
+            lock (gate)
+            {
+                runStats.Add((s.Chromatic, s.Stats.Incidents, s.Stats.Consumes, s.Stats.Replaces));
+                foreach (var (kind, step) in mine)
+                {
+                    if (!steps.TryGetValue(kind, out var list)) steps[kind] = list = [];
+                    list.Add(step);
+                }
+                if (++done % 200 == 0) Console.WriteLine($"{done}/{runs} runs, {sw.Elapsed.TotalSeconds:0} s");
+            }
+        });
+        Console.WriteLine($"{runs} runs in {sw.Elapsed.TotalSeconds:0} s: per run Chromatic {runStats.Average(x => x.Chromatic):0.00}, Prison Incidents {runStats.Average(x => x.Incidents):0.00}, Consumes {runStats.Average(x => x.Consumes):0.00}, Replaces {runStats.Average(x => x.Replaces):0.00}");
+        foreach (var (kind, list) in steps.OrderByDescending(x => x.Value.Count))
+        {
+            var (m, se) = MeanSe(list);
+            Console.WriteLine($"  {kind,-26} {list.Count,7}  mean {m:+0.000;-0.000}  se {se:0.000}");
+        }
+    }
+
     private static void Report(string name, List<double> d, double control, double controlSe)
     {
         if (d.Count < 2) return;
