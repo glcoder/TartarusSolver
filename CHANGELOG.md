@@ -4,6 +4,14 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.26 — 2026-10-31
+
+- The Torture Instrument pick an Objective brings is hinted with the Objective done: the panel under the cards could
+  still read it unfinished, and the hint played on as if a second pick were coming (a Re-roll worth more than any card
+  was passed over).
+- A Prison Incident's effect is told from its window's Confirm, not its opening: a pick that comes right after one asks
+  for a look at the Sandbox (the eye button) instead of hinting over the cells as they were before it.
+
 ## 0.7.25 — 2026-10-31
 
 - The solver's rules no longer take away a Destination on some mornings for no reason: the game shows two only with

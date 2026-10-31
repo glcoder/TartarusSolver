@@ -86,6 +86,9 @@ public static class GameObservation
         foreach (var c in pick.Cards)
             if (c.Id != null && R.GameData.InstrumentById(c.Id) is { } i) o.Offer.Add(i);
         o.OfferForObjective = o.Instruments.Count > 0;
+        // Instruments are offered only at the start and for the Objective: a later offer is the Objective done, whatever
+        // the panel read under the cards said (2026-10-31: read 0/1, the search counted on a second Objective pick).
+        if (o.OfferForObjective) o.ObjectiveDone = true;
         // No instrument held yet: the run's first pick, before the Sandbox under the cards was ever seen.
         o.StartOfRun = !o.OfferForObjective;
         return o;

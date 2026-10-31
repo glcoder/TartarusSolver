@@ -21,7 +21,18 @@ internal static class Sim
         var scan = scanner.Scan(ImageIO.Load(args[0]));
         R.Observation observation;
         if (scan.Ok) observation = GameObservation.From(EditableSandbox.FromScan(scan), scan.Text);
-        else if (scan.Pick is { } pick) observation = GameObservation.FromPick(pick, EditableSandbox.Empty());
+        // --sandbox other.png: the Sandbox under a pick, read from another frame (as the app takes the last one it saw).
+        else if (scan.Pick is { } pick && opt(args, "--sandbox") is { } under)
+        {
+            var below = scanner.Scan(ImageIO.Load(under));
+            if (!below.Ok)
+            {
+                Console.Error.WriteLine($"no Sandbox in {under}: {below.Reason}");
+                return 1;
+            }
+            observation = GameObservation.FromPick(pick, EditableSandbox.FromScan(below), below.Text);
+        }
+        else if (scan.Pick is { } pick2) observation = GameObservation.FromPick(pick2, EditableSandbox.Empty());
         else
         {
             Console.Error.WriteLine($"nothing to hint: {scan.Reason}");
@@ -40,7 +51,9 @@ internal static class Sim
         string? path = WeightsFile.Find();
         var weights = path != null ? WeightsFile.Read(File.ReadAllText(path)) : EvalWeights.Default;
         var net = opt(args, "--no-net") == null && !args.Contains("--no-net") && ValueNet.Find() is { } netPath ? ValueNet.Load(netPath) : null;
-        var search = new MonteCarloSearch(engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = net };
+        // The playouts' policy network as the app has it.
+        var policy = net != null && ValueNet.FindPolicy() is { } policyPath ? ValueNet.Load(policyPath) : null;
+        var search = new MonteCarloSearch(engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = net, Policy = policy };
         Console.WriteLine(net != null ? "value network: on" : "value network: off");
         // Warm up first (JIT tiers, thread pool), as the app's search always is.
         search.Search(state, 20000, TimeSpan.FromSeconds(1), seed: 999);
