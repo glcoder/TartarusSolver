@@ -107,7 +107,26 @@ public static class GameObservation
     /// The Objective from the panel's lines (the name may wrap: "Survival of the" / "Fittest"; the task line helps), or,
     /// in another language, from its goal: each Objective counts to its own number.
     /// </summary>
-    public static R.ObjectiveKind? Objective(ScreenText text)
+    public static R.ObjectiveKind? Objective(ScreenText text) => ObjectiveByName(text) ?? (text.Progress?.Goal switch
+    {
+        1 => R.ObjectiveKind.KingOfTheCaged,
+        4 => R.ObjectiveKind.SurvivalOfTheFittest,
+        10 => R.ObjectiveKind.BehindCellDoors,
+        2 => R.ObjectiveKind.Undercurrents,
+        18 => R.ObjectiveKind.PrisonWalk,
+        _ => null,
+    });
+
+    /// <summary>
+    /// Whether the game's text reads at all: the Objective panel's words matched an Objective's name (true), text there
+    /// but no name in it (false: the OCR's language isn't the game's, 2026-10-31: a Chinese client read as English), or
+    /// nothing to tell by (null).
+    /// </summary>
+    public static bool? TextReadable(ScreenText text) =>
+        ObjectiveByName(text) != null ? true : text.Objective is { Length: >= 2 } ? false : null;
+
+    /// <summary>The Objective by its words alone, not by the number it counts to.</summary>
+    private static R.ObjectiveKind? ObjectiveByName(ScreenText text)
     {
         string all = ScreenText.Normalize((text.Objective ?? "") + " " + (text.ObjectiveProgress ?? ""));
         if (all.Contains("king of") || all.Contains("reaches ultimate")) return R.ObjectiveKind.KingOfTheCaged;
@@ -122,15 +141,7 @@ public static class GameObservation
             if (names.Count > 0 && NameMatch.Best(read, names, n => n.Name) is ({ } best, >= 0.75) && Enum.TryParse<R.ObjectiveKind>(best.Id, out var kind))
                 return kind;
         }
-        return text.Progress?.Goal switch
-        {
-            1 => R.ObjectiveKind.KingOfTheCaged,
-            4 => R.ObjectiveKind.SurvivalOfTheFittest,
-            10 => R.ObjectiveKind.BehindCellDoors,
-            2 => R.ObjectiveKind.Undercurrents,
-            18 => R.ObjectiveKind.PrisonWalk,
-            _ => null,
-        };
+        return null;
     }
 
     public static R.Code Code(Code? code) => code switch

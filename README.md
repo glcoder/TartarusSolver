@@ -25,7 +25,8 @@ chests).
   network at their horizon.
 - **Reading the screen:** a convolutional network for the cells (Code, rarity, marks), small networks for the
   Torture Instrument and Chromatic slots, card and pick screens told by their pictures, and OCR (PaddleOCR, ONNX)
-  for the text. Works in any of the game's languages: English and Russian OCR ship, others are downloaded on asking.
+  for the text. Works in any of the game's languages: English and Russian OCR ship, others are downloaded on asking;
+  the language is taken from the game's settings, or chosen in the window (asked for when the text doesn't read).
 - **The game's log:** run start, days, Consumes, Chromatics, Prison Incidents and picks, read from the log file the
   game writes, to fill in what the screen hides (a red Consume screen, a popup).
 - **Statistics:** the runs played and the Chromatic Inmates they ended with (in all and per run), from the game's
@@ -59,15 +60,16 @@ every 6 hours; when there is one, "Update to …" downloads it, checks it and re
 | Ctrl+Shift+E / Ctrl+Shift+D | label editing / save the frame (for building the training set; with `--debug`) |
 
 Hotkeys work while the game or the app is in front. The control window holds the game window, auto scan and its
-period (0 to 1 s; 0: the next frame as soon as the last one's reading and hint are done), the hint quality, the
-game's log and bug reports. `TartarusSolver.exe --debug` opens the whole window: overlay views (regions, OCR text,
+period (0 to 1 s; 0: the next frame as soon as the last one's reading and hint are done), the game's language, the
+hint quality, the game's log and bug reports. `TartarusSolver.exe --debug` opens the whole window: overlay views (regions, OCR text,
 everything read), labels, dataset collecting and the app's log.
 
 Settings live in `%LOCALAPPDATA%\TartarusSolver\settings.json`, among them:
 
 - `CacheWorth`: what a Riot chest per Inmate left is worth, in Chromatics, by rarity (Normal … Ultimate); the
   solver weighs a sure chest against a chance at a Chromatic with it.
-- `GameLanguage`: the game's language for OCR (`en`, `ru`, …); by default read from the game's own settings.
+- `GameLanguage`: the game's language for OCR (`en`, `ru`, `zh`, …; also Game language in the window); null: read
+  from the game's own settings.
 - `HintPlayouts`, `HintSeconds`: how hard the solver thinks per move (also the slider in the control window).
 - `CheckUpdates`: ask GitHub for new versions (the checkbox in the window).
 - `Hotkeys`, `GameLogPath`, `ReportDsn`.

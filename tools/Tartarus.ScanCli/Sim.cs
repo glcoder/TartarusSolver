@@ -85,3 +85,29 @@ internal static class LogRuns
         return 0;
     }
 }
+
+/// <summary>
+/// tartarus-scan readable &lt;frame.png|dir&gt;... [--lang code] [--every N]: whether the game's text reads in the OCR's language on
+/// each Sandbox frame (the Objective's name found), as the app tells a game language it can't read.
+/// </summary>
+internal static class Readable
+{
+    public static int Run(string[] args, Func<string[], string, string?> opt, Func<string[], ISandboxScanner> makeScanner)
+    {
+        int every = int.TryParse(opt(args, "--every"), out int e) ? e : 1;
+        var files = args.TakeWhile(a => !a.StartsWith("--"))
+            .SelectMany(a => Directory.Exists(a) ? Directory.GetFiles(a, "*.png").Order().Where((_, i) => i % every == 0) : [a]).ToList();
+        using var scanner = makeScanner(args);
+        int yes = 0, no = 0, none = 0;
+        foreach (var file in files)
+        {
+            var scan = scanner.Scan(ImageIO.Load(file));
+            if (!scan.Ok || scan.Text == null) continue;
+            bool? readable = GameObservation.TextReadable(scan.Text);
+            if (readable == true) yes++; else if (readable == false) no++; else none++;
+            if (readable != true) Console.WriteLine($"{Path.GetFileName(file)}: {(readable == false ? "NOT READ" : "nothing")}  objective \"{scan.Text.Objective}\" / \"{scan.Text.ObjectiveProgress}\"");
+        }
+        Console.WriteLine($"Sandbox frames: read {yes}, not read {no}, nothing to tell {none}");
+        return 0;
+    }
+}

@@ -95,11 +95,33 @@ public sealed class UiWatchdog : IDisposable
         }
     }
 
-    /// <summary>The managed stacks of every thread, the UI thread's first.</summary>
+    /// <summary>
+    /// The managed stacks of every thread, the UI thread's first. A snapshot refused for a moment (2026-10-31: error
+    /// 1450, no system resources, on a 4K player's busy PC) is tried again.
+    /// </summary>
     private string Stacks()
     {
-        using var target = DataTarget.CreateSnapshotAndAttach(Environment.ProcessId);
-        using var runtime = target.ClrVersions[0].CreateRuntime();
+        for (int attempt = 1; ; attempt++)
+        {
+            try { return ReadStacks(); }
+            catch (Exception) when (attempt < 3)
+            {
+                Thread.Sleep(500);
+            }
+        }
+    }
+
+    // The DAC beside the runtime this process runs on: never a download (2026-10-31: a player's local DAC failed its
+    // signature check, ClrMD went to msdl.microsoft.com and the network refused it: no stack). It's the runtime's own
+    // folder, as trusted as the runtime already loaded from it.
+    private static readonly DataTargetOptions Options = new() { SymbolPaths = [], VerifyDacOnWindows = false };
+
+    private string ReadStacks()
+    {
+        using var target = DataTarget.CreateSnapshotAndAttach(Environment.ProcessId, Options);
+        var clr = target.ClrVersions[0];
+        string localDac = Path.Combine(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(), "mscordaccore.dll");
+        using var runtime = File.Exists(localDac) ? clr.CreateRuntime(localDac) : clr.CreateRuntime();
         var text = new StringBuilder();
         foreach (var thread in runtime.Threads.Where(t => t.IsAlive).OrderBy(t => t.ManagedThreadId != _uiThread))
         {

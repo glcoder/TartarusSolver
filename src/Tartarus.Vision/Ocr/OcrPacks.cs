@@ -41,12 +41,13 @@ public static class OcrPacks
     public static readonly OcrPack Thai = new("thai", "Thai and Latin", "thai",
         7873480, "2b6e56b1872200349e227574c25aeb0e0f9af9b8356e9ff5f75ac543a535669a", 1767, "57f5406f94bb6688fb7077f7be65f08bbd71cecf48c01ea26c522cb5c4836b7a");
 
-    /// <summary>The pack for one of the game's language codes (en, ru, de, es, fr, pt, id, ja, ko, th, vi, zhCN, zhTw).</summary>
+    /// <summary>The pack for one of the game's language codes (en, ru, de, es, fr, pt, id, ja, ko, th, vi, zh, zhTw;
+    /// the text tables call Simplified Chinese zhCN).</summary>
     public static OcrPack ForGame(string? languageCode) => languageCode?.ToLowerInvariant() switch
     {
         "ru" => EastSlavic,
         "de" or "es" or "fr" or "pt" or "id" or "vi" => Latin,
-        "zhcn" or "zhtw" or "ja" => Chinese,
+        "zh" or "zhcn" or "zhtw" or "ja" => Chinese,
         "ko" => Korean,
         "th" => Thai,
         _ => English,
@@ -57,7 +58,19 @@ public static class OcrPacks
     {
         "en" => "English", "ru" => "Russian", "de" => "German", "es" => "Spanish", "fr" => "French", "pt" => "Portuguese",
         "id" => "Indonesian", "vi" => "Vietnamese", "ja" => "Japanese", "ko" => "Korean", "th" => "Thai",
-        "zhcn" => "Chinese (Simplified)", "zhtw" => "Chinese (Traditional)",
+        "zh" or "zhcn" => "Chinese (Simplified)", "zhtw" => "Chinese (Traditional)",
+        _ => code ?? "?",
+    };
+
+    /// <summary>The game's languages, as its settings file writes them (Simplified Chinese "zh", seen 2026-10-31).</summary>
+    public static IReadOnlyList<string> GameLanguages { get; } = ["en", "ru", "de", "es", "fr", "pt", "id", "vi", "ja", "ko", "th", "zh", "zhTw"];
+
+    /// <summary>The language's own name for itself ("ru": Русский), for a player who doesn't read English.</summary>
+    public static string NativeName(string? code) => code?.ToLowerInvariant() switch
+    {
+        "en" => "English", "ru" => "Русский", "de" => "Deutsch", "es" => "Español", "fr" => "Français", "pt" => "Português",
+        "id" => "Bahasa Indonesia", "vi" => "Tiếng Việt", "ja" => "日本語", "ko" => "한국어", "th" => "ไทย",
+        "zh" or "zhcn" => "简体中文", "zhtw" => "繁體中文",
         _ => code ?? "?",
     };
 

@@ -49,6 +49,13 @@
               ValueChanged="IntervalSlider_ValueChanged" ToolTip="Seconds from one frame to the next; 0: the next frame as soon as the last one's reading and hint are done" />
       <TextBlock x:Name="IntervalText" Margin="6,0,0,0" Text="0.5 s" />
     </StackPanel>
+    <StackPanel Orientation="Horizontal" Margin="0,6,0,0"
+                ToolTip="The language the game shows its text in, so the app can read it. The app itself stays in English.">
+      <TextBlock Text="Game language" Margin="0,0,6,0" />
+      <ComboBox x:Name="GameLanguageCombo" Width="230" />
+      <CheckBox x:Name="GameLanguageAutoCheck" Content="Detect automatically" Margin="10,0,0,0"
+                ToolTip="Take the language from the game's settings file; off: choose it in the list yourself" />
+    </StackPanel>
     <StackPanel x:Name="ViewPanel" Orientation="Horizontal" Margin="0,6,0,0">
       <CheckBox x:Name="OverlayCheck" Content="Overlay" Checked="OverlayCheck_Changed" Unchecked="OverlayCheck_Changed" />
       <CheckBox x:Name="BoxesCheck" Content="Interactable regions" ToolTip="Frame everything clickable: cells, cards, buttons, Torture Instrument and Chromatic slots, pick cards" Checked="BoxesCheck_Changed" Unchecked="BoxesCheck_Changed" />

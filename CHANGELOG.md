@@ -4,6 +4,17 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.27 — 2026-10-31
+
+- Game language in the window (Recognition): taken from the game's settings file by default ("Detect automatically"),
+  or chosen in the list by hand when the game shows another one (a TapTap client in Chinese wrote "en" there, and its
+  Remaining Days and Destination cards weren't read). The app itself stays in English.
+- Simplified Chinese is read as such: the game writes its code "zh", which was taken for English.
+- When the game's text doesn't read in the language taken (the Objective's name not found on Sandbox after Sandbox), a
+  window asks which language the game shows; the choice goes to Game language, auto detection off.
+- A hang report reads the stacks with the runtime's own DAC, never downloading one (a player's PC refused the
+  download: the report came without a stack), and tries a refused process snapshot again.
+
 ## 0.7.26 — 2026-10-31
 
 - The Torture Instrument pick an Objective brings is hinted with the Objective done: the panel under the cards could

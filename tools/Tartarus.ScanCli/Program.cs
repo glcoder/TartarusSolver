@@ -34,6 +34,7 @@ return args.Length == 0 ? Usage() : args[0] switch
     "capture" => Capture(args[1..]),
     "ocr" => Ocr(args[1..]),
     "sim" => Sim.Run(args[1..], Opt, MakeScanner),
+    "readable" => Readable.Run(args[1..], Opt, MakeScanner),
     "runs" => LogRuns.Run(args[1..], Opt),
     "carry-red" => CarryRed.Run(args[1..], MakeScanner),
     "audit" => Audit.Run(args[1..]),
