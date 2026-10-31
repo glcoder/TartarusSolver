@@ -4,6 +4,15 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.25 — 2026-10-31
+
+- The solver's rules no longer take away a Destination on some mornings for no reason: the game shows two only with
+  Barbed Whip, Forged Key or Burning Stake (checked against ~1100 logged mornings). The expected chests shown are
+  recalibrated to it and the hint quality levels measured again.
+- The app's window no longer stands still for seconds at a time while it looks for the game's window on a busy PC.
+- A graphics card reset (a driver update, waking from sleep, a GPU timeout) no longer stops auto scan for good: the
+  game's window is captured again.
+
 ## 0.7.24 — 2026-10-31
 
 - A pick the game clicks for the player ("Quick Decision") now counts as taken: the Sandbox no longer asks to go

@@ -33,6 +33,7 @@ public partial class ControlWindow : Window
     private WindowCapture? _capture;
     // A capture being set up off the UI thread: no second one meanwhile.
     private bool _startingCapture;
+    private bool _findingGame;
     private WindowInfo? _target;
 
     // What the overlay shows: the last scanned frame, its scan, and its labels (edited by hand in edit mode).
@@ -238,12 +239,17 @@ public partial class ControlWindow : Window
         _scans.SetGameLanguage(code);
     }
 
-    private void TryAutoAttach()
+    private async void TryAutoAttach()
     {
         CheckGameLanguage();
-        if (_capture != null || _startingCapture || AutoAttachCheck.IsChecked != true) return;
+        if (_capture != null || _startingCapture || _findingGame || AutoAttachCheck.IsChecked != true) return;
         var pattern = new Regex(_settings.WindowTitle);
-        var game = Win32Windows.FindGame(pattern) ?? default;
+        // Every window on the desktop is looked at: off the UI thread, so a slow one can't stand the window still.
+        _findingGame = true;
+        WindowInfo game;
+        try { game = await Task.Run(() => Win32Windows.FindGame(pattern) ?? default); }
+        finally { _findingGame = false; }
+        if (_capture != null || AutoAttachCheck.IsChecked != true) return;
         if (game.Hwnd != IntPtr.Zero && !Win32Windows.IsMinimized(game.Hwnd)) StartCapture(game);
     }
 
@@ -435,7 +441,19 @@ public partial class ControlWindow : Window
         if (_target is { } t && Win32Windows.IsMinimized(t.Hwnd)) return false;
         // Off the UI thread: the copy waits on the graphics card, which may take its time (or never answer).
         var capture = _capture;
-        var frame = await Task.Run(capture.Grab);
+        Frame? frame;
+        try { frame = await Task.Run(capture.Grab); }
+        catch (Exception ex) when (WindowCapture.IsDeviceLost(ex))
+        {
+            // The graphics card was reset under the capture (2026-10-31, Sentry: auto scan stopped for good): a new
+            // capture of the same window.
+            if (capture != _capture) return false;
+            Log("Capture: the graphics device was lost, capturing again (" + ex.Message.Trim() + ")");
+            var target = _target;
+            StopCapture();
+            if (target is { } w && Win32Windows.Exists(w.Hwnd)) StartCapture(w);
+            return false;
+        }
         if (capture != _capture) return false;
         if (frame == null)
         {

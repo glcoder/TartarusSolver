@@ -105,6 +105,14 @@ public sealed unsafe class WindowCapture : IDisposable
     /// <summary>Where the last grabbed frame sits on screen (physical pixels): the client area, or the whole window.</summary>
     public PixelRect LastBounds { get; private set; }
 
+    /// <summary>
+    /// The graphics device is gone (driver reset or update, sleep, a GPU timeout): this capture is done for, a new one
+    /// works. DXGI_ERROR_DEVICE_REMOVED, _HUNG, _RESET, DRIVER_INTERNAL_ERROR.
+    /// </summary>
+    public static bool IsDeviceLost(Exception ex) =>
+        (ex is SharpGen.Runtime.SharpGenException sharp ? sharp.ResultCode.Code : ex.HResult) is
+            unchecked((int)0x887A0005) or unchecked((int)0x887A0006) or unchecked((int)0x887A0007) or unchecked((int)0x887A0020);
+
     /// <summary>Copies the latest frame to a CPU buffer (BGRA). Null until the first frame arrives.</summary>
     public Frame? Grab()
     {

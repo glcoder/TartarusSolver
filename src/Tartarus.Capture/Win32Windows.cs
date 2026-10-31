@@ -73,7 +73,10 @@ public static partial class Win32Windows
     /// (NtQuerySystemInformation, SystemProcessIdInformation): no handle to the process is opened, nothing of it is
     /// read. Null when Windows doesn't say.
     /// </summary>
-    public static unsafe string? ImagePath(int pid)
+    public static string? ImagePath(int pid) => DevicePath(pid) is { } device ? DosPath(device) : null;
+
+    /// <summary>The executable's path as the kernel names it ("\Device\HarddiskVolume5\...\x.exe"), or null.</summary>
+    private static unsafe string? DevicePath(int pid)
     {
         const int SystemProcessIdInformation = 0x58;
         char* buffer = stackalloc char[1024];
@@ -83,8 +86,7 @@ public static partial class Win32Windows
             ImageName = new UnicodeString { Length = 0, MaximumLength = 1024 * sizeof(char), Buffer = (IntPtr)buffer },
         };
         if (NtQuerySystemInformation(SystemProcessIdInformation, &info, sizeof(SystemProcessIdInfo), out _) != 0) return null;
-        string device = new(buffer, 0, info.ImageName.Length / sizeof(char));
-        return DosPath(device);
+        return new string(buffer, 0, info.ImageName.Length / sizeof(char));
     }
 
     /// <summary>"\Device\HarddiskVolume5\Games\x.exe" as "G:\Games\x.exe", by the drive letters' device names.</summary>
@@ -148,11 +150,13 @@ public static partial class Win32Windows
     private static bool IsCloaked(IntPtr h) =>
         DwmGetWindowAttribute(h, DWMWA_CLOAKED, out int cloaked, sizeof(int)) == 0 && cloaked != 0;
 
-    private static string ProcessName(int pid)
-    {
-        try { using var p = Process.GetProcessById(pid); return p.ProcessName; }
-        catch { return "?"; }
-    }
+    /// <summary>
+    /// The executable's name without ".exe", as <see cref="Process.ProcessName"/> gives it, but from the system's process
+    /// list: Process.GetProcessById waits on the process's handle, and on a busy PC that stood the UI thread still for
+    /// 5–16 s at a time with every window listed (2026-10-31, a player's hang reports).
+    /// </summary>
+    private static string ProcessName(int pid) =>
+        DevicePath(pid) is { Length: > 0 } path ? Path.GetFileNameWithoutExtension(path) : "?";
 
     private delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr lParam);
 
