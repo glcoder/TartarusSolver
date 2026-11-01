@@ -19,7 +19,7 @@ public static class OcrDownload
     public static readonly string[] Hosts = ["https://huggingface.co/", "https://hf-mirror.com/"];
 
     /// <summary>A host that sends nothing for this long is given up for the next.</summary>
-    public static readonly TimeSpan Stall = TimeSpan.FromSeconds(15);
+    public static readonly TimeSpan Stall = TimeSpan.FromSeconds(10);
 
     /// <summary>
     /// Reports bytes done of the pack's whole size, and each host as it's tried. A file no host gives whole and right

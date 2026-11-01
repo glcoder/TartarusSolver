@@ -27,7 +27,7 @@ things.
 - The Consume target pick (the red screen) keeps the Tusk and Prey marks read just before it: the red hid a Prey
   mark, and the Consume hinted a moment before was ranked under Cancel there.
 - The app's log names the best move on the Consume target pick as the overlay does (Cancel among the targets).
-- Text recognition for another language downloads from hf-mirror.com when Hugging Face sends nothing for 15 s (it is
+- Text recognition for another language downloads from hf-mirror.com when Hugging Face sends nothing for 10 s (it is
   blocked in China: a TapTap player's Chinese recognizer never came); the window says which host it comes from.
 - A graphics card reset no longer stands the app still: the overlay stays up while the game's window is captured
   again (hiding it then waited 10 s on Windows).
