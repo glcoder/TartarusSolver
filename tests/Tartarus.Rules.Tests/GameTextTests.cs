@@ -9,6 +9,14 @@ public class GameTextTests
     [Fact]
     public void TextsAreThere() => Assert.True(GameText.Loaded, "models/text/tartarus_text.json");
 
+    [Fact]
+    public void The_Brass_Horn_reads_in_Simplified_Chinese_as_the_card_shows_it()
+    {
+        // 2026-11-01: the text table has "升阶奖励" for it, the card "斗争铜号".
+        var (treasure, score) = WardenTreasures.Match("斗争铜号");
+        Assert.Equal(("horn", 1.0), (treasure.Id, score));
+    }
+
     [Theory]
     // As the East Slavic recognizer read them off Russian frames: spaces dropped, a letter off.
     [InlineData("Крюкотбора", "hook")]

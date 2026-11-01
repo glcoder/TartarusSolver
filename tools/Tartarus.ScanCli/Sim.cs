@@ -45,6 +45,9 @@ internal static class Sim
             foreach (var id in held.Split(',', StringSplitOptions.RemoveEmptyEntries))
                 if (R.GameData.InstrumentById(id.Trim()) is { } i) observation.Instruments.Add(i);
         }
+        // --worth 0,0.002,0.01,0.05,0.2: what a Warden's Cache is worth by rarity, Normal to Ultimate (the app's CacheWorth).
+        if (opt(args, "--worth") is { } worth)
+            R.RunScore.SetWorth(worth.Split(',').Select(w => double.Parse(w, System.Globalization.CultureInfo.InvariantCulture)).ToArray());
         var engine = new R.Engine();
         var state = engine.FromObservation(observation, 1);
         Console.Write(R.StateText.Describe(state));

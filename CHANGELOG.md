@@ -4,6 +4,16 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.29 — 2026-11-01
+
+- A Destination hint no longer goes away when its cards aren't read for a moment (a card under the mouse grows):
+  only another Warden, other cards or a new Inmate in the Warden's cell take a hint away before the new one settles.
+- A Re-roll counter read again as its Re-roll is clicked (the old cards fading) no longer gives the Re-roll back: the
+  Objective's pick hinted a Re-roll the run no longer had.
+- The Brass Horn of Strife reads in Simplified Chinese ("斗争铜号" on the card; the game's text table has another
+  name for it).
+- Closing the app no longer stands its window still while a big text recognizer is freed (the Chinese one took 5 s).
+
 ## 0.7.28 — 2026-11-01
 
 - Hints come sooner after a move:

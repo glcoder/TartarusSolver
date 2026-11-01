@@ -186,7 +186,9 @@ public partial class ControlWindow : Window
         _hotkeys?.Dispose();
         StopCapture();
         _overlay.Close();
-        _scans.Dispose();
+        // Off the UI thread: freeing a big recognizer took over 5 s on closing (2026-11-01, Sentry: the Chinese one), and
+        // the app goes away anyway.
+        Task.Run(_scans.Dispose);
         _hints.Dispose();
         _gameLog?.Dispose();
         base.OnClosed(e);
@@ -902,10 +904,16 @@ public partial class ControlWindow : Window
     /// <summary>A Sandbox read whole: the Warden found and no more than a couple of cells under the interface.</summary>
     private static bool WholeBoard(EditableSandbox b) => b.Warden > 0 && b.Cells.Count(c => c.Covered) < 3;
 
-    /// <summary>Another decision than the one hinted on <paramref name="was"/>: the Warden, the phase, the Destinations or the Warden's Inmate.</summary>
+    /// <summary>Another decision than the one hinted on <paramref name="was"/>: the Warden, the Destinations or the Warden's Inmate.</summary>
+    /// <remarks>
+    /// Only what the new reading shows: Destination cards not read on one frame are no move, nor the phase that goes to
+    /// Make Your Decision without them (2026-11-01: a card under the mouse grew and went unread, and the Destination
+    /// hint went away before it was clicked). A day's End brings new cards, a move another Warden.
+    /// </remarks>
     private static bool MovedOn(EditableSandbox was, EditableSandbox now) =>
-        was.Warden != now.Warden || was.Phase != now.Phase || !was.Destinations.SequenceEqual(now.Destinations)
-        || now.Warden > 1 && SandboxText.CellShort(was[now.Warden]) != SandboxText.CellShort(now[now.Warden]);
+        was.Warden != now.Warden
+        || now.Destinations.Count > 0 && !was.Destinations.SequenceEqual(now.Destinations)
+        || now.Warden > 1 && !now[now.Warden].Covered && SandboxText.CellShort(was[now.Warden]) != SandboxText.CellShort(now[now.Warden]);
 
     private void RequestHint(ScanResult r)
     {
@@ -1074,13 +1082,18 @@ public partial class ControlWindow : Window
                 if (pick.Kind == PickRead.Instrument)
                 {
                     string cards = string.Join(",", pick.Cards.Select(c => c.Id));
-                    if (pick.Rerolls is int read && _logRun != null) _rerollsRead = (_logRun, read, _logRun.RerollsUsed, _logRun.InstrumentPicks, cards);
                     // The last Re-roll takes its counter away, and a log of pages has no clicks: other cards on the same
                     // pick are a Re-roll made (2026-10-30, a player's report: Re-roll hinted with none left).
                     int Used((LoggedRun Run, int Left, int Used, int Pick, string Cards) seen) =>
                         Math.Max(seen.Run.RerollsUsed - seen.Used,
                             seen.Run.InstrumentPicks == seen.Pick && pick.Cards.Count == 3 && pick.Cards.All(c => c.Id != null) && cards != seen.Cards ? 1 : 0);
-                    _rerolls = pick.Rerolls ?? (_rerollsRead is { } seen && seen.Run == _logRun ? Math.Max(0, seen.Left - Used(seen)) : 0);
+                    int? left = _rerollsRead is { } seen && seen.Run == _logRun ? Math.Max(0, seen.Left - Used(seen)) : null;
+                    // A counter read after its Re-roll was clicked (the old cards still fading) gives no Re-roll back: a
+                    // run's only go down (2026-11-01: "Re-roll 1" read again after the click, and the Objective's pick
+                    // hinted a Re-roll the run no longer had).
+                    int? read = pick.Rerolls is int counter && left is int leftNow ? Math.Min(counter, leftNow) : pick.Rerolls;
+                    if (read is int now && _logRun != null) _rerollsRead = (_logRun, now, _logRun.RerollsUsed, _logRun.InstrumentPicks, cards);
+                    _rerolls = read ?? left ?? 0;
                 }
                 // The Sandbox changed under the pick since it was last seen (a chain, Chromatics leaving it): the hint is
                 // for the old one until the player looks at it (the game's eye button) and it's read again.

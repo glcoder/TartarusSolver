@@ -94,7 +94,13 @@ public static class WardenTreasures
 
     public static string NameOf(string id) => Find(id)?.Name ?? id;
 
-    public static (WardenTreasure Treasure, double Score) Match(string text) => NameMatch.ByName(text, All, t => t.Id, t => t.Name, "treasures");
+    /// <summary>
+    /// Names the game shows that its text tables don't hold: Simplified Chinese has "升阶奖励" ("rank-up reward") for the
+    /// Brass Horn of Strife, and the card reads "斗争铜号" (2026-11-01, a TapTap player's log: the card went unread).
+    /// </summary>
+    private static readonly (string Id, string Name)[] Shown = [("horn", "斗争铜号")];
+
+    public static (WardenTreasure Treasure, double Score) Match(string text) => NameMatch.ByName(text, All, t => t.Id, t => t.Name, "treasures", Shown);
 
     public static string? FindIconDir() => NameMatch.FindModelDir("treasures", null);
 
@@ -141,10 +147,12 @@ public static class NameMatch
     /// The item whose name, in English or any language of the game (<see cref="GameText"/>'s <paramref name="section"/>),
     /// is likest the read text, and how alike.
     /// </summary>
-    public static (T Item, double Score) ByName<T>(string text, IReadOnlyList<T> items, Func<T, string> id, Func<T, string> name, string section)
+    public static (T Item, double Score) ByName<T>(string text, IReadOnlyList<T> items, Func<T, string> id, Func<T, string> name, string section,
+        IEnumerable<(string Id, string Name)>? more = null)
     {
         var byId = items.ToDictionary(id);
-        var names = items.Select(i => (Id: id(i), Name: name(i))).Concat(GameText.Names(section).Where(n => byId.ContainsKey(n.Id)).Select(n => (n.Id, Name: n.Text))).ToList();
+        var names = items.Select(i => (Id: id(i), Name: name(i))).Concat(GameText.Names(section).Where(n => byId.ContainsKey(n.Id)).Select(n => (n.Id, Name: n.Text)))
+            .Concat(more ?? []).ToList();
         var (best, score) = Best(text, names, n => n.Name);
         return (byId[best.Id], score);
     }
