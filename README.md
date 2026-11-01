@@ -13,8 +13,9 @@ chests).
 
 ## Features
 
-- **Move hints:** the best move framed bold green (with "Hide alternatives" off, the moves as good framed dashed
-  beside it), with the chests the run is expected to end with (Chromatic and Ultimate) over the frame. Hints for every
+- **Move hints:** the best move framed bold green, with the chests the run is expected to end with (Chromatic and
+  Ultimate) over the frame; when it is the Consume or Hunt card, its target's cell framed dashed for the click after
+  it. Hints for every
   decision: Destinations, Make Your Decision (Consume, Replace, Hunt, End, Instigate, Bestow), the Consume target pick
   and chains, the Hunt's target pick, the Sewer Ratway, the Torture Instrument picks (with Re-roll) and the Warden's
   Treasure.

@@ -138,6 +138,21 @@ public class SandboxTests
     }
 
     [Fact]
+    public void A_Warden_s_Treasure_that_changes_nothing_holds_the_hint_back_2_s_not_4()
+    {
+        // 2026-11-01 06:04:46: a Treasure taken with no effect on the Sandbox, and no hint for 4 s after it.
+        var settle = new BoardSettle();
+        var t = new DateTime(2026, 11, 1, 6, 4, 44);
+        var board = EditableSandbox.Empty();
+        board.Warden = 3;
+        (board[3].Kind, board[3].Code, board[3].Rarity) = (CellKind.Inmate, Vision.Code.Mammoth, Vision.Rarity.Magic);
+        settle.Take(board, t, default);
+        var taken = t.AddSeconds(2);
+        Assert.Equal(BoardSettle.Verdict.Stale, settle.Take(board, t.AddSeconds(3), taken, BoardSettle.StaleForTreasure));
+        Assert.Equal(BoardSettle.Verdict.Take, settle.Take(board, t.AddSeconds(4.2), taken, BoardSettle.StaleForTreasure));
+    }
+
+    [Fact]
     public void A_Sandbox_the_log_s_change_left_as_it_was_is_hinted_again_after_a_while()
     {
         var settle = new BoardSettle();

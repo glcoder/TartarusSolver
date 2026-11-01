@@ -86,6 +86,8 @@ RuleOptions Rules(string? spec, RuleOptions over)
         {
             "fewer" => over with { FewerDestinationsPercent = double.Parse(kv[1], CultureInfo.InvariantCulture) },
             "replace" => over with { ReplaceWeights = kv[1].Split(',').Select(x => double.Parse(x, CultureInfo.InvariantCulture)).ToArray() },
+            // theme=ironlaw (none, tyranny, opulence, cagefight): every run of that theme.
+            "theme" => over with { Theme = Enum.Parse<Theme>(kv[1], ignoreCase: true) },
             _ => throw new ArgumentException($"unknown rule {kv[0]}"),
         };
     }

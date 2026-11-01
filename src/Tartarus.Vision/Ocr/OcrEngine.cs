@@ -18,6 +18,16 @@ public sealed class OcrEngine : IDisposable
     private volatile string? _wantedLanguage;
     private volatile bool _languageAsked;
 
+    /// <summary>
+    /// The runtime's worker threads sleep between operations instead of spinning for the next one: a scan took ~2 s of
+    /// CPU for 0.27 s of time (2026-11-01, off the board every 5 s still half a core), the spinning taken from the game.
+    /// </summary>
+    public static void NoSpinning(SessionOptions options)
+    {
+        options.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");
+        options.AddSessionConfigEntry("session.inter_op.allow_spinning", "0");
+    }
+
     public OcrEngine(string? modelDir = null, int threads = 4, string? gameLanguage = null)
     {
         ModelDir = modelDir ?? FindModelDir();
@@ -28,6 +38,7 @@ public sealed class OcrEngine : IDisposable
             GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
             ExecutionMode = ExecutionMode.ORT_SEQUENTIAL,
         };
+        NoSpinning(_options);
         Detector = new TextDetector(Path.Combine(ModelDir, DetectorFile), _options);
         Recognizer = _recognizers[OcrPacks.English.Id] = new TextRecognizer(Path.Combine(ModelDir, RecognizerFile), Path.Combine(ModelDir, DictionaryFile), _options);
         Pack = OcrPacks.English;

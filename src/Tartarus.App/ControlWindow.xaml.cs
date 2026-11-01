@@ -54,7 +54,8 @@ public partial class ControlWindow : Window
     public ControlWindow(AppSettings settings)
     {
         _settings = settings;
-        _scans = new ScanService(settings.OcrThreads);
+        // A quarter of the cores at most (one at least): a 4-core PC keeps three for the game.
+        _scans = new ScanService(Math.Clamp(Environment.ProcessorCount / 4, 1, Math.Max(1, settings.OcrThreads)));
         _hints = new HintService(settings.HintPlayouts, settings.HintSeconds);
         _hints.Log += line => Dispatcher.BeginInvoke(() => Log("Hint: " + line));
         _hints.Ready += hint => Dispatcher.BeginInvoke(() =>
@@ -92,7 +93,7 @@ public partial class ControlWindow : Window
         AutoScanCheck.Content = "Auto" + Hk("auto") + ", every";
         ReportButton.Content = "Report a bug" + Hk("report");
         Title = $"Tartarus Solver {AppVersion.Number}" + (settings.Debug ? " (debug)" : "");
-        // The player's window: the game window, scanning, the hints' quality and alternatives, the game's log, the version
+        // The player's window: the game window, scanning, the hints' quality, the game's log, the version
         // and bug reports.
         if (!settings.Debug)
             foreach (var panel in new FrameworkElement[] { ViewPanel, HintsCheck, HintsOnlyCheck, DebugPanel }) panel.Visibility = Visibility.Collapsed;
@@ -102,7 +103,6 @@ public partial class ControlWindow : Window
 
         settings.AutoScanSeconds = Math.Clamp(Math.Round(settings.AutoScanSeconds, 1), 0, 1);
         IntervalSlider.Value = settings.AutoScanSeconds;
-        HideAlternativesCheck.IsChecked = settings.HideAlternatives;
         ShowInterval();
         AutoScanCheck.IsChecked = settings.AutoScan;
         OverlayCheck.IsChecked = settings.OverlayVisible;
@@ -355,7 +355,12 @@ public partial class ControlWindow : Window
     private async void TryAutoAttach()
     {
         CheckGameLanguage();
-        if (_capture != null || _startingCapture || _findingGame || AutoAttachCheck.IsChecked != true) return;
+        if (_capture != null || _startingCapture || _findingGame) return;
+        if (AutoAttachCheck.IsChecked != true)
+        {
+            CaptureStatus.Text = "Not capturing";
+            return;
+        }
         var pattern = new Regex(_settings.WindowTitle);
         // Every window on the desktop is looked at: off the UI thread, so a slow one can't stand the window still.
         _findingGame = true;
@@ -363,7 +368,11 @@ public partial class ControlWindow : Window
         try { game = await Task.Run(() => Win32Windows.FindGame(pattern) ?? default); }
         finally { _findingGame = false; }
         if (_capture != null || AutoAttachCheck.IsChecked != true) return;
-        if (game.Hwnd != IntPtr.Zero && !Win32Windows.IsMinimized(game.Hwnd)) StartCapture(game);
+        // What it waits for, said (2026-11-01: players started the app with the game minimized or not yet running, saw
+        // only "Not capturing" and sent bug reports).
+        if (game.Hwnd == IntPtr.Zero) CaptureStatus.Text = "Not capturing: waiting for the game window (Torchlight: Infinite)…";
+        else if (Win32Windows.IsMinimized(game.Hwnd)) CaptureStatus.Text = "Not capturing: the game window is minimized, restore it";
+        else StartCapture(game);
     }
 
     /// <summary>Captures <paramref name="w"/>; <paramref name="keepOverlay"/>: the same window again, the overlay stays up.</summary>
@@ -520,6 +529,9 @@ public partial class ControlWindow : Window
     private (LoggedRun Run, int Left, int Used, int Pick, string Cards)? _rerollsRead;
     // The last pick whose cards all read: its kind and cards.
     private (string Kind, List<string> Ids)? _lastWholePick;
+    // The run's Re-rolls clicked as last seen in the log, and the cards a Re-roll is taking away (until others come).
+    private (LoggedRun Run, int Used)? _rerollsSeen;
+    private List<string>? _rerolledCards;
     // The last Sandbox read before the Consume target pick's red screen.
     private Vision.Ocr.ScreenText? _textBeforeRed;
 
@@ -547,7 +559,6 @@ public partial class ControlWindow : Window
             EyeHint = !stale && _settings.Hints && _eyeHint,
             HintsOnly = _settings.Hints && _settings.HintsOnly,
             HintLine = _settings.Debug,
-            Alternatives = !_settings.HideAlternatives,
         };
     }
 
@@ -720,15 +731,6 @@ public partial class ControlWindow : Window
     {
         if (!_hintSliderReady) return;
         _settings.HintsOnly = HintsOnlyCheck.IsChecked == true;
-        RefreshOverlay();
-    }
-
-    private void HideAlternativesCheck_Changed(object sender, RoutedEventArgs e)
-    {
-        bool hide = HideAlternativesCheck.IsChecked == true;
-        if (hide == _settings.HideAlternatives) return;
-        _settings.HideAlternatives = hide;
-        _settings.Save();
         RefreshOverlay();
     }
 
@@ -936,7 +938,10 @@ public partial class ControlWindow : Window
             }
             if (r.Ok && _sandbox != null)
             {
-                var settle = _boardSettle.Take(_settleRead ?? _sandbox, _lastBoardAt, LiveLogRun?.BoardChangedAt ?? default);
+                // A Warden's Treasure taken (its Confirm the log's last change, the pick taken then too) may change nothing.
+                var changed = LiveLogRun;
+                var settle = _boardSettle.Take(_settleRead ?? _sandbox, _lastBoardAt, changed?.BoardChangedAt ?? default,
+                    changed is { } c && c.BoardChangedAt == c.PickTakenAt ? BoardSettle.StaleForTreasure : null);
                 // A reading not settled yet: the next frame is read soon, not a whole scan period later.
                 _confirmSoon = settle == BoardSettle.Verdict.Unsettled;
                 // A frame caught as a popup comes or goes (presence well below a plain Sandbox's 0.6-0.7) reads wrong where
@@ -998,8 +1003,10 @@ public partial class ControlWindow : Window
                 bool destinations = _sandbox.Phase == Phases.Destination && _sandbox.Destinations.Count > 0;
                 // The day's move clicked (the log tells): Destination cards still on screen are going away, and two quick
                 // readings alike took one left for the only Destination (2026-11-01: "Cell 16" flashed twice after Cell
-                // 2 was clicked).
-                if (destinations && live is { Moved: true } moved && _lastBoardAt > moved.MovedAt) destinations = false;
+                // 2 was clicked). Not for long: cards still there 2 s after the click weren't left (2026-11-01: a click the
+                // game logged but didn't take, and the Destination hint stayed away the rest of the day).
+                if (destinations && live is { Moved: true } moved && _lastBoardAt > moved.MovedAt
+                    && _lastBoardAt - moved.MovedAt < TimeSpan.FromSeconds(2)) destinations = false;
                 bool decision = r.Text?.Cards.Any(c => c.Meaning is var t
                     && (t.Contains("consume") || t.Contains("replace") || t.Contains("hunt") || t.Contains("instigate") || t.Contains("bestow") || t == "end" || t.EndsWith(" end"))) == true;
                 // The target pick: its banner read, or the log's red-screen sound with nothing else on screen (the
@@ -1111,10 +1118,19 @@ public partial class ControlWindow : Window
                 // hint for the whole pick stays, not one for the cards left (2026-10-30: a weaker instrument hinted for
                 // 4 s after the best one was clicked).
                 var known = pick.Cards.Where(c => c.Id != null).Select(c => c.Id!).ToList();
+                // A Re-roll clicked (the log): the cards on screen go a moment later, and a hint on them would flash
+                // (2026-11-01: one of the old three hinted after the click). None until other cards come.
+                if (_logRun is { } rerun && (_rerollsSeen is not { } seenRun || seenRun.Run != rerun || seenRun.Used != rerun.RerollsUsed))
+                {
+                    if (_rerollsSeen is { } was && was.Run == rerun && rerun.RerollsUsed > was.Used && _lastWholePick is { } before) _rerolledCards = before.Ids;
+                    _rerollsSeen = (rerun, rerun.RerollsUsed);
+                }
+                bool rerolling = _rerolledCards is { } gone && known.Count > 0 && known.All(gone.Contains);
+                if (!rerolling) _rerolledCards = null;
                 bool cardLost = known.Count < pick.Cards.Count && _lastWholePick is { } whole && whole.Kind == pick.Kind && known.All(whole.Ids.Contains);
                 if (known.Count == pick.Cards.Count) _lastWholePick = (pick.Kind, known);
                 // No pick hint on an old Sandbox: the eye button first.
-                if (boardStale)
+                if (boardStale || rerolling)
                 {
                     _hints.Clear();
                     ClearHint();
@@ -1247,6 +1263,14 @@ public partial class ControlWindow : Window
     private static readonly TimeSpan QuickScan = TimeSpan.FromSeconds(0.2);
     private static readonly TimeSpan BurstFor = TimeSpan.FromSeconds(1.5);
     private DateTime _burstUntil;
+    /// <summary>
+    /// Off the board (neither a Sandbox nor a pick read) for <see cref="OffBoardAfter"/>: the menus, the map, the Hideout
+    /// are scanned only this often; the game's log calling (a click, a page) brings the usual pace back at once.
+    /// </summary>
+    private static readonly TimeSpan OffBoardScan = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan OffBoardAfter = TimeSpan.FromSeconds(3);
+    // The first of the scans in a row that read no board; null while on it.
+    private DateTime? _offBoardSince;
     // Completed by the game's log: the scan loop's wait ends at once.
     private TaskCompletionSource _wake = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -1254,6 +1278,7 @@ public partial class ControlWindow : Window
     private void OnLogActivity()
     {
         _burstUntil = DateTime.Now + BurstFor;
+        _offBoardSince = null;
         _wake.TrySetResult();
     }
 
@@ -1283,10 +1308,15 @@ public partial class ControlWindow : Window
                 if (BugReports.Enabled) Report(ex);
                 return;
             }
+            if (scanned) _offBoardSince = _scan is { } last && (last.Ok || last.Pick != null) ? null : _offBoardSince ?? DateTime.Now;
+            bool offBoard = _offBoardSince is { } off && DateTime.Now - off >= OffBoardAfter && !_confirmSoon && DateTime.Now >= _burstUntil;
             // Nothing to scan (no window, minimized, editing): no spinning at 0.
-            double period = _settings.AutoScanSeconds;
-            if (scanned && (_confirmSoon || DateTime.Now < _burstUntil)) period = Math.Min(period, QuickScan.TotalSeconds);
-            double wait = Math.Max(period, scanned ? 0 : 0.2) - started.Elapsed.TotalSeconds;
+            double period = offBoard ? OffBoardScan.TotalSeconds : _settings.AutoScanSeconds;
+            if (!offBoard && scanned && (_confirmSoon || DateTime.Now < _burstUntil)) period = Math.Min(period, QuickScan.TotalSeconds);
+            // A scan and its hint rest at least as long as they took: on a slow PC (a Sandbox read in 1.3 s) they ran
+            // back to back, and the game had what was left.
+            double busy = started.Elapsed.TotalSeconds;
+            double wait = Math.Max(Math.Max(period, scanned ? 0 : 0.2) - busy, scanned ? busy : 0);
             // The log's activity cuts the wait short (only a scan's own time apart: not when nothing was scanned).
             var delay = Task.Delay(TimeSpan.FromSeconds(Math.Max(wait, 0.001)));
             await (scanned ? Task.WhenAny(delay, _wake.Task) : delay);

@@ -19,6 +19,14 @@ public partial class App : Application
             return;
         }
         DispatcherUnhandledException += OnUnhandled;
+        // The game first: scans and hints take the CPU it leaves (2026-11-01: on a slow PC the game stalled opening a
+        // window while a scan ran every moment).
+        try
+        {
+            using var self = System.Diagnostics.Process.GetCurrentProcess();
+            self.PriorityClass = System.Diagnostics.ProcessPriorityClass.BelowNormal;
+        }
+        catch (Exception) { }
         var settings = AppSettings.Load();
         // --debug: the whole window (overlay views, hint quality, labels, dataset collecting, the log); else the player's.
         settings.Debug = e.Args.Any(a => a.Equals("--debug", StringComparison.OrdinalIgnoreCase) || a.Equals("/debug", StringComparison.OrdinalIgnoreCase));

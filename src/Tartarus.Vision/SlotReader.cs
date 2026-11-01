@@ -22,6 +22,7 @@ public sealed class SlotReader : ICellReader
     {
         ModelDir = modelDir ?? FindModelDir() ?? throw new DirectoryNotFoundException("Slot models not found (models/slots/chromatic.onnx).");
         using var options = new SessionOptions { IntraOpNumThreads = threads, InterOpNumThreads = 1 };
+        Ocr.OcrEngine.NoSpinning(options);
         _chromatic = new InferenceSession(Path.Combine(ModelDir, "chromatic.onnx"), options);
         _instrument = new InferenceSession(Path.Combine(ModelDir, "instrument.onnx"), options);
         _chromaticClasses = Classes("chromatic");

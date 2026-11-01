@@ -4,6 +4,36 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.30 — 2026-11-01
+
+- Lighter on the PC, so the game keeps its frame rate: the app runs at below-normal priority; off the board (menus,
+  the map, the Hideout: neither a Sandbox nor a pick read for 3 s) the screen is read every 5 s, and the game's log
+  (a click, a page) brings the usual pace back at once; a scan and its hint rest at least as long as they took (a slow
+  PC read the screen back to back); text recognition uses a quarter of the cores at most (was 4 threads); the neural
+  networks' worker threads sleep between steps instead of spinning (a scan took 1.1 s of CPU for 0.13 s of time, now
+  0.33 s, and is faster too).
+- After a Warden's Treasure that changes nothing on the Sandbox, the hint comes back after 2 s, not 4: the same Sandbox
+  after its Confirm was held for the old one still on screen.
+- A Prison Incident's window opening is no change of the Sandbox (its Confirm is): an instrument pick taken as one
+  opened asked for the eye button.
+- OCR language downloads ask huggingface.co and hf-mirror.com at once and take the first to answer: in China the
+  download no longer stands still for 10 s before the mirror is tried.
+- Without the game captured, the window says whether it waits for the game window or finds it minimized, not just
+  "Not capturing".
+- Chinese and Japanese are read by the mobile text recognizer (16.5 MB, the same alphabet) instead of the server one
+  (84 MB): a Sandbox read in 3 s on a player's PC, and in 45-130 s on another's, so hints came late or never. It reads
+  the report frames alike in half the time. Players with the old one are offered the new download.
+- The Consume or Hunt card framed as the best move comes with its target's cell framed dashed: the next click is
+  seen before the target pick is read, and on the pick that cell stays the hint while it is as good as the best
+  (within 0.05 Chromatic).
+- "Hide alternatives" is gone: the best move is always framed alone (the dashed frames of moves as good were off by
+  default).
+- A shown move is kept over a new best only while as good as it (within 0.05 Chromatic, was 0.15), and the overlay
+  frames the kept move (it framed the new best while the log named the kept one).
+- Destination cards still on screen 2 s after a move's click get their hint again: a click the game logged but didn't
+  take left the day without one.
+- No pick hint on the cards a Re-roll is taking away: one of the old three flashed after the click.
+
 ## 0.7.29 — 2026-11-01
 
 - A Destination hint no longer goes away when its cards aren't read for a moment (a card under the mouse grows):

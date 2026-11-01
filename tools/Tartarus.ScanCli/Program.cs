@@ -83,6 +83,17 @@ static int Capture(string[] args)
         Console.Error.WriteLine("no frame within 3 s (is the window minimized?)");
         return 1;
     }
+    // --watch N: the frames Windows sends in N seconds and the CPU this process spends taking them (no scans).
+    if (int.TryParse(Opt(args, "--watch"), out int watch) && watch > 0)
+    {
+        using var self = Process.GetCurrentProcess();
+        long frames0 = cap.FrameCount;
+        var cpu0 = self.TotalProcessorTime;
+        Thread.Sleep(watch * 1000);
+        self.Refresh();
+        double cpuMs = (self.TotalProcessorTime - cpu0).TotalMilliseconds;
+        Console.WriteLine($"{watch} s: {(cap.FrameCount - frames0) / (double)watch:0.0} frames/s, CPU {cpuMs:0} ms ({cpuMs / (watch * 10.0):0.0}% of one core)");
+    }
     var grabSw = Stopwatch.StartNew();
     frame = cap.Grab()!;
     Console.WriteLine($"frame {frame.Width}x{frame.Height}, first after {sw.ElapsedMilliseconds - grabSw.ElapsedMilliseconds} ms, grab {grabSw.Elapsed.TotalMilliseconds:0.0} ms, frames so far {cap.FrameCount}");

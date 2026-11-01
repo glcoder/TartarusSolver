@@ -28,11 +28,21 @@ public sealed class BoardSettle
         string.Join(",", b.Cells.Select(c => $"{c.Kind}:{c.Code}:{c.Rarity}:{c.VisibleRarity}:{(c.Nest ? "n" : "")}{(c.Incident ? "i" : "")}{(c.ScratchMarks ? "s" : "")}{(c.Tusk ? "t" : "")}{(c.Prey ? "p" : "")}"))
         + $"|{b.Warden}|{b.Phase}|{string.Join(" ", b.Destinations)}";
 
-    /// <summary>A whole Sandbox read on a frame captured at <paramref name="at"/>; <paramref name="changedAt"/>: the log's last change on the Sandbox.</summary>
-    public Verdict Take(EditableSandbox b, DateTime at, DateTime changedAt)
+    /// <summary>
+    /// How long after a Warden's Treasure is taken the old Sandbox may still be on screen: its window closes ~0.4 s
+    /// after the Confirm, and a Treasure that changes nothing leaves the old Sandbox for good (2026-11-01: no hint for 4 s
+    /// after one).
+    /// </summary>
+    public static readonly TimeSpan StaleForTreasure = TimeSpan.FromSeconds(2);
+
+    /// <summary>
+    /// A whole Sandbox read on a frame captured at <paramref name="at"/>; <paramref name="changedAt"/>: the log's last
+    /// change on the Sandbox, the old one counted as on screen for <paramref name="staleFor"/> after it (<see cref="StaleFor"/>).
+    /// </summary>
+    public Verdict Take(EditableSandbox b, DateTime at, DateTime changedAt, TimeSpan? staleFor = null)
     {
         string key = Key(b);
-        bool stale = at > changedAt && at - changedAt < StaleFor
+        bool stale = at > changedAt && at - changedAt < (staleFor ?? StaleFor)
             && _reads.Any(r => r.At <= changedAt && changedAt - r.At <= Before && r.Key == key);
         bool settled = key == _last;
         _last = key;

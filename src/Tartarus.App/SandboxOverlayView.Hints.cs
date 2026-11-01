@@ -9,19 +9,19 @@ using Tartarus.Vision.Ocr;
 namespace Tartarus.App;
 
 // The move hints on the overlay, kept to two marks: the best move framed bold green where it is clicked (a decision
-// card, a Destination's card, a target's cell, the Cancel button, a pick card), the moves as good as it (within
-// Hint.TieWithin; unless the player hides them) framed dashed green. Over each frame, the chests the run is expected to
-// end with after the move: each rarity's Riot chest (the game's minimap icons, models/chests) and its expected count;
-// and in the debug window a summary line top left.
+// card, a Destination's card, a target's cell, the Cancel button, a pick card), and when that click asks for a second
+// (Consume, Hunt: their target pick comes next) the target's cell framed dashed green. Over the bold frame, the chests
+// the run is expected to end with after the move: each rarity's Riot chest (the game's minimap icons, models/chests)
+// and its expected count; and in the debug window a summary line top left.
 public sealed partial class SandboxOverlayView
 {
     private static readonly Brush HintBrush = Freeze(new SolidColorBrush(Color.FromRgb(90, 235, 125)));
     private static readonly Pen BestPen = FreezePen(new Pen(HintBrush, 5));
-    private static readonly Pen TiePen = FreezePen(new Pen(HintBrush, 2) { DashStyle = new DashStyle([4, 3], 0) });
+    private static readonly Pen NextPen = FreezePen(new Pen(HintBrush, 2) { DashStyle = new DashStyle([4, 3], 0) });
     private static readonly string? ChestDir = NameMatch.FindModelDir("chests", "chromatic.png");
 
-    /// <summary>A place to click and the best of the moves made there.</summary>
-    private sealed record Spot(Rect Box, ActionValue Value);
+    /// <summary>A place to click and the first of the moves made there, by the hint's order (<see cref="Hint.Rank"/>).</summary>
+    private sealed record Spot(Rect Box, ActionValue Value, int Rank);
 
     private static Rect Pixels(ScreenLayout layout, CanvasRect r, double sx, double sy)
     {
@@ -30,40 +30,27 @@ public sealed partial class SandboxOverlayView
     }
 
     /// <summary>
-    /// The best spot bold, the ones as good dashed (with <paramref name="alternatives"/>); nothing for the rest. Over each, the chests the run is expected to
-    /// end with after that move (Chromatic and Ultimate), "×8.0" by each chest (tenths, rounded): the player
-    /// compares them.
+    /// The best spot framed bold, the chests the run is expected to end with after that move (Chromatic and Ultimate)
+    /// over it, "×8.0" by each chest (tenths, rounded). The rest aren't shown (2026-11-01: the dashed frames of moves as
+    /// good, off by default, went with their checkbox). Returns the best spot.
     /// </summary>
-    private static void DrawSpots(DrawingContext dc, IEnumerable<Spot> spots, double fontSize, double ppd, bool alternatives)
+    private static Spot? DrawSpots(DrawingContext dc, IEnumerable<Spot> spots, double fontSize, double ppd)
     {
-        var ordered = spots.OrderByDescending(s => s.Value.Mean).ToList();
-        if (ordered.Count == 0) return;
-        double top = ordered[0].Value.Mean;
-        for (int i = 0; i < ordered.Count; i++)
+        if (spots.MinBy(s => s.Rank) is not { } best) return null;
+        // Inside the card's or cell's edge (the pen straddles the line): neighbours sit only ~8 canvas units apart.
+        var box = Inflate(best.Box, -3);
+        dc.DrawRoundedRectangle(null, BestPen, box, 8, 8);
+        // The expected chests of a rarity at the Riot, in tenths, always both: every hint looks alike.
+        // The rarity's name stands in when its icon isn't there.
+        var parts = new List<(ImageSource? Icon, string Text, Brush Brush)>();
+        foreach (var (chest, name, expected) in new[] { ("chromatic", "Chromatic", best.Value.Chromatic), ("ultimate", "Ultimate", best.Value.Ultimate) })
         {
-            var s = ordered[i];
-            bool best = i == 0;
-            if (!best && (!alternatives || top - s.Value.Mean >= Hint.TieWithin)) break;
-            // Inside the card's or cell's edge (the pen straddles the line): neighbours sit only ~8 canvas units apart.
-            var box = Inflate(s.Box, best ? -3 : -1);
-            dc.DrawRoundedRectangle(null, best ? BestPen : TiePen, box, 8, 8);
-            var parts = new List<(ImageSource? Icon, string Text, Brush Brush)>();
-            Chests("chromatic", "Chromatic", s.Value.Chromatic);
-            Chests("ultimate", "Ultimate", s.Value.Ultimate);
-            if (parts.Count > 0)
-            {
-                // A size up from the overlay's other captions: the hint is what the player reads at a glance.
-                ColorPill(dc, parts, new Point(box.Left + box.Width / 2, box.Top - 2), fontSize * 1.17, ppd);
-            }
-
-            // The expected chests of a rarity at the Riot, in tenths, always both: every hint looks alike.
-            // The rarity's name stands in when its icon isn't there.
-            void Chests(string chest, string name, double expected)
-            {
-                var icon = Icon(ChestDir, chest);
-                parts.Add((icon, (icon == null ? name + " " : "") + "×" + expected.ToString("0.0", CultureInfo.InvariantCulture), HintBrush));
-            }
+            var icon = Icon(ChestDir, chest);
+            parts.Add((icon, (icon == null ? name + " " : "") + "×" + expected.ToString("0.0", CultureInfo.InvariantCulture), HintBrush));
         }
+        // A size up from the overlay's other captions: the hint is what the player reads at a glance.
+        ColorPill(dc, parts, new Point(box.Left + box.Width / 2, box.Top - 2), fontSize * 1.17, ppd);
+        return best;
     }
 
     /// <summary>A pill of pieces, each an optional icon and a colored text, side by side, centred over <paramref name="at"/>.</summary>
@@ -95,7 +82,7 @@ public sealed partial class SandboxOverlayView
     /// Destination: its cards; the Consume target pick: the targets' cells, and Cancel worth the best move but
     /// consuming (on a chain, stopping it); the Hunt target pick: its targets' cells; the Sewer Ratway: the cells.
     /// </summary>
-    private static void DrawSandboxHint(DrawingContext dc, ScreenLayout layout, ScanResult scan, Hint hint, double sx, double sy, double fontSize, double ppd, bool alternatives)
+    private static void DrawSandboxHint(DrawingContext dc, ScreenLayout layout, ScanResult scan, Hint hint, double sx, double sy, double fontSize, double ppd)
     {
         if (scan.Cells is not { } cells) return;
         var spots = new Dictionary<string, Spot>();
@@ -111,7 +98,7 @@ public sealed partial class SandboxOverlayView
         void Add(string key, Rect? box, ActionValue v)
         {
             if (box is not { } b) return;
-            if (!spots.TryGetValue(key, out var s) || v.Mean > s.Value.Mean) spots[key] = new Spot(b, v);
+            if (!spots.TryGetValue(key, out var s) || hint.Rank(v) < s.Rank) spots[key] = new Spot(b, v, hint.Rank(v));
         }
 
         foreach (var v in hint.Result.Actions)
@@ -155,7 +142,11 @@ public sealed partial class SandboxOverlayView
                     break;
             }
         }
-        DrawSpots(dc, spots.Values, fontSize, ppd, alternatives);
+        // The best card's click is followed by its target's (the Consume or Hunt target pick): that cell framed dashed
+        // beforehand, so the second click needn't wait for the pick to be read.
+        if (DrawSpots(dc, spots.Values, fontSize, ppd) is { Value.Action: { Kind: ActionKind.Consume or ActionKind.Chain or ActionKind.Hunt } next }
+            && !hint.ConsumeOnly && !hint.HuntOnly && CellBox(next.Arg) is { } target)
+            dc.DrawRoundedRectangle(null, NextPen, Inflate(target, -1), 8, 8);
     }
 
     /// <summary>"Hint: Consume: Cell 9 ≈ Replace (tied) — at the Riot ≈6.4 Chromatic · 2.1 Ultimate · 3.0 Legendary · then End (12,800 playouts)".</summary>
@@ -209,7 +200,7 @@ public sealed partial class SandboxOverlayView
     }
 
     /// <summary>An instrument or Warden's Treasure pick: its cards, and the Re-roll button.</summary>
-    private static void DrawPickHint(DrawingContext dc, ScreenLayout layout, PickRead pick, Hint hint, double sx, double sy, double ppd, bool alternatives)
+    private static void DrawPickHint(DrawingContext dc, ScreenLayout layout, PickRead pick, Hint hint, double sx, double sy, double ppd)
     {
         if (hint.Shown.Count == 0) return;
         double fontSize = Math.Clamp(13 * layout.K * sx, 10, 20);
@@ -222,10 +213,10 @@ public sealed partial class SandboxOverlayView
                 ? GameObservation.Treasure(card.Id) is { } t ? new GameAction(ActionKind.PickTreasure, (byte)t) : null
                 : GameData.InstrumentById(card.Id) is { } i ? new GameAction(ActionKind.PickInstrument, (byte)i) : null;
             if (action is not { } act || hint.Shown.FirstOrDefault(a => a.Action == act) is not { } value) continue;
-            spots.Add(new Spot(Pixels(layout, treasure ? ScreenLayout.TreasureCard(card.X) : ScreenLayout.PickCard(card.Index), sx, sy), value));
+            spots.Add(new Spot(Pixels(layout, treasure ? ScreenLayout.TreasureCard(card.X) : ScreenLayout.PickCard(card.Index), sx, sy), value, hint.Rank(value)));
         }
         if (hint.Shown.FirstOrDefault(a => a.Action.Kind == ActionKind.Reroll) is { } reroll)
-            spots.Add(new Spot(Pixels(layout, ScreenLayout.PickRerollButton, sx, sy), reroll));
-        DrawSpots(dc, spots, fontSize, ppd, alternatives);
+            spots.Add(new Spot(Pixels(layout, ScreenLayout.PickRerollButton, sx, sy), reroll, hint.Rank(reroll)));
+        DrawSpots(dc, spots, fontSize, ppd);
     }
 }

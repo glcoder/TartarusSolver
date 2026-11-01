@@ -22,12 +22,20 @@ public sealed record Hint(GameState State, SearchResult Result, bool ConsumeOnly
 
     /// <summary>
     /// The moves as the overlay ranks them: on the Consume target pick the best one but consuming (made by Cancel first)
-    /// among the targets.
+    /// among the targets. In the order of <see cref="SearchResult.Actions"/>: by worth, but for a shown move kept first.
     /// </summary>
     public IReadOnlyList<ActionValue> Ranked => ConsumeOnly
-        && Result.Actions.Where(a => a.Action.Kind is not (ActionKind.Consume or ActionKind.Chain)).MaxBy(a => a.Mean) is { } stop
-        ? Shown.Append(stop).OrderByDescending(a => a.Mean).ToList()
+        && Result.Actions.FirstOrDefault(a => a.Action.Kind is not (ActionKind.Consume or ActionKind.Chain)) is { } stop
+        ? Shown.Append(stop).OrderBy(Rank).ToList()
         : Shown;
+
+    /// <summary>Where a move stands in the hint's order (0 = the one framed bold).</summary>
+    public int Rank(ActionValue a)
+    {
+        for (int i = 0; i < Result.Actions.Count; i++)
+            if (Result.Actions[i] == a) return i;
+        return int.MaxValue;
+    }
 }
 
 /// <summary>
@@ -47,8 +55,12 @@ public sealed class HintService : IDisposable
     /// <summary>The last search started: done once its hint is out (or it was cancelled).</summary>
     public Task Searching { get; private set; } = Task.CompletedTask;
 
-    /// <summary>A shown move stays while still legal and no more than this behind the new best (worth, in Chromatics): flicker between near-equal moves helps nobody.</summary>
-    public double KeepWithin { get; set; } = 0.15;
+    /// <summary>
+    /// A shown move stays while still legal and no more than this behind the new best (worth, in Chromatics): flicker
+    /// between near-equal moves helps nobody. As good as the best (<see cref="Hint.TieWithin"/>), not more: 0.15 kept a
+    /// worse move once a better reading came (a Chromatic count from the log, a cell read right).
+    /// </summary>
+    public double KeepWithin { get; set; } = Hint.TieWithin;
 
     /// <summary>A line for the log: what changed in the position since the last search (diagnostics).</summary>
     public event Action<string>? Log;
@@ -134,11 +146,16 @@ public sealed class HintService : IDisposable
     /// <summary>
     /// The shown move stays first when it is still among the actions and the new best beats it by no more than
     /// <see cref="KeepWithin"/>: a slightly different reading of the same screen doesn't flip the hint. Not
-    /// across another day, phase or Warden's Inmate: that is another decision, not another reading of it.
+    /// across another day, phase or Warden's Inmate: that is another decision, not another reading of it. The Consume
+    /// (Hunt) card's target, framed dashed with the card, stays first on its target pick: the player saw it coming.
     /// </summary>
     private SearchResult Steady(in GameState state, SearchResult result, bool consumeOnly, bool huntOnly)
     {
-        if (_shown?.Shown is not { Count: > 0 } old || result.Actions.Count < 2 || _shown.ConsumeOnly != consumeOnly || _shown.HuntOnly != huntOnly) return result;
+        if (_shown?.Shown is not { Count: > 0 } old || result.Actions.Count < 2) return result;
+        var shownKind = old[0].Action.Kind;
+        bool toPick = !_shown.ConsumeOnly && !_shown.HuntOnly
+            && (consumeOnly && shownKind is ActionKind.Consume or ActionKind.Chain || huntOnly && shownKind == ActionKind.Hunt);
+        if (!toPick && (_shown.ConsumeOnly != consumeOnly || _shown.HuntOnly != huntOnly)) return result;
         var before = _shown.State;
         if (before.Day != state.Day || before.Phase != state.Phase || before.Position != state.Position
             || before.Cells[before.Position].Inmate.Code != state.Cells[state.Position].Inmate.Code

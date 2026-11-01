@@ -4,18 +4,22 @@ namespace Tartarus.Vision.Ocr;
 /// A text line recognizer and its alphabet (PaddleOCR PP-OCRv5, ONNX): rec_&lt;id&gt;.onnx and dict_&lt;id&gt;.txt, in
 /// models/ocr beside the program or, once downloaded, in %LOCALAPPDATA%\TartarusSolver\models\ocr.
 /// </summary>
-public sealed record OcrPack(string Id, string Script, string Folder, long ModelSize, string ModelSha256, long DictionarySize, string DictionarySha256)
+public sealed record OcrPack(string Id, string Script, string Folder, long ModelSize, string ModelSha256, long DictionarySize, string DictionarySha256,
+    string? ModelPath = null, string? DictionaryPath = null)
 {
     public string Model => $"rec_{Id}.onnx";
     public string Dictionary => $"dict_{Id}.txt";
     public long Size => ModelSize + DictionarySize;
 
-    /// <summary>The files to download: name, its path on a host of <see cref="OcrDownload.Hosts"/>, size, SHA-256.</summary>
+    /// <summary>
+    /// The files to download: name, its path on a host of <see cref="OcrDownload.Hosts"/>, size, SHA-256. From
+    /// monkt/paddleocr-onnx's language <see cref="Folder"/> unless <see cref="ModelPath"/> and <see cref="DictionaryPath"/> say otherwise.
+    /// </summary>
     public IEnumerable<(string Name, string Path, long Size, string Sha256)> Files()
     {
         string root = $"monkt/paddleocr-onnx/resolve/main/languages/{Folder}/";
-        yield return (Model, root + "rec.onnx", ModelSize, ModelSha256);
-        yield return (Dictionary, root + "dict.txt", DictionarySize, DictionarySha256);
+        yield return (Model, ModelPath ?? root + "rec.onnx", ModelSize, ModelSha256);
+        yield return (Dictionary, DictionaryPath ?? root + "dict.txt", DictionarySize, DictionarySha256);
     }
 }
 
@@ -33,9 +37,14 @@ public static class OcrPacks
     /// <summary>French, German, Spanish, Portuguese, Indonesian, Vietnamese and other Latin-script languages, with their accents.</summary>
     public static readonly OcrPack Latin = new("latin", "Latin with accents", "latin",
         7862832, "614ffc2d6d3902d360fad7f1b0dd455ee45e877069d14c4e51a99dc4ef144409", 1634, "3c0a8a79b612653c25f765271714f71281e4e955962c153e272b7b8c1d2b13ff");
-    /// <summary>Simplified and Traditional Chinese, Japanese, and English (the server recognizer).</summary>
-    public static readonly OcrPack Chinese = new("chinese", "CJK and Latin", "chinese",
-        84468836, "26fa4f47060f58e25962b9af6beaee05c8182b90e026c4ecc6db165d9dfdc38a", 74012, "d1979e9f794c464c0d2e0b70a7fe14dd978e9dc644c0e71f14158cdf8342af1b");
+    /// <summary>
+    /// Simplified and Traditional Chinese, Japanese, and English: the mobile recognizer, same alphabet as the server one
+    /// (84 MB) it replaced. 2026-11-01: the server one read a Sandbox in 3 s on a TapTap player's PC and in 45-130 s on
+    /// another's; the mobile one reads the same 117 report frames alike (cells, Destinations, days, cards) in half the time.
+    /// </summary>
+    public static readonly OcrPack Chinese = new("chinese_mobile", "CJK and Latin", "chinese",
+        16517247, "bf66820f48fa99f779974c4df78e5274a9d8e0458c4137e8c5357e40e2c3faf2", 74012, "d1979e9f794c464c0d2e0b70a7fe14dd978e9dc644c0e71f14158cdf8342af1b",
+        "webnn/PP-OCRv5-ONNX/resolve/main/ch_PP-OCRv5_rec.onnx", "webnn/PP-OCRv5-ONNX/resolve/main/ch_PP-OCRv5_dict.txt");
     public static readonly OcrPack Korean = new("korean", "Hangul and Latin", "korean",
         13401252, "322f140154c820fcb83c3d24cfe42c9ec70dd1a1834163306a7338136e4f1eaa", 47451, "a88071c68c01707489baa79ebe0405b7beb5cca229f4fc94cc3ef992328802d7");
     public static readonly OcrPack Thai = new("thai", "Thai and Latin", "thai",

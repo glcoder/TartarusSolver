@@ -24,6 +24,7 @@ public sealed class CnnCellReader : ICellReader
     {
         ModelDir = modelDir ?? FindModelDir() ?? throw new DirectoryNotFoundException("Cell models not found (models/cells/cellnet.onnx).");
         using var options = new SessionOptions { IntraOpNumThreads = threads, InterOpNumThreads = 1 };
+        Ocr.OcrEngine.NoSpinning(options);
         _cells = new InferenceSession(Path.Combine(ModelDir, "cellnet.onnx"), options);
         _arrows = new InferenceSession(Path.Combine(ModelDir, "arrownet.onnx"), options);
         using var meta = JsonDocument.Parse(File.ReadAllText(Path.Combine(ModelDir, "cellnet.json")));

@@ -249,10 +249,11 @@ public sealed partial class GameLog
         else if (line.Contains("AudioEnum  == UI_S16_Premium_Quality_Fly", StringComparison.Ordinal)) { }
         else if (line.Contains("AudioEnum  == UI_S16_Premium_Quality", StringComparison.Ordinal)) (run.Chromatic, run.BoardChangedAt) = (run.Chromatic + 1, LocalTime(line));
         else if (line.Contains("Anim_Archive_LightUp", StringComparison.Ordinal)) (run.PanelLights, _panelLights) = (run.PanelLights + 1, true);
-        else if (line.Contains("] S16BoardEventPop Run", StringComparison.Ordinal)) (run.Incidents, run.BoardChangedAt) = (run.Incidents + 1, LocalTime(line));
         // The Prison Incident works on the Sandbox as its window is confirmed, not as it opens: a reading between the two
         // is the Sandbox before it (2026-10-31: a cell the incident opened on an Ultimate, the Objective's pick hinted
-        // over it still Unopened).
+        // over it still Unopened). Its opening is no change of its own (2026-11-01: an instrument pick taken as the
+        // window opened asked for the eye button; every window opened was confirmed in the log, 61 of 61).
+        else if (line.Contains("] S16BoardEventPop Run", StringComparison.Ordinal)) run.Incidents++;
         else if (line.Contains("-click Btn_S16Board_EventPop_Confirm", StringComparison.Ordinal)) run.BoardChangedAt = LocalTime(line);
         // A bite closes what the red sound opened as far as the log can tell (a chain's later picks have no sound of their own).
         else if (line.Contains("AudioEnum  == UI_S16_Own_Eat", StringComparison.Ordinal)) (run.Consumes, run.ConsumePick, run.BoardChangedAt) = (run.Consumes + 1, false, LocalTime(line));
