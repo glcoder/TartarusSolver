@@ -38,6 +38,8 @@ public partial class ControlWindow : Window
 
     // What the overlay shows: the last scanned frame, its scan, and its labels (edited by hand in edit mode).
     private Frame? _frame;
+    // Frames' buffers, given back once a frame is no one's (it went to the report history as a small picture).
+    private readonly PixelPool _pixels = new();
     private ScanResult? _scan;
     private EditableSandbox? _scannedSandbox;
     // The last scan as read, before KeepCovered and Steady: what Steady compares the next one with.
@@ -69,6 +71,7 @@ public partial class ControlWindow : Window
                     + string.Concat(ranked.Skip(1).Where(t => best.Mean - t.Mean < Hint.TieWithin).Select(t => $", tied with {SandboxOverlayView.RankedName(hint, t)} ≈{t.Mean:0.000}"))
                     + $" ({hint.Result.Elapsed.TotalMilliseconds:0} ms)");
             _hint = hint;
+            _hintShownAt = DateTime.Now;
             HintStatus.Text = $"Last hint: {hint.Result.Elapsed.TotalMilliseconds:0} ms, {hint.Result.Playouts:N0} playouts"
                 + (_hints.Net != null ? " · value net" : " · no value net") + (_hints.Policy != null ? " · policy net" : "") + (_hints.Picks != null ? " · picks net" : "");
             RefreshOverlay();
@@ -448,6 +451,10 @@ public partial class ControlWindow : Window
         // The hotkeys are held only while the game or this app is in front: elsewhere the keys are other apps'.
         int foreground = Win32Windows.ProcessIdOf(Win32Windows.Foreground);
         if (_hotkeys != null) _hotkeys.Active = foreground == Environment.ProcessId || _target is { } game && foreground == game.Pid;
+        // On top only over the game (or when this window is in front): over other work it's an ordinary window, not in the
+        // way (2026-11-01, the user's ask). Set on a change only: each one has WPF wait on its render thread.
+        bool overGame = foreground == Environment.ProcessId || _capture != null && _target is { } played && foreground == played.Pid;
+        if (Topmost != overGame) Topmost = overGame;
         if (_capture == null || _target is not { } target) return;
         IntPtr hwnd = target.Hwnd;
         if (!Win32Windows.Exists(hwnd))
@@ -467,7 +474,7 @@ public partial class ControlWindow : Window
         var bounds = Win32Windows.ClientBounds(hwnd);
         if (bounds.IsEmpty || _capture.CropToClient == false) bounds = Win32Windows.VisibleBounds(hwnd);
         if (!_overlay.IsVisible) _overlay.Show();
-        _overlay.PlaceOver(bounds);
+        _overlay.PlaceOver(bounds, hwnd);
 
         // A scan of a differently sized frame no longer lines up with the window.
         bool stale = _frame != null && (_frame.Width != bounds.Width || _frame.Height != bounds.Height);
@@ -482,6 +489,8 @@ public partial class ControlWindow : Window
     private readonly RunMemory _run = new();
     private readonly HintService _hints;
     private Hint? _hint;
+    // When the hint shown came out.
+    private DateTime _hintShownAt;
     // The last Sandbox the hints saw (with the run's memory) and its text: a pick screen's hint plays on from it.
     private EditableSandbox? _hintSandbox;
     private Vision.Ocr.ScreenText? _hintText;
@@ -576,7 +585,7 @@ public partial class ControlWindow : Window
         // Off the UI thread: the copy waits on the graphics card, which may take its time (or never answer).
         var capture = _capture;
         Frame? frame;
-        try { frame = await Task.Run(capture.Grab); }
+        try { frame = await Task.Run(() => capture.Grab(_pixels)); }
         catch (Exception ex) when (WindowCapture.IsDeviceLost(ex))
         {
             // The graphics card was reset under the capture (2026-10-31, Sentry: auto scan stopped for good): a new
@@ -956,6 +965,10 @@ public partial class ControlWindow : Window
                 // with the Chromatic's sound, before a reading settles (every Treasure asked for the eye button). The old
                 // Sandbox still on screen after the log's change counts as seen before it: the pick asks for the eye button.
                 _hintSandbox = _sandbox.Clone();
+                // The day's Destinations with a Prison Incident marker: a move onto one that does the Objective shows the
+                // Objective's pick before the incident plays out, and the marker is gone from under the pick.
+                if (_sandbox.Destinations.Count > 0)
+                    _markedDestinations = (_sandbox.Days, _sandbox.Destinations.Where(d => d > 1 && _sandbox[d].Incident).ToHashSet());
                 // A look at the Sandbox from a pick (the eye button) comes after its animations: always the new one.
                 if (settle != BoardSettle.Verdict.Stale || viewing) _hintBoardAt = _lastBoardAt;
                 _hintRead = _lastRead?.Clone();
@@ -980,10 +993,11 @@ public partial class ControlWindow : Window
                     ClearHint();
                     return;
                 }
-                // A reading in the middle of an animation waits for the next scan: the hint shown stays, unless the position
-                // moved on (2026-11-01: "Cell 16" stood over the Warden walking into it, then went to the Consume card).
-                // The old Sandbox still on screen after the log's bite, Chromatic or Prison Incident takes the hint away:
-                // it's for that one.
+                // A reading not settled yet is searched ahead, its hint held until the next reading confirms it: the hint
+                // shown stays meanwhile, unless the position moved on (2026-11-01: "Cell 16" stood over the Warden walking
+                // into it, then went to the Consume card). The old Sandbox still on screen after the log's bite, Chromatic
+                // or Prison Incident takes the hint away: it's for that one.
+                bool ahead = settle == BoardSettle.Verdict.Unsettled;
                 switch (settle)
                 {
                     case BoardSettle.Verdict.Unsettled:
@@ -992,7 +1006,7 @@ public partial class ControlWindow : Window
                             _hints.Clear();
                             ClearHint();
                         }
-                        return;
+                        break;
                     case BoardSettle.Verdict.Stale:
                         _hints.Clear();
                         ClearHint();
@@ -1009,6 +1023,10 @@ public partial class ControlWindow : Window
                     && _lastBoardAt - moved.MovedAt < TimeSpan.FromSeconds(2)) destinations = false;
                 bool decision = r.Text?.Cards.Any(c => c.Meaning is var t
                     && (t.Contains("consume") || t.Contains("replace") || t.Contains("hunt") || t.Contains("instigate") || t.Contains("bestow") || t == "end" || t.EndsWith(" end"))) == true;
+                // A day begins with its move: decision cards on a new day the log saw no move of yet are the last day's
+                // going away (2026-11-01: End hinted for half a second on 11 of 231 new days).
+                if (decision && live is { Paged: false, Moved: false } today && today.DayStartedAt > today.MovedAt
+                    && _lastBoardAt > today.DayStartedAt && _lastBoardAt - today.DayStartedAt < TimeSpan.FromSeconds(2)) decision = false;
                 // The target pick: its banner read, or the log's red-screen sound with nothing else on screen (the
                 // banner's text doesn't always read).
                 bool consumeOnly = r.Text?.ConsumePick == true || live is { ConsumePick: true } && !destinations && !decision;
@@ -1020,8 +1038,11 @@ public partial class ControlWindow : Window
                 // The Hunt made: the game starts the next day while the pick's banner still shows; nothing to hint there.
                 if (r.Text?.RatwayPick == true && _huntOffer is { } made && made.Warden == _sandbox.Warden && made.Days - 1 == _hintSandbox.Days)
                 {
-                    _hints.Clear();
-                    ClearHint();
+                    if (!ahead)
+                    {
+                        _hints.Clear();
+                        ClearHint();
+                    }
                     return;
                 }
                 // The Sewer Ratway's pick: any cell to go to.
@@ -1044,8 +1065,15 @@ public partial class ControlWindow : Window
                     decision = false;
                 if (!consumeOnly && !destinations && !decision)
                 {
-                    _hints.Clear();
-                    ClearHint();
+                    // The Hunt card clicked: its target pick takes ~2.2 s to come, the cards gone meanwhile. The hint stays,
+                    // its target framed dashed, for the click to come (2026-11-01: it went away for those two seconds).
+                    bool huntComing = _hint?.Ranked is { Count: > 0 } shown && shown[0].Action.Kind == Tartarus.Rules.ActionKind.Hunt
+                        && live is { CardTold: false } clicked && clicked.CardClickedAt > _hintShownAt && DateTime.Now - clicked.CardClickedAt < TimeSpan.FromSeconds(4);
+                    if (!ahead && !huntComing)
+                    {
+                        _hints.Clear();
+                        ClearHint();
+                    }
                     return;
                 }
                 // The red screen spoils the panels' text too (the Objective): the last text read before it stands in.
@@ -1053,6 +1081,7 @@ public partial class ControlWindow : Window
                 if (huntPick) _hintSandbox = _huntOffer!.Value.Board.Clone();
                 var text = consumeOnly ? _textBeforeRed ?? r.Text : huntPick ? _huntOffer!.Value.Text : r.Text;
                 var observation = Tartarus.Vision.GameObservation.From(_hintSandbox, text, _rerolls);
+                _run.Objective(observation, settled: !ahead);
                 // The log knows whether today's Consume is used, which a missing Consume card doesn't (no target either).
                 if (live is { Paged: false, MaxDays: > 0 } && live.RemainingDays == _hintSandbox.Days)
                 {
@@ -1069,6 +1098,11 @@ public partial class ControlWindow : Window
                     && (objective == Tartarus.Rules.ObjectiveKind.SurvivalOfTheFittest ? live.Consumes
                         : objective == Tartarus.Rules.ObjectiveKind.Undercurrents ? live.Incidents : -1) is int counted and >= 0)
                     observation.ObjectiveProgress = Math.Max(observation.ObjectiveProgress, Math.Min(counted, Tartarus.Rules.GameData.Target(objective)));
+                if (ahead)
+                {
+                    _hints.Request(observation, consumeOnly, huntPick, ahead: true);
+                    return;
+                }
                 _hinted = _settleRead?.Clone();
                 if (_hints.Request(observation, consumeOnly, huntPick)) ClearHint();
             }
@@ -1153,10 +1187,29 @@ public partial class ControlWindow : Window
                         under = under.Clone();
                         under.Chromatic = counted.ChromaticAtLeast;
                     }
+                    // The Objective's pick right on the move that did it, no reading of the landing between (the cards
+                    // came first): the Sandbox under it is the morning's, Destinations and all. The Warden is on the one
+                    // that could do the Objective (2026-11-01: the pick was searched with the Warden still at 11 and a
+                    // move left to make, and its Prison Incident put on cell 11).
+                    if (pick.Kind == PickRead.Instrument && under.Phase == Phases.Destination && under.Destinations.Count > 0
+                        && LiveLogRun is { Moved: true } && LandedFor(under, text) is int landed)
+                    {
+                        under = under.Clone();
+                        (under.Warden, under.Phase) = (landed, Phases.Decision);
+                        under.Destinations.Clear();
+                    }
                     // Re-rolls left as worked out above: the counter shows a moment after the cards (until then the log
                     // tells), and a Warden's Treasure pick has none of its own (the run's go to later offers).
                     var observation = Tartarus.Vision.GameObservation.FromPick(pick, under, text);
+                    // Not the run's first pick: the Objective is this run's.
+                    if (!observation.StartOfRun) _run.Objective(observation);
                     if (_rerolls is { } left) observation.Rerolls = left;
+                    // The Objective done by the move onto a marker: its incident plays out after this pick (the game's
+                    // order). Undercurrents is only ever done so (2026-11-01: the search took the incident as gone, and
+                    // the shown chests fell 0.7 on average at that pick).
+                    observation.IncidentAfterPick = observation.OfferForObjective
+                        && (observation.Objective == Tartarus.Rules.ObjectiveKind.Undercurrents
+                            || _markedDestinations is { } marked && marked.Days == under.Days && marked.Cells.Contains(under.Warden));
                     if (_hints.Request(observation, consumeOnly: false)) ClearHint();
                 }
             }
@@ -1201,6 +1254,7 @@ public partial class ControlWindow : Window
         _lastCollectedAt = DateTime.Now;
         _collecting = true;
         var (sandbox, title) = (_sandbox.Clone(), _target?.Title);
+        frame.Keep();
         _ = Task.Run(() => _dataset.Save(frame, r, sandbox, title, auto: true)).ContinueWith(t => Dispatcher.BeginInvoke(() =>
         {
             _collecting = false;
@@ -1214,13 +1268,33 @@ public partial class ControlWindow : Window
     }
 
     private string? _lastPick;
+    // The last Destinations read (Remaining Days, cells) that held a Prison Incident marker.
+    private (int? Days, HashSet<int> Cells)? _markedDestinations;
+
+    /// <summary>
+    /// The one Destination of <paramref name="morning"/> whose move does its Objective: a marked one for Undercurrents,
+    /// one far enough for Prison Walk. Null when none or more than one could.
+    /// </summary>
+    private int? LandedFor(EditableSandbox morning, Vision.Ocr.ScreenText? text)
+    {
+        var before = Tartarus.Vision.GameObservation.From(morning, text);
+        var candidates = before.Objective switch
+        {
+            Tartarus.Rules.ObjectiveKind.Undercurrents when _markedDestinations is { } marked && marked.Days == morning.Days =>
+                morning.Destinations.Where(marked.Cells.Contains).ToList(),
+            Tartarus.Rules.ObjectiveKind.PrisonWalk => morning.Destinations
+                .Where(d => (d - morning.Warden + 16) % 16 >= Tartarus.Rules.GameData.Target(Tartarus.Rules.ObjectiveKind.PrisonWalk) - before.ObjectiveProgress).ToList(),
+            _ => [],
+        };
+        return candidates.Count == 1 ? candidates[0] : null;
+    }
 
     /// <summary>Saves a Torture Instrument pick screen to the dataset's picks/, once per offer (a Re-roll is a new one).</summary>
     private void CollectPick(Frame frame, ScanResult r, PickRead pick)
     {
         // The treasures' icons come from the first pick screen that shows them (with or without collecting).
-        if (pick.Kind == PickRead.Treasure && r.Layout is { } layout)
-            _ = Task.Run(() => WardenTreasures.SaveMissingIcons(frame, layout, pick)).ContinueWith(t => Dispatcher.BeginInvoke(() =>
+        if (pick.Kind == PickRead.Treasure && r.Layout is { } layout && frame.Keep() is var kept)
+            _ = Task.Run(() => WardenTreasures.SaveMissingIcons(kept, layout, pick)).ContinueWith(t => Dispatcher.BeginInvoke(() =>
             {
                 if (t.Exception is { } ex) Log("Warden's Treasure icons: could not save: " + ex.InnerException?.Message);
                 else if (t.Result.Count > 0) Log("Warden's Treasure icons saved: " + string.Join(", ", t.Result));
@@ -1234,6 +1308,7 @@ public partial class ControlWindow : Window
     {
         if (!_settings.AutoCollect || _editMode || key == _lastPick) return;
         _lastPick = key;
+        frame.Keep();
         _ = Task.Run(() => _dataset.SavePick(frame, r)).ContinueWith(t => Dispatcher.BeginInvoke(() =>
             Log(t.Exception is { } ex ? "Auto-collect: could not save the screen: " + ex.InnerException?.Message : $"Auto-collect: screen {t.Result} ({key})")));
     }
@@ -1258,9 +1333,12 @@ public partial class ControlWindow : Window
     /// <summary>
     /// Scans come this soon after the last one's start, not a whole period: to confirm a reading not settled yet (a hint
     /// waits for two alike), and for <see cref="BurstFor"/> after the game's log tells of a click or a page opening or
-    /// closing (the screen is about to change).
+    /// closing (the screen is about to change). A tenth of a second: the confirming reading was a fifth of every hint's
+    /// wait (2026-11-01); a slow PC rests as long as its scan took anyway.
     /// </summary>
-    private static readonly TimeSpan QuickScan = TimeSpan.FromSeconds(0.2);
+    private static readonly TimeSpan QuickScan = TimeSpan.FromSeconds(0.1);
+    /// <summary>A scan (with its hint) longer than this rests as long again before the next: a slow PC's.</summary>
+    private const double SlowScan = 0.25;
     private static readonly TimeSpan BurstFor = TimeSpan.FromSeconds(1.5);
     private DateTime _burstUntil;
     /// <summary>
@@ -1298,7 +1376,7 @@ public partial class ControlWindow : Window
             try
             {
                 scanned = await ScanAsync(manual: false);
-                await _hints.Searching;
+                await _hints.SearchingConfirmed;
             }
             catch (Exception ex)
             {
@@ -1309,14 +1387,18 @@ public partial class ControlWindow : Window
                 return;
             }
             if (scanned) _offBoardSince = _scan is { } last && (last.Ok || last.Pick != null) ? null : _offBoardSince ?? DateTime.Now;
-            bool offBoard = _offBoardSince is { } off && DateTime.Now - off >= OffBoardAfter && !_confirmSoon && DateTime.Now >= _burstUntil;
+            // A reading to confirm is the Sandbox's: one left unconfirmed as the board went away (a run's last frame, faded)
+            // kept the scans coming every 0.1 s off the board, the pick search and all (2026-11-01: 1.24 cores in the lobby).
+            bool confirm = _confirmSoon && _scan is { Ok: true };
+            bool offBoard = _offBoardSince is { } off && DateTime.Now - off >= OffBoardAfter && !confirm && DateTime.Now >= _burstUntil;
             // Nothing to scan (no window, minimized, editing): no spinning at 0.
             double period = offBoard ? OffBoardScan.TotalSeconds : _settings.AutoScanSeconds;
-            if (!offBoard && scanned && (_confirmSoon || DateTime.Now < _burstUntil)) period = Math.Min(period, QuickScan.TotalSeconds);
-            // A scan and its hint rest at least as long as they took: on a slow PC (a Sandbox read in 1.3 s) they ran
-            // back to back, and the game had what was left.
+            if (!offBoard && scanned && (confirm || DateTime.Now < _burstUntil)) period = Math.Min(period, QuickScan.TotalSeconds);
+            // A slow scan and its hint rest at least as long as they took: on a slow PC (a Sandbox read in 1.3 s) they ran
+            // back to back, and the game had what was left. Not a quick one: the rest held every confirming reading back
+            // ~0.1 s on a fast PC (2026-11-01: a new day's hint 0.27 s after its first reading with cards, 0.17 before).
             double busy = started.Elapsed.TotalSeconds;
-            double wait = Math.Max(Math.Max(period, scanned ? 0 : 0.2) - busy, scanned ? busy : 0);
+            double wait = Math.Max(Math.Max(period, scanned ? 0 : 0.2) - busy, scanned && busy > SlowScan ? busy : 0);
             // The log's activity cuts the wait short (only a scan's own time apart: not when nothing was scanned).
             var delay = Task.Delay(TimeSpan.FromSeconds(Math.Max(wait, 0.001)));
             await (scanned ? Task.WhenAny(delay, _wake.Task) : delay);
@@ -1538,7 +1620,7 @@ public partial class ControlWindow : Window
             Log($"Nothing to save: scan first ({_settings.Hotkeys.GetValueOrDefault("scan", "Scan")})");
             return;
         }
-        var (frame, scan, sandbox, title) = (_frame, _scan, _sandbox.Clone(), _target?.Title);
+        var (frame, scan, sandbox, title) = (_frame.Keep(), _scan, _sandbox.Clone(), _target?.Title);
         try
         {
             var sw = Stopwatch.StartNew();

@@ -4,6 +4,47 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.31 — 2026-11-01
+
+- The app's window stays on top only while the game (or the window itself) is in front: over other programs it is an
+  ordinary window, not in the way.
+- Off the board again after a run: a last Sandbox reading left unconfirmed (the run's end fading) kept the screen
+  read every tenth of a second in the lobby, picks searched and all (1.24 cores), instead of every 5 s.
+- The Hunt card clicked, its target pick takes ~2.2 s to come up: the hint now stays meanwhile, the target's cell
+  framed dashed (it went away for those two seconds, though the target was known).
+- Only a slow scan (over 0.25 s) rests as long again before the next: on a fast PC the rest held every confirming
+  reading back ~0.1 s (a new day's hint 0.27 s after its first reading with cards).
+- Hints sooner: a reading not confirmed yet is searched ahead, alongside the next scan, and its hint shows the moment
+  that scan confirms it (the search waited for the confirmation before, 0.15-0.47 s of every hint and more on a slow
+  PC); the confirming scan comes 0.1 s after the last one, not 0.2.
+- The search's value and policy networks no longer zero their scratch on every call: it took two thirds of their time
+  (12% of the app's CPU in a player's trace); the same moves, the simulator 8% faster.
+- A frame read as a Warden's Treasure or a pick fades in no longer changes the run's Torture Instruments or
+  Objective: a held slot's instrument and the Objective change only when read so three times in a row (a report:
+  Kin's Coin of Fate read as Ravenous Chains and a done Behind Cell Doors as Survival of the Fittest 0/4, and Thumb
+  Ring was hinted until the eye button showed the Sandbox again, then Crimson Vintage).
+- Memory no longer climbs to 1-1.6 GB: the networks' inputs, the text detector's labels, the Sandbox check's
+  features and the report pictures reuse their buffers (off the board 5.7 MB a second was allocated, now 1.2; large
+  objects 5.4 -> 0.6), and the game's log is read keeping only its "S16" lines (a 200 MB log's first read left
+  hundreds of MB of strings to collect). The readings are the same, frame for frame.
+- The Objective's pick that comes up before the landing is read (the cards cover the Sandbox at once) is searched
+  with the Warden on the Destination that did it (the marked one for Undercurrents, the one far enough for Prison
+  Walk), not still at the morning's cell with a move to make: the shown chests jumped by up to 1 Chromatic there.
+- The neural networks share one memory arena that grows by what is asked (it doubled before), without memory
+  patterns: the app's memory no longer climbs through a run (510 MB before one, 1.27 GB at its peak); on 220 frames the
+  peak fell from ~535 to ~390 MB, the scans as fast.
+- No End or Replace hint on a new day's first frames: the last day's decision cards still going away were read as
+  the new day's (half a second on 11 of 231 new days); a day begins with its move.
+- Less memory and less work for the graphics card: frame buffers are reused instead of a new one per scan (14.7 MB
+  at 2560x1440, 65 MB at 7680x2112); the frames kept for a bug report are half-size JPEGs (six whole frames held
+  88-390 MB); the overlay is drawn again only when what it shows changes (it was redrawn whole at every scan); and
+  it is put back on top of the game only when the game climbed above it, not five times a second (each time WPF
+  waited on its render thread, where the window stood in some players' hang reports).
+- The Objective's pick that comes with a move onto a Prison Incident marker (always for Undercurrents, and Prison
+  Walk done on a marker) is hinted with the incident still to come: the game shows the pick first and plays the
+  incident out after its Confirm, and the search took the incident as gone. The shown chests fell 0.7 Chromatic on
+  average at Undercurrents' pick (1.8 in a run of 2026-11-01, 0.8 now). The rules play it in the game's order too.
+
 ## 0.7.30 — 2026-11-01
 
 - Lighter on the PC, so the game keeps its frame rate: the app runs at below-normal priority; off the board (menus,

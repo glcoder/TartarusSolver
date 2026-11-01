@@ -159,6 +159,12 @@ public struct GameState
     public bool ObjectiveDone;
     /// <summary>Which Usurpation is in the Prison Incidents now: 0 = I .. 3 = IV, 4 = none left.</summary>
     public byte UsurpationStage;
+    /// <summary>
+    /// The Prison Incident landed on by the move that did the Objective: the game asks the Objective's pick first and
+    /// plays the incident out after it (its window opens on the pick's Confirm), on <see cref="DeferredCell"/>.
+    /// </summary>
+    public Incident DeferredIncident;
+    public byte DeferredCell;
     public ushort NextId;
     public PendingArray Pending;
     public byte PendingCount;

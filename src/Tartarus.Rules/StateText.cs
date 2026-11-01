@@ -49,6 +49,7 @@ public static class StateText
             sb.AppendLine();
         }
         for (int i = 0; i < s.PendingCount; i++) sb.AppendLine($"Pending: {Pending(s, s.Pending[i])}");
+        if (s.DeferredIncident != Incident.None) sb.AppendLine($"Pending: a Prison Incident on cell {s.DeferredCell + 1} after the Objective's pick");
         return sb.ToString();
     }
 

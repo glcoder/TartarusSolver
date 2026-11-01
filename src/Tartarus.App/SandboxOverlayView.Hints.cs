@@ -144,7 +144,9 @@ public sealed partial class SandboxOverlayView
         }
         // The best card's click is followed by its target's (the Consume or Hunt target pick): that cell framed dashed
         // beforehand, so the second click needn't wait for the pick to be read.
-        if (DrawSpots(dc, spots.Values, fontSize, ppd) is { Value.Action: { Kind: ActionKind.Consume or ActionKind.Chain or ActionKind.Hunt } next }
+        // The card itself gone (clicked, its pick not up yet): the target's cell alone, dashed.
+        var best = DrawSpots(dc, spots.Values, fontSize, ppd)?.Value ?? (spots.Count == 0 && hint.Ranked is { Count: > 0 } ranked ? ranked[0] : null);
+        if (best is { Action: { Kind: ActionKind.Consume or ActionKind.Chain or ActionKind.Hunt } next }
             && !hint.ConsumeOnly && !hint.HuntOnly && CellBox(next.Arg) is { } target)
             dc.DrawRoundedRectangle(null, NextPen, Inflate(target, -1), 8, 8);
     }

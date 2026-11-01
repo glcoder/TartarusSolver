@@ -14,6 +14,10 @@ public sealed class TextDetector : IDisposable
 
     private readonly InferenceSession _session;
     private readonly string _input;
+    // Reused from read to read (one reader at a time): the input picture, the regions' labels.
+    private readonly Scratch<float> _inputBuffer = new();
+    private readonly Scratch<int> _labels = new();
+    private readonly Stack<int> _stack = new();
 
     public TextDetector(string modelPath, SessionOptions options)
     {
@@ -43,7 +47,7 @@ public sealed class TextDetector : IDisposable
         int w = Math.Max(1, (int)Math.Round(a.Width * ratio)), h = Math.Max(1, (int)Math.Round(a.Height * ratio));
         int tw = Math.Max(32, (w + 31) / 32 * 32), th = Math.Max(32, (h + 31) / 32 * 32);
 
-        var input = new DenseTensor<float>([1, 3, th, tw]);
+        var input = new DenseTensor<float>(_inputBuffer.Take(3 * th * tw), [1, 3, th, tw]);
         Resample.ToBgrPlanes(frame, a.X0, a.Y0, a.X1, a.Y1, w, h, input.Buffer.Span, tw, Mean, Std, th);
         using var results = _session.Run([NamedOnnxValue.CreateFromTensor(_input, input)]);
         var prob = results[0].AsTensor<float>();
@@ -54,8 +58,9 @@ public sealed class TextDetector : IDisposable
 
     private List<Region> Regions(ReadOnlySpan<float> map, int w, int h, PixelBox area, double kx, double ky)
     {
-        var label = new int[w * h];
-        var stack = new Stack<int>();
+        var label = _labels.Take(w * h).Span;
+        var stack = _stack;
+        stack.Clear();
         var regions = new List<Region>();
         int next = 0;
         for (int start = 0; start < w * h; start++)

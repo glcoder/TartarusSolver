@@ -24,7 +24,7 @@ public sealed class CnnCellReader : ICellReader
     {
         ModelDir = modelDir ?? FindModelDir() ?? throw new DirectoryNotFoundException("Cell models not found (models/cells/cellnet.onnx).");
         using var options = new SessionOptions { IntraOpNumThreads = threads, InterOpNumThreads = 1 };
-        Ocr.OcrEngine.NoSpinning(options);
+        Ocr.OcrEngine.Tune(options);
         _cells = new InferenceSession(Path.Combine(ModelDir, "cellnet.onnx"), options);
         _arrows = new InferenceSession(Path.Combine(ModelDir, "arrownet.onnx"), options);
         using var meta = JsonDocument.Parse(File.ReadAllText(Path.Combine(ModelDir, "cellnet.json")));
@@ -61,6 +61,9 @@ public sealed class CnnCellReader : ICellReader
         return null;
     }
 
+    // The networks' inputs, reused from scan to scan (one reader at a time).
+    private readonly Scratch<float> _cellBuffer = new(), _arrowBuffer = new();
+
     public ScanResult Read(Frame frame, ScreenLayout layout)
     {
         var sw = Stopwatch.StartNew();
@@ -69,7 +72,7 @@ public sealed class CnnCellReader : ICellReader
         var panels = _panels == null ? null : Task.Run(() => _panels.Read(frame, layout));
 
         var places = Enumerable.Range(0, 16).Select(n => layout.Cell(n + 1)).ToArray();
-        var cellInput = new DenseTensor<float>([15, 3, CellCrops.ContextHeight, CellCrops.ContextWidth]);
+        var cellInput = new DenseTensor<float>(_cellBuffer.Take(15 * 3 * CellCrops.ContextHeight * CellCrops.ContextWidth), [15, 3, CellCrops.ContextHeight, CellCrops.ContextWidth]);
         var cellIds = new DenseTensor<float>([15, 16]);
         for (int i = 1; i < 16; i++)
         {
@@ -77,7 +80,7 @@ public sealed class CnnCellReader : ICellReader
             Fill(cellInput, i - 1, CellCrops.Context(frame, x, y, k));
             cellIds[i - 1, i] = 1;
         }
-        var arrowInput = new DenseTensor<float>([16, 3, CellCrops.ArrowSize, CellCrops.ArrowSize]);
+        var arrowInput = new DenseTensor<float>(_arrowBuffer.Take(16 * 3 * CellCrops.ArrowSize * CellCrops.ArrowSize), [16, 3, CellCrops.ArrowSize, CellCrops.ArrowSize]);
         var arrowIds = new DenseTensor<float>([16, 16]);
         for (int i = 0; i < 16; i++)
         {

@@ -30,6 +30,15 @@ public sealed class Frame
     public DateTimeOffset Timestamp { get; }
     public int Stride => Width * 4;
 
+    /// <summary>Held beyond its scan (a dataset sample saved in the background): its buffer never goes back to a <see cref="PixelPool"/>.</summary>
+    public bool Kept { get; private set; }
+
+    public Frame Keep()
+    {
+        Kept = true;
+        return this;
+    }
+
     /// <summary>Copies the pixels into <paramref name="dest"/> as RGBA, swizzling if needed.</summary>
     public void CopyRgbaTo(Span<byte> dest)
     {

@@ -86,9 +86,42 @@ public sealed partial class Engine
     private void FireIncident(ref GameState s, Incident incident, int n)
     {
         s.Stats.Incidents++;
-        Effect(ref s, incident, n);
+        // It counts first; when the landing did the Objective (Undercurrents by this incident, Prison Walk by the steps)
+        // the Objective's pick comes up, and the incident plays out after it is taken (2026-11-01, the game's log: six
+        // landings on a marker that did the Objective went RouteCell, RelicPop, its Confirm, then EventPop).
         AdvanceObjective(ref s, ObjectiveKind.Undercurrents, 1);
+        if (ObjectivePickWaiting(s))
+        {
+            (s.DeferredIncident, s.DeferredCell) = (incident, (byte)n);
+            return;
+        }
+        PlayOut(ref s, incident, n);
+    }
+
+    private static bool ObjectivePickWaiting(in GameState s)
+    {
+        for (int i = 0; i < s.PendingCount; i++) if (s.Pending[i].Kind == PendingKind.Instrument && s.Pending[i].ForObjective) return true;
+        return false;
+    }
+
+    /// <summary>An incident's effect, and the marker that likely follows it.</summary>
+    private void PlayOut(ref GameState s, Incident incident, int n)
+    {
+        Effect(ref s, incident, n);
         if (s.Rng.Chance(Options.IncidentFollowPercent)) AddMarkers(ref s, 1, unopenedOnly: false, avoidWarden: true);
+    }
+
+    /// <summary>
+    /// The Objective's pick taken: the incident put off for it plays out, on its cell opened first if it isn't yet (the
+    /// screen under the pick shows the Warden at a closed door).
+    /// </summary>
+    private void PlayDeferred(ref GameState s)
+    {
+        if (s.DeferredIncident == Incident.None) return;
+        var (incident, n) = (s.DeferredIncident, (int)s.DeferredCell);
+        s.DeferredIncident = Incident.None;
+        if (n != GameData.Room && s.Cells[n].Sealed) OpenCell(ref s, n, How.Patrol);
+        PlayOut(ref s, incident, n);
     }
 
     private void Effect(ref GameState s, Incident incident, int n)

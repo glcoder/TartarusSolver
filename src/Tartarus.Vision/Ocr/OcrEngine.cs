@@ -19,13 +19,38 @@ public sealed class OcrEngine : IDisposable
     private volatile bool _languageAsked;
 
     /// <summary>
-    /// The runtime's worker threads sleep between operations instead of spinning for the next one: a scan took ~2 s of
-    /// CPU for 0.27 s of time (2026-11-01, off the board every 5 s still half a core), the spinning taken from the game.
+    /// How every network session runs. The runtime's worker threads sleep between operations instead of spinning for
+    /// the next one: a scan took ~2 s of CPU for 0.27 s of time (2026-11-01, off the board every 5 s still half a core),
+    /// the spinning taken from the game. And memory: one arena for all sessions that grows by what is asked, not by
+    /// doubling, without memory patterns (OCR's inputs change size every read, so patterns never fit): the arena kept
+    /// growing through a run (working set 510 MB before it, 1.27 GB at its peak). Measured on 220 frames: peak working
+    /// set 530-541 -> 387-398 MB, private 591-601 -> 364-377 MB; on a run's 56 frames scanned three times each, 300 MB
+    /// against 430-500, the scans as fast (fresh ~175 ms, cached ~45 ms either way); without any arena 320 MB but twice
+    /// as slow.
     /// </summary>
-    public static void NoSpinning(SessionOptions options)
+    public static void Tune(SessionOptions options)
     {
         options.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");
         options.AddSessionConfigEntry("session.inter_op.allow_spinning", "0");
+        SharedArena();
+        options.AddSessionConfigEntry("session.use_env_allocators", "1");
+        options.EnableMemoryPattern = false;
+    }
+
+    private static readonly object ArenaLock = new();
+    private static bool _arenaRegistered;
+
+    /// <summary>The process's one CPU arena, extended by the size asked for (kSameAsRequested), registered once.</summary>
+    private static void SharedArena()
+    {
+        lock (ArenaLock)
+        {
+            if (_arenaRegistered) return;
+            using var memory = new OrtMemoryInfo(OrtMemoryInfo.allocatorCPU, OrtAllocatorType.ArenaAllocator, 0, OrtMemType.Default);
+            using var config = new OrtArenaCfg(0, 1, -1, -1);
+            OrtEnv.Instance().CreateAndRegisterAllocator(memory, config);
+            _arenaRegistered = true;
+        }
     }
 
     public OcrEngine(string? modelDir = null, int threads = 4, string? gameLanguage = null)
@@ -38,7 +63,7 @@ public sealed class OcrEngine : IDisposable
             GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
             ExecutionMode = ExecutionMode.ORT_SEQUENTIAL,
         };
-        NoSpinning(_options);
+        Tune(_options);
         Detector = new TextDetector(Path.Combine(ModelDir, DetectorFile), _options);
         Recognizer = _recognizers[OcrPacks.English.Id] = new TextRecognizer(Path.Combine(ModelDir, RecognizerFile), Path.Combine(ModelDir, DictionaryFile), _options);
         Pack = OcrPacks.English;

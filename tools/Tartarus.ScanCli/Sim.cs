@@ -20,7 +20,14 @@ internal static class Sim
         using var scanner = makeScanner(args);
         var scan = scanner.Scan(ImageIO.Load(args[0]));
         R.Observation observation;
-        if (scan.Ok) observation = GameObservation.From(EditableSandbox.FromScan(scan), scan.Text);
+        // --days N --theme ironlaw: what the app knows from the log and the run's start, when the frame doesn't show it.
+        EditableSandbox Known(EditableSandbox b)
+        {
+            if (int.TryParse(opt(args, "--days"), out int days)) b.Days = days;
+            if (opt(args, "--theme") is { } theme) b.Theme = theme;
+            return b;
+        }
+        if (scan.Ok) observation = GameObservation.From(Known(EditableSandbox.FromScan(scan)), scan.Text);
         // --sandbox other.png: the Sandbox under a pick, read from another frame (as the app takes the last one it saw).
         else if (scan.Pick is { } pick && opt(args, "--sandbox") is { } under)
         {
@@ -30,7 +37,18 @@ internal static class Sim
                 Console.Error.WriteLine($"no Sandbox in {under}: {below.Reason}");
                 return 1;
             }
-            observation = GameObservation.FromPick(pick, EditableSandbox.FromScan(below), below.Text);
+            var board = EditableSandbox.FromScan(below);
+            // --warden N: where the Warden went (the Sandbox read before the move still has the old cell).
+            if (int.TryParse(opt(args, "--warden"), out int warden))
+            {
+                board.Warden = warden;
+                board.Destinations.Clear();
+                board.Phase = Phases.Decision;
+            }
+            Known(board);
+            observation = GameObservation.FromPick(pick, board, below.Text);
+            // --incident-after: the move onto a marker did the Objective, its incident plays out after this pick (as the app tells).
+            observation.IncidentAfterPick = args.Contains("--incident-after");
         }
         else if (scan.Pick is { } pick2) observation = GameObservation.FromPick(pick2, EditableSandbox.Empty());
         else

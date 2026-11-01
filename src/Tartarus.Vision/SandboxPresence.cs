@@ -47,7 +47,18 @@ public sealed class SandboxPresence
     /// <summary>models/sandbox/template.bin next to the executable or in the repository it runs from; null if there is none yet.</summary>
     public static string? FindTemplate() => AppFiles.Find("models", "sandbox", FileName);
 
-    public float Score(Frame frame, ScreenLayout layout) => Score(Features(frame, layout));
+    // The features' buffers, reused: the scale search scores 36 layouts a frame (2026-11-01: 20 MB of large arrays in
+    // 25 s off the board).
+    private readonly float[] _picture = new float[Width * Height], _features = new float[Length];
+
+    public float Score(Frame frame, ScreenLayout layout)
+    {
+        lock (_features)
+        {
+            Features(frame, layout, _picture, _features);
+            return Score(_features);
+        }
+    }
 
     /// <summary>Match of features from <see cref="Features"/> with the template.</summary>
     public float Score(float[] features) => Dot(features, _template);
@@ -79,8 +90,17 @@ public sealed class SandboxPresence
     /// <summary>The Sandbox region box-averaged down to Width x Height, its x and y differences, zero-mean unit-length.</summary>
     public static float[] Features(Frame frame, ScreenLayout layout)
     {
+        var g = new float[Length];
+        Features(frame, layout, new float[Width * Height], g);
+        return g;
+    }
+
+    /// <summary><see cref="Features(Frame, ScreenLayout)"/> into <paramref name="g"/>, by way of <paramref name="v"/>.</summary>
+    private static void Features(Frame frame, ScreenLayout layout, float[] v, float[] g)
+    {
+        // The border's zeros: the last normalizing shifted them.
+        Array.Clear(g);
         var box = layout.ToPixels(Region);
-        var v = new float[Width * Height];
         var p = frame.Pixels;
         int fw = frame.Width;
         // Brightest channel, averaged over each output cell's pixels.
@@ -105,7 +125,6 @@ public sealed class SandboxPresence
             }
         }
         // x differences first, then y differences; zero on the border.
-        var g = new float[Length];
         int plane = Width * Height;
         for (int j = 1; j < Height - 1; j++)
             for (int i = 1; i < Width - 1; i++)
@@ -114,7 +133,6 @@ public sealed class SandboxPresence
                 g[plane + j * Width + i] = v[(j + 1) * Width + i] - v[(j - 1) * Width + i];
             }
         Normalize(g);
-        return g;
     }
 
     private static void Normalize(float[] a)

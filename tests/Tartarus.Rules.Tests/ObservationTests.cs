@@ -94,6 +94,28 @@ public class ObservationTests
     }
 
     [Fact]
+    public void The_Objective_s_pick_before_its_incident_keeps_the_incident_to_come()
+    {
+        // The pick on screen, the Warden at a door not opened yet: the incident that did Undercurrents plays out after it.
+        var o = new Observation { Warden = 4, RemainingDays = 22, Objective = ObjectiveKind.Undercurrents, ObjectiveDone = true, OfferForObjective = true, IncidentAfterPick = true };
+        for (int n = 1; n < GameData.Cells; n++) o.Cells[n].Kind = ObservedKind.Unopened;
+        o.Instruments.Add(Instrument.Shackles);
+        o.Offer.AddRange([Instrument.Saw, Instrument.Muzzle, Instrument.Cage]);
+        var engine = new Engine { AutoEnd = false };
+        var s = engine.FromObservation(o, 1);
+        Assert.NotEqual(Incident.None, s.DeferredIncident);
+        Assert.Equal(4, s.DeferredCell);
+        engine.Determinize(ref s, 7);
+        Assert.NotEqual(Incident.None, s.DeferredIncident);
+        Assert.True(engine.Apply(ref s, new GameAction(ActionKind.PickInstrument, (byte)Instrument.Saw)));
+        Assert.Equal(Incident.None, s.DeferredIncident);
+        Assert.False(s.Cells[4].Sealed);
+        // Without it, the pick is all there is.
+        o.IncidentAfterPick = false;
+        Assert.Equal(Incident.None, engine.FromObservation(o, 1).DeferredIncident);
+    }
+
+    [Fact]
     public void A_scanned_decision_can_be_played_on()
     {
         var o = new Observation { Warden = 4, RemainingDays = 12, Objective = ObjectiveKind.SurvivalOfTheFittest, ObjectiveProgress = 2 };

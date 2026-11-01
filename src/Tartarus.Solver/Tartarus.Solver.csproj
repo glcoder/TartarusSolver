@@ -4,6 +4,8 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <IsAotCompatible>true</IsAotCompatible>
+    <!-- [SkipLocalsInit] on the value network's scratch. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Shared\AppFiles.cs" Link="AppFiles.cs" />

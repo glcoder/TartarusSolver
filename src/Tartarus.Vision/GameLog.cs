@@ -41,6 +41,13 @@ public sealed class LoggedRun
     public DateTime DayStartedAt { get; set; }
     /// <summary>The day's move is made: Destination cards still on screen are going away (logs with clicks only).</summary>
     public bool Moved => MovedAt > DayStartedAt;
+    /// <summary>When a decision card was last clicked (logs with clicks only), local time.</summary>
+    public DateTime CardClickedAt { get; set; }
+    /// <summary>
+    /// The last decision card's click was told by its sound: a Replace's reveal, an End's new day, a Consume's red screen.
+    /// A Hunt's isn't: its target pick comes ~2.2 s later, with nothing in the log between.
+    /// </summary>
+    public bool CardTold { get; set; }
 
     public int RemainingDays => MaxDays - Day;
     /// <summary>A pick (Torture Instrument, Warden's Treasure) is open, if out of sight while the Sandbox is viewed: its Confirm not clicked yet.</summary>
@@ -226,12 +233,14 @@ public sealed partial class GameLog
                 || line.Contains("UI_S16_Eating_red_screen", StringComparison.Ordinal))
             {
                 _decisionAt = null;
+                run.CardTold = true;
                 if (reveal && LocalTime(line) - clicked < TimeSpan.FromSeconds(0.5)) run.ReplacedAt = LocalTime(line);
             }
         }
         if (line.Contains("-click Btn_S16Board_ActionCell", StringComparison.Ordinal))
         {
             _decisionAt = LocalTime(line);
+            (run.CardClickedAt, run.CardTold) = (_decisionAt.Value, false);
             return false;
         }
         if (line.Contains("AudioEnum  == UI_S16_Eating_red_screen", StringComparison.Ordinal)) run.ConsumePick = true;
@@ -412,19 +421,32 @@ public sealed class GameLogWatcher : IDisposable
             while ((n = stream.Read(_bytes, 0, _bytes.Length)) > 0)
             {
                 _position += n;
-                string text = _partial + new string(_chars, 0, _decoder.GetChars(_bytes, 0, n, _chars, 0));
-                int end = text.LastIndexOf('\n');
-                _partial = end < 0 ? text : text[(end + 1)..];
-                if (end < 0) continue;
+                // Lines cut out of the decoded chunk where they lie: only the few the log's reading looks at (with "S16")
+                // become strings. The whole chunk as a string, split, made a 200 MB log's first read hundreds of MB of
+                // garbage that kept the app at 1 GB for minutes (2026-11-01).
+                ReadOnlySpan<char> chunk = _chars.AsSpan(0, _decoder.GetChars(_bytes, 0, n, _chars, 0));
                 lock (Log)
-                    foreach (var line in text[..end].Split('\n'))
+                    for (int end; (end = chunk.IndexOf('\n')) >= 0; chunk = chunk[(end + 1)..])
                     {
-                        changed |= Log.Feed(line);
-                        activity |= !history && IsActivity(line);
+                        var piece = chunk[..end];
+                        if (_partial.Length > 0)
+                        {
+                            Take(_partial + piece.ToString());
+                            _partial = "";
+                        }
+                        else if (piece.Contains("S16", StringComparison.Ordinal)) Take(piece.ToString());
                     }
+                // The line the chunk ends inside: the next chunk finishes it.
+                _partial += chunk.ToString();
             }
             if (changed && Log.Current is { } run) Changed?.Invoke(run);
             if (activity) Activity?.Invoke();
+
+            void Take(string line)
+            {
+                changed |= Log.Feed(line);
+                activity |= !history && IsActivity(line);
+            }
         }
         catch (IOException)
         {

@@ -51,9 +51,19 @@ public sealed class HintService : IDisposable
     private string? _key;
     private string? _lastText;
     private Hint? _shown;
+    // A search started ahead on a reading not settled yet: its hint waits here until the position is confirmed.
+    private readonly object _gate = new();
+    private bool _confirmed;
+    private Hint? _held;
 
     /// <summary>The last search started: done once its hint is out (or it was cancelled).</summary>
     public Task Searching { get; private set; } = Task.CompletedTask;
+
+    /// <summary>The search a scan waits for: not one started ahead, which runs alongside the scan that confirms it.</summary>
+    public Task SearchingConfirmed
+    {
+        get { lock (_gate) return _confirmed ? Searching : Task.CompletedTask; }
+    }
 
     /// <summary>
     /// A shown move stays while still legal and no more than this behind the new best (worth, in Chromatics): flicker
@@ -101,14 +111,37 @@ public sealed class HintService : IDisposable
     /// <summary>Raised on a thread-pool thread with the final ranking of a position.</summary>
     public event Action<Hint>? Ready;
 
-    /// <summary>Starts searching the position the screen shows, unless it's the one being searched. True when a new search started (the old hint no longer fits).</summary>
-    public bool Request(Observation observation, bool consumeOnly, bool huntOnly = false)
+    /// <summary>
+    /// Starts searching the position the screen shows, unless it's the one being searched. True when a new search
+    /// started (the old hint no longer fits). <paramref name="ahead"/>: a reading not settled yet, searched ahead so the
+    /// hint is ready when the next reading confirms it (2026-11-01: the wait for that reading and the search after it
+    /// were 0.15-0.47 s of every hint, 0.3-0.5 s more on a slow PC); its hint is held until the same position is asked
+    /// for without <paramref name="ahead"/>.
+    /// </summary>
+    public bool Request(Observation observation, bool consumeOnly, bool huntOnly = false, bool ahead = false)
     {
         var state = _engine.FromObservation(observation, 1);
         if (state.Ended) return false;
         string key = StateText.Describe(state) + consumeOnly + huntOnly;
-        if (key + Playouts == _key) return false;
+        if (key + Playouts == _key)
+        {
+            if (ahead) return false;
+            Hint? ready;
+            lock (_gate)
+            {
+                if (_confirmed) return false;
+                (_confirmed, ready, _held) = (true, _held, null);
+                if (ready != null) _shown = ready;
+            }
+            // Searched ahead and done: out at once.
+            if (ready != null) Ready?.Invoke(ready);
+            return false;
+        }
+        // A confirmed search still running isn't given up for a reading that may be a passing misread.
+        lock (_gate)
+            if (ahead && _confirmed && !Searching.IsCompleted) return false;
         _key = key + Playouts;
+        lock (_gate) (_confirmed, _held) = (!ahead, null);
         string text = StateText.Describe(state) + (consumeOnly ? "(Consume target pick)" : huntOnly ? "(Hunt target pick)" : "");
         if (_lastText != null)
         {
@@ -133,7 +166,16 @@ public sealed class HintService : IDisposable
                 result = Steady(state, result, consumeOnly, huntOnly);
                 if (Chests is { } chests) result = result with { Actions = [.. result.Actions.Select(a => Calibrated(a, chests, days))] };
                 var hint = new Hint(state, result, consumeOnly, Final: true, huntOnly);
-                _shown = hint;
+                lock (_gate)
+                {
+                    if (cts.IsCancellationRequested) return;
+                    if (!_confirmed)
+                    {
+                        _held = hint;
+                        return;
+                    }
+                    _shown = hint;
+                }
                 Ready?.Invoke(hint);
             }
             catch (OperationCanceledException)
@@ -182,6 +224,7 @@ public sealed class HintService : IDisposable
         _cts?.Cancel();
         _key = null;
         _shown = null;
+        lock (_gate) (_confirmed, _held) = (false, null);
     }
 
     public void Dispose() => _cts?.Cancel();

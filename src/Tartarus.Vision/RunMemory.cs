@@ -1,3 +1,5 @@
+using R = Tartarus.Rules;
+
 namespace Tartarus.Vision;
 
 /// <summary>
@@ -8,6 +10,15 @@ namespace Tartarus.Vision;
 public sealed class RunMemory
 {
     private readonly List<string> _held = [];
+    // Another instrument read in a held slot, and how many scans in a row: a slot's instrument doesn't change in a run,
+    // but a frame mid-fade reads one wrong (2026-11-01: Kin's Coin of Fate read as Ravenous Chains as a Warden's
+    // Treasure opened, and the pick was hinted for the wrong instruments).
+    private readonly Dictionary<int, (string Id, int Times)> _otherRead = [];
+    /// <summary>Reads in a row it takes to change what a run has settled (a held slot's instrument, the Objective).</summary>
+    public const int ChangeAfter = 3;
+    // The run's Objective (kind, progress, done), and another one read instead, how many times in a row.
+    private (R.ObjectiveKind Kind, int Progress, bool Done)? _objective;
+    private (R.ObjectiveKind Kind, int Times)? _otherObjective;
     private readonly HashSet<int> _kept = [];
     private int? _lastDays;
     private int _chromatic;
@@ -74,8 +85,25 @@ public sealed class RunMemory
             string? r = i < read.Count ? read[i] : null;
             if (r != null && SlotReader.IsInstrument(r))
             {
-                if (i < _held.Count) _held[i] = r;
-                else if (i == _held.Count) _held.Add(r);
+                if (i < _held.Count && _held[i] != r)
+                {
+                    // Another instrument where one is held: only when read so again and again.
+                    var other = _otherRead.TryGetValue(i, out var o) && o.Id == r ? (r, o.Times + 1) : (r, 1);
+                    if (other.Item2 >= ChangeAfter)
+                    {
+                        _held[i] = r;
+                        _otherRead.Remove(i);
+                    }
+                    else
+                    {
+                        _otherRead[i] = other;
+                        shown.Add(_held[i]);
+                        _kept.Add(i);
+                        continue;
+                    }
+                }
+                else _otherRead.Remove(i);
+                if (i == _held.Count) _held.Add(r);
                 shown.Add(r);
             }
             else if (i < _held.Count)
@@ -106,9 +134,50 @@ public sealed class RunMemory
         return _chromatic;
     }
 
+    /// <summary>
+    /// The run's Objective into <paramref name="o"/>: the one read, unless another was settled and this one wasn't read
+    /// <see cref="ChangeAfter"/> times in a row (a fade reads another name, 2026-11-01: Survival of the Fittest 0/4 for
+    /// a done Behind Cell Doors); the settled one when none reads. <paramref name="settled"/> false: a reading not
+    /// settled yet (searched ahead), told what the run has settled without counting toward a change.
+    /// </summary>
+    public void Objective(R.Observation o, bool settled = true)
+    {
+        if (!settled)
+        {
+            if (_objective is { } known && o.Objective != known.Kind)
+                (o.Objective, o.ObjectiveProgress, o.ObjectiveDone) = (known.Kind, known.Progress, known.Done || o.ObjectiveDone);
+            else if (_objective is { } same) o.ObjectiveDone |= same.Done;
+            return;
+        }
+        if (_objective is not { } kept)
+        {
+            if (o.Objective is { } first) _objective = (first, o.ObjectiveProgress, o.ObjectiveDone);
+            return;
+        }
+        if (o.Objective is null || o.Objective == kept.Kind)
+        {
+            _otherObjective = null;
+            if (o.Objective is null) (o.Objective, o.ObjectiveProgress) = (kept.Kind, kept.Progress);
+            o.ObjectiveDone |= kept.Done;
+            _objective = (kept.Kind, o.ObjectiveProgress, o.ObjectiveDone);
+            return;
+        }
+        var other = _otherObjective is { } seen && seen.Kind == o.Objective ? (seen.Kind, seen.Times + 1) : (o.Objective.Value, 1);
+        if (other.Item2 >= ChangeAfter)
+        {
+            _objective = (other.Item1, o.ObjectiveProgress, o.ObjectiveDone);
+            _otherObjective = null;
+            return;
+        }
+        _otherObjective = other;
+        (o.Objective, o.ObjectiveProgress, o.ObjectiveDone) = (kept.Kind, kept.Progress, kept.Done || o.ObjectiveDone);
+    }
+
     public void Clear()
     {
         _held.Clear();
+        _otherRead.Clear();
+        (_objective, _otherObjective) = (null, null);
         _kept.Clear();
         _lastDays = null;
         _chromatic = 0;

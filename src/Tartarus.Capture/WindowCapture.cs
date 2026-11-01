@@ -113,8 +113,11 @@ public sealed unsafe class WindowCapture : IDisposable
         (ex is SharpGen.Runtime.SharpGenException sharp ? sharp.ResultCode.Code : ex.HResult) is
             unchecked((int)0x887A0005) or unchecked((int)0x887A0006) or unchecked((int)0x887A0007) or unchecked((int)0x887A0020);
 
-    /// <summary>Copies the latest frame to a CPU buffer (BGRA). Null until the first frame arrives.</summary>
-    public Frame? Grab()
+    /// <summary>
+    /// Copies the latest frame to a CPU buffer (BGRA), from <paramref name="pool"/> if given. Null until the first frame
+    /// arrives.
+    /// </summary>
+    public Frame? Grab(PixelPool? pool = null)
     {
         lock (_lock)
         {
@@ -163,7 +166,7 @@ public sealed unsafe class WindowCapture : IDisposable
             var map = _context.Map(_staging, 0, MapMode.Read, Vortice.Direct3D11.MapFlags.None);
             try
             {
-                var pixels = new byte[w * h * 4];
+                var pixels = pool?.Rent(w * h * 4) ?? new byte[w * h * 4];
                 int row = w * 4;
                 fixed (byte* dst = pixels)
                 {

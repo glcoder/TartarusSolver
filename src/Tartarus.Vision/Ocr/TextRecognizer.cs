@@ -14,6 +14,8 @@ public sealed class TextRecognizer : IDisposable
 
     private readonly InferenceSession _session;
     private readonly string _input;
+    // The batch's input, reused from batch to batch (one reader at a time).
+    private readonly Scratch<float> _inputBuffer = new();
     private readonly string[] _classes;
 
     public TextRecognizer(string modelPath, string dictPath, SessionOptions options)
@@ -47,7 +49,7 @@ public sealed class TextRecognizer : IDisposable
             var batch = order.AsSpan(start, Math.Min(BatchSize, order.Length - start)).ToArray();
             int[] widths = batch.Select(i => Math.Clamp((int)Math.Ceiling(Height * (double)boxes[i].Width / Math.Max(1, boxes[i].Height)), 8, MaxWidth)).ToArray();
             int batchW = Math.Max(MinWidth, widths.Max());
-            var input = new DenseTensor<float>([batch.Length, 3, Height, batchW]);
+            var input = new DenseTensor<float>(_inputBuffer.Take(batch.Length * 3 * Height * batchW), [batch.Length, 3, Height, batchW]);
             var buf = input.Buffer.Span;
             int itemSize = 3 * Height * batchW;
             for (int k = 0; k < batch.Length; k++)

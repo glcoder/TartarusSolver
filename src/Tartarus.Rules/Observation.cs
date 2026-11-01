@@ -54,6 +54,11 @@ public sealed class Observation
     public List<Instrument> Offer { get; } = [];
     /// <summary>The offer is the Objective's (else the run's first).</summary>
     public bool OfferForObjective { get; set; }
+    /// <summary>
+    /// The Objective's pick came up on a move onto a Prison Incident marker, the incident not played out yet (the game
+    /// shows the pick first): the Warden's cell's incident follows the pick.
+    /// </summary>
+    public bool IncidentAfterPick { get; set; }
     /// <summary>The run's first instrument pick: the Sandbox under the cards isn't seen yet, so its first Inmates are drawn as a run starts.</summary>
     public bool StartOfRun { get; set; }
     /// <summary>A Warden's Treasure pick on screen: the rewards offered, and how many picks (Opulence: 3).</summary>
@@ -170,6 +175,12 @@ public sealed partial class Engine
                 p.Count++;
             }
             if (p.Count > 0) PushPending(ref s, p);
+            if (p.Count > 0 && o.OfferForObjective && o.IncidentAfterPick && s.Position != GameData.Room)
+            {
+                // Its marker, if still read there, is the one about to play out.
+                s.Cells[s.Position].Marker = Incident.None;
+                (s.DeferredIncident, s.DeferredCell) = (DrawIncident(ref s, s.Position), s.Position);
+            }
         }
         return s;
     }
@@ -237,5 +248,8 @@ public sealed partial class Engine
             var incident = DrawIncident(ref s, n);
             s.Cells[n].Marker = incident;
         }
+        // The incident put off for the Objective's pick is a marker nobody saw inside either.
+        if (s.DeferredIncident != Incident.None && DrawIncident(ref s, s.DeferredCell) is var deferred and not Incident.None)
+            s.DeferredIncident = deferred;
     }
 }

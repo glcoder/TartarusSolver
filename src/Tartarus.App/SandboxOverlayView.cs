@@ -71,15 +71,52 @@ public sealed partial class SandboxOverlayView : FrameworkElement
     ];
 
     private OverlayModel? _model;
+    // What the last drawing showed (DrawKey), when it showed only the hint.
+    private string? _drawnKey;
 
+    /// <summary>
+    /// The model; drawn again only when what it shows differs. The overlay is a transparent window as big as the game's,
+    /// and each drawing goes through the graphics card and back whole: a scan's model with the same hint drew it again
+    /// 2-5 times a second (2026-11-01).
+    /// </summary>
     public OverlayModel? Model
     {
         get => _model;
         set
         {
+            var hintBefore = _model?.Hint;
             _model = value;
+            string? key = DrawKey(value);
+            if (key != null && key == _drawnKey && ReferenceEquals(value?.Hint, hintBefore)) return;
+            _drawnKey = key;
             InvalidateVisual();
         }
+    }
+
+    /// <summary>
+    /// What a hints-only model draws, as text: the status and warning lines, the eye button, and the boxes the hint's
+    /// frames are placed by (the cells', the cards' as read, the pick cards'); the hint itself is compared as the same
+    /// object. Null for the other views (the debug window's), drawn every time.
+    /// </summary>
+    private static string? DrawKey(OverlayModel? m)
+    {
+        if (m is not { HintsOnly: true, EditMode: false }) return null;
+        var key = new System.Text.StringBuilder();
+        key.Append(m.FrameWidth).Append('x').Append(m.FrameHeight).Append('|').Append(m.Status).Append('|').Append(m.Warning)
+            .Append('|').Append(m.EyeHint).Append('|').Append(m.HintLine).Append('|').Append(m.Sandbox != null);
+        var scan = m.Scan;
+        if (scan?.Layout is { } layout) key.Append("|L").Append(layout.Width).Append(',').Append(layout.Height).Append(',').Append(layout.K.ToString("0.####", CultureInfo.InvariantCulture));
+        if (m.Hint == null || scan == null) return key.ToString();
+        key.Append("|ok").Append(scan.Ok).Append(scan.Pick?.Kind);
+        if (scan.Pick is { } pick)
+            foreach (var c in pick.Cards) key.Append('|').Append(c.Index).Append(c.Id).Append('@').Append(c.X.ToString("0.#", CultureInfo.InvariantCulture));
+        if (scan.Ok && scan.Cells is { } cells)
+            foreach (var c in cells) key.Append('|').Append(c.N).Append(',').Append((int)c.X).Append(',').Append((int)c.Y).Append(',').Append((int)(c.K * 1000));
+        if (scan.Text is { } text)
+            foreach (var c in text.Cards)
+                key.Append('|').Append(c.Index).Append(c.Meaning).Append(c.DestinationCell).Append('@')
+                    .Append(c.Line.Box.X0).Append(',').Append(c.Line.Box.Y0).Append(',').Append(c.Line.Box.X1).Append(',').Append(c.Line.Box.Y1);
+        return key.ToString();
     }
 
     public static Brush RarityBrush(Rarity rarity) => RarityBrushes[Math.Clamp((int)rarity, 0, RarityBrushes.Length - 1)];

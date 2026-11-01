@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Tartarus.Rules;
 
@@ -65,7 +66,11 @@ public sealed class ValueNet
     /// <summary>The playouts' instrument picks' own network, models/solver/picks.bin (policynet.py --instruments); null if there is none.</summary>
     public static string? FindPicks() => AppFiles.Find("models", "solver", "picks.bin");
 
+    // No zeroing of the scratch below: Encode clears the features itself, Forward writes every value before reading it.
+    // The zeroing took two thirds of the network's time (12% of the app's CPU, 2026-11-01's player trace): the
+    // playouts' policy network is small (456 inputs, 32 hidden), the scratch bigger than its sums.
     /// <summary>The predicted utility of a state (<see cref="Utility"/> of its outputs).</summary>
+    [SkipLocalsInit]
     public double Value(in GameState s)
     {
         Span<float> x = stackalloc float[Features.Count];
@@ -97,6 +102,7 @@ public sealed class ValueNet
         ? outputs[1] + RunScore.Worth[4] * outputs[2] + RunScore.Worth[3] * outputs[3]
         : outputs[0];
 
+    [SkipLocalsInit]
     public void Forward(ReadOnlySpan<float> input, Span<float> output)
     {
         Span<float> a = stackalloc float[MaxWidth];

@@ -20,6 +20,7 @@ internal static class Native
     public const uint WDA_NONE = 0, WDA_EXCLUDEFROMCAPTURE = 0x11;
 
     public const uint MONITOR_DEFAULTTONEAREST = 2;
+    public const uint GW_HWNDPREV = 3;
 
     [StructLayout(LayoutKind.Sequential)]
     public struct POINT
@@ -33,6 +34,7 @@ internal static class Native
     [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")] public static extern long GetWindowLongPtr(IntPtr h, int index);
     [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")] public static extern long SetWindowLongPtr(IntPtr h, int index, long value);
     [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
+    [DllImport("user32.dll")] public static extern IntPtr GetWindow(IntPtr h, uint cmd);
     [DllImport("user32.dll")] public static extern bool RegisterHotKey(IntPtr h, int id, uint mods, uint vk);
     [DllImport("user32.dll")] public static extern bool UnregisterHotKey(IntPtr h, int id);
     [DllImport("user32.dll")] public static extern bool SetWindowDisplayAffinity(IntPtr h, uint affinity);

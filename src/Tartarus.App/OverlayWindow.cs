@@ -58,11 +58,14 @@ public sealed class OverlayWindow : Window
         else Native.RemoveExStyle(_hwnd, Native.WS_EX_TRANSPARENT);
     }
 
-    /// <summary>Moves the overlay onto <paramref name="r"/> (physical pixels) and keeps it on top.</summary>
-    public void PlaceOver(PixelRect r)
+    /// <summary>Moves the overlay onto <paramref name="r"/> (physical pixels) and keeps it on top of <paramref name="game"/>.</summary>
+    public void PlaceOver(PixelRect r, IntPtr game)
     {
         if (_hwnd == IntPtr.Zero || r.IsEmpty) return;
-        // Re-assert topmost every time: a borderless game window can climb above us when it's activated.
+        // In place and still on top: nothing to tell Windows. Each SetWindowPos has WPF wait on its render thread
+        // (HwndTarget.UpdateWindowSettings, SyncFlush), where the UI stood in players' hang reports; it was sent five times
+        // a second (2026-11-01). A borderless game window can climb above us when it's activated: then again.
+        if (r == _placed && OnTopOf(game)) return;
         uint flags = Native.SWP_NOACTIVATE;
         if (r == _placed) flags |= Native.SWP_NOMOVE | Native.SWP_NOSIZE;
         // Onto another monitor, whose DPI may differ: a small window goes there first, then takes the size. On the DPI
@@ -73,5 +76,15 @@ public sealed class OverlayWindow : Window
             Native.SetWindowPos(_hwnd, Native.HWND_TOPMOST, r.Left, r.Top, 16, 16, Native.SWP_NOACTIVATE);
         Native.SetWindowPos(_hwnd, Native.HWND_TOPMOST, r.Left, r.Top, r.Width, r.Height, flags);
         _placed = r;
+    }
+
+    /// <summary>Topmost, and the game window isn't among the few above it in the Z order.</summary>
+    private bool OnTopOf(IntPtr game)
+    {
+        if ((Native.GetWindowLongPtr(_hwnd, Native.GWL_EXSTYLE) & Native.WS_EX_TOPMOST) == 0) return false;
+        int seen = 0;
+        for (var h = Native.GetWindow(_hwnd, Native.GW_HWNDPREV); h != IntPtr.Zero && seen < 512; h = Native.GetWindow(h, Native.GW_HWNDPREV), seen++)
+            if (h == game) return false;
+        return true;
     }
 }

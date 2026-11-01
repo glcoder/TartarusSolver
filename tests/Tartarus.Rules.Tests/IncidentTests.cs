@@ -17,6 +17,61 @@ public class IncidentTests
     }
 
     [Fact]
+    public void The_incident_that_does_Undercurrents_plays_out_after_the_Objective_s_pick()
+    {
+        // 2026-11-01, the game's log: RouteCell, the Objective's pick (RelicPop), its Confirm, then the incident's window.
+        var s = Empty(warden: 3);
+        s.Objective = ObjectiveKind.Undercurrents;
+        s.ObjectiveProgress = 1;
+        int sealedBefore = Sealed(s);
+        LandOn(ref s, 6, Incident.TasteOfFreedom);
+        Assert.True(s.ObjectiveDone);
+        Assert.Equal(PendingKind.Instrument, s.Pending[0].Kind);
+        Assert.Equal(Incident.TasteOfFreedom, s.DeferredIncident);
+        // Only the Warden's door opened so far: Taste of Freedom's three wait for the pick.
+        Assert.Equal(sealedBefore - 1, Sealed(s));
+        Do(Manual, ref s, new GameAction(ActionKind.PickInstrument, s.Pending[0].A));
+        Assert.Equal(Incident.None, s.DeferredIncident);
+        Assert.Equal(sealedBefore - 4, Sealed(s));
+        Assert.Equal(1, s.Stats.Incidents);
+
+        static int Sealed(in GameState s)
+        {
+            int k = 0;
+            for (int n = 1; n < GameData.Cells; n++) if (s.Cells[n].Sealed) k++;
+            return k;
+        }
+    }
+
+    [Fact]
+    public void A_move_that_does_Prison_Walk_onto_a_marker_puts_the_incident_after_the_pick_too()
+    {
+        // 2026-11-01 04:28: Prison Walk 14/18, four steps onto a marker: the pick, then the incident's window.
+        var s = Empty(warden: 3);
+        s.ObjectiveProgress = 16;
+        LandOn(ref s, 6, Incident.TasteOfFreedom);
+        Assert.True(s.ObjectiveDone);
+        Assert.Equal(Incident.TasteOfFreedom, s.DeferredIncident);
+        Do(Manual, ref s, new GameAction(ActionKind.PickInstrument, s.Pending[0].A));
+        Assert.Equal(Incident.None, s.DeferredIncident);
+    }
+
+    [Fact]
+    public void An_incident_that_doesn_t_finish_Undercurrents_plays_out_at_once()
+    {
+        var s = Empty(warden: 3);
+        s.Objective = ObjectiveKind.Undercurrents;
+        int sealedBefore = 0;
+        for (int n = 1; n < GameData.Cells; n++) if (s.Cells[n].Sealed) sealedBefore++;
+        LandOn(ref s, 6, Incident.TasteOfFreedom);
+        Assert.False(s.ObjectiveDone);
+        Assert.Equal(Incident.None, s.DeferredIncident);
+        int sealedAfter = 0;
+        for (int n = 1; n < GameData.Cells; n++) if (s.Cells[n].Sealed) sealedAfter++;
+        Assert.Equal(sealedBefore - 4, sealedAfter);
+    }
+
+    [Fact]
     public void Execution_Efficiency_removes_lower_countered_Inmates_and_raises_the_executioner()
     {
         var s = Empty(warden: 3);
