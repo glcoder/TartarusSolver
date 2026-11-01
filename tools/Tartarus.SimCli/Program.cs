@@ -74,8 +74,8 @@ int Fail(string message)
 
 string? Opt(string name) => Array.IndexOf(args, name) is int i and >= 0 && i + 1 < args.Length ? args[i + 1] : null;
 
-// Rules R: "fewer=P;replace=w0,w1,w2,w3,w4" over the base: P % of mornings one Destination short, the Replace rarity weights
-// (Normal .. Ultimate); "default" the rules as shipped.
+// Rules R: "fewer=P;replace=w0,w1,w2,w3,w4;noose=w0,..,w4" over the base: P % of mornings one Destination short, the Replace
+// rarity weights (Normal .. Ultimate), those with Hangman's Noose held; "default" the rules as shipped.
 RuleOptions Rules(string? spec, RuleOptions over)
 {
     if (spec is null or "default") return over;
@@ -86,6 +86,7 @@ RuleOptions Rules(string? spec, RuleOptions over)
         {
             "fewer" => over with { FewerDestinationsPercent = double.Parse(kv[1], CultureInfo.InvariantCulture) },
             "replace" => over with { ReplaceWeights = kv[1].Split(',').Select(x => double.Parse(x, CultureInfo.InvariantCulture)).ToArray() },
+            "noose" => over with { NooseReplaceWeights = kv[1].Split(',').Select(x => double.Parse(x, CultureInfo.InvariantCulture)).ToArray() },
             // theme=ironlaw (none, tyranny, opulence, cagefight): every run of that theme.
             "theme" => over with { Theme = Enum.Parse<Theme>(kv[1], ignoreCase: true) },
             _ => throw new ArgumentException($"unknown rule {kv[0]}"),

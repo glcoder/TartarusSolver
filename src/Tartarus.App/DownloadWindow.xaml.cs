@@ -15,6 +15,9 @@ public partial class DownloadWindow : Window
     /// <summary>What happened, for the app's log.</summary>
     public string Result { get; private set; } = "";
 
+    /// <summary>The last try failed (no host gave it), rather than the player saying no.</summary>
+    public bool Failed { get; private set; }
+
     public DownloadWindow(OcrPack pack, string languageCode)
     {
         _pack = pack;
@@ -32,6 +35,7 @@ public partial class DownloadWindow : Window
         CancelButton.Content = "Cancel";
         Bar.Visibility = Status.Visibility = Visibility.Visible;
         _cancel = new CancellationTokenSource();
+        Failed = false;
         // Which host it comes from: Hugging Face, else its mirror (blocked in China).
         string from = "";
         var progress = new Progress<(long Done, long Total)>(p =>
@@ -60,6 +64,7 @@ public partial class DownloadWindow : Window
         catch (Exception ex)
         {
             Result = $"OCR: {_pack.Id} recognizer download failed: {ex.Message}";
+            Failed = true;
             Status.Text = "Download failed: " + ex.Message;
             DownloadButton.IsEnabled = true;
             DownloadButton.Content = "Retry";

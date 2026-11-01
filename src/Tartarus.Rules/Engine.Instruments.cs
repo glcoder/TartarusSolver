@@ -22,7 +22,11 @@ public sealed partial class Engine
         CheckPrey(ref s);
         Span<double> w = stackalloc double[5];
         Options.ReplaceWeights.AsSpan(0, 5).CopyTo(w);
-        if (s.Has(Instrument.Noose)) w[0] = w[1] = 0;
+        if (s.Has(Instrument.Noose))
+        {
+            if (Options.NooseReplaceWeights is { } noose) noose.AsSpan(0, 5).CopyTo(w);
+            w[0] = w[1] = 0;
+        }
 
         // Scapegoat's Guillotine: with 2 or more others on the Sandbox, 2 random ones go and the new Inmate comes in rarer.
         bool above = false;

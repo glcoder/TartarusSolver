@@ -215,9 +215,41 @@ public partial class ControlWindow : Window
     private bool _askingOcr;
     // Recognizers the player said no to this session: not asked again until the next start.
     private readonly HashSet<string> _declinedOcr = [];
+    // A recognizer whose download failed is offered once more, a few minutes later: the network may be back.
+    private readonly HashSet<string> _reofferedOcr = [];
+    private DateTime? _reofferOcrAt;
+    private static readonly TimeSpan ReofferOcrAfter = TimeSpan.FromMinutes(3);
 
     // The list showing a language, not the player choosing one.
     private bool _showingLanguage;
+
+    // The language in the game's settings file beside _iniPath (the log it was read for).
+    private string? _iniLanguage, _iniPath;
+    private bool _readingIni;
+
+    /// <summary>
+    /// Reads the game's settings file off the UI thread (2026-11-01, a hang report: opening a file on the game's drive
+    /// stood the window still for over 5 s), then checks the language again.
+    /// </summary>
+    private async void ReadGameIni()
+    {
+        if (_readingIni || _settings.GameLanguage != null || _gameLogPath is not { } path) return;
+        _readingIni = true;
+        try
+        {
+            _iniLanguage = await Task.Run(() =>
+            {
+                try { return GameLog.LanguageOf(path); }
+                catch (Exception) { return null; }
+            });
+            _iniPath = path;
+        }
+        finally
+        {
+            _readingIni = false;
+        }
+        CheckGameLanguage();
+    }
 
     /// <summary>
     /// The game's language (the player's choice, else the game's own settings file beside its log) to OCR: checked every
@@ -227,8 +259,20 @@ public partial class ControlWindow : Window
     private void CheckGameLanguage()
     {
         if (_askingOcr) return;
-        string code = _settings.GameLanguage ?? (_gameLogPath != null ? GameLog.LanguageOf(_gameLogPath) : null) ?? "en";
-        if (code == _gameLanguage) return;
+        string? fromIni = null;
+        if (_settings.GameLanguage == null && _gameLogPath is { } log)
+        {
+            // This log's settings file not read yet: its language is waited for rather than English taken first.
+            if (!string.Equals(_iniPath, log, StringComparison.OrdinalIgnoreCase))
+            {
+                ReadGameIni();
+                return;
+            }
+            fromIni = _iniLanguage;
+        }
+        string code = _settings.GameLanguage ?? fromIni ?? "en";
+        if (code == _gameLanguage && !(_reofferOcrAt is { } at && DateTime.Now >= at)) return;
+        _reofferOcrAt = null;
         _gameLanguage = code;
         ShowGameLanguage(code);
         var pack = Tartarus.Vision.Ocr.OcrPacks.ForGame(code);
@@ -343,7 +387,11 @@ public partial class ControlWindow : Window
         {
             var window = new DownloadWindow(pack, code);
             if (IsVisible) window.Owner = this;
-            if (window.ShowDialog() != true) _declinedOcr.Add(pack.Id);
+            if (window.ShowDialog() != true)
+            {
+                if (window.Failed && _reofferedOcr.Add(pack.Id)) _reofferOcrAt = DateTime.Now + ReofferOcrAfter;
+                else _declinedOcr.Add(pack.Id);
+            }
             Log(window.Result);
         }
         finally
@@ -355,13 +403,25 @@ public partial class ControlWindow : Window
         _scans.SetGameLanguage(code);
     }
 
+    // Windows.Graphics.Capture missing on this PC: auto attach stops trying (2026-11-01, Windows 10 1909: tried every
+    // 2 s, 1904 lines of the same failure in the log, nothing on screen to tell the player why).
+    private bool _captureUnsupported;
+    private const string UnsupportedStatus = "Not capturing: Windows can't capture windows on this PC (Windows.Graphics.Capture unsupported)";
+
     private async void TryAutoAttach()
     {
         CheckGameLanguage();
+        // The player may switch the language in the game: its settings file read again.
+        ReadGameIni();
         if (_capture != null || _startingCapture || _findingGame) return;
         if (AutoAttachCheck.IsChecked != true)
         {
             CaptureStatus.Text = "Not capturing";
+            return;
+        }
+        if (_captureUnsupported)
+        {
+            CaptureStatus.Text = UnsupportedStatus;
             return;
         }
         var pattern = new Regex(_settings.WindowTitle);
@@ -402,6 +462,14 @@ public partial class ControlWindow : Window
             Log($"Capturing window \"{w.Title}\" ({w.Process}), {Win32Windows.VisibleBounds(w.Hwnd)}");
             // The log of the very install that's running, from its executable's path.
             if (Win32Windows.ImagePath(w.Pid) is { } exe) StartGameLog(exe);
+        }
+        catch (PlatformNotSupportedException ex)
+        {
+            if (!_captureUnsupported)
+                Log($"Could not start capturing \"{w.Title}\": {ex.Message} Usually a remote desktop session, a virtual machine "
+                    + "or a display driver without Direct3D 11. Not tried again automatically.");
+            _captureUnsupported = true;
+            CaptureStatus.Text = UnsupportedStatus;
         }
         catch (Exception ex)
         {

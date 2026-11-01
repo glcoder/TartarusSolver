@@ -4,6 +4,15 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.32 — 2026-11-01
+
+- The game's settings file (its language) is read off the UI thread: opening it on a slow drive stood the window still.
+- OCR language download: every host tried three times, a file cut off goes on from where it stopped, and a failed
+  download is offered once more three minutes later.
+- Windows.Graphics.Capture unsupported (remote desktop, virtual machine, old display driver): said once in the log and
+  in the status line, no longer retried every 2 s.
+- tools: `tartarus-sim --rules noose=w0,..,w4` (Replace rarity weights with Hangman's Noose held).
+
 ## 0.7.31 — 2026-11-01
 
 - The app's window stays on top only while the game (or the window itself) is in front: over other programs it is an

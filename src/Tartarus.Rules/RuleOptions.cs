@@ -13,6 +13,8 @@ public sealed record RuleOptions
     public double[] DoorWeights { get; init; } = [45, 35, 10, 8, 2];
     /// <summary>Rarity weights of the Inmate a Replace brings in (30,000 runs' boards).</summary>
     public double[] ReplaceWeights { get; init; } = [42, 34, 11.5, 9.5, 2.5];
+    /// <summary>Rarity weights of a Replace with Hangman's Noose held; null: <see cref="ReplaceWeights"/> without Normal and Magic.</summary>
+    public double[]? NooseReplaceWeights { get; init; }
     /// <summary>A Replace never brings in the Code it replaced (0.3% of 30,000 runs' Replaces did: read as never).</summary>
     public bool ReplaceNewCode { get; init; } = true;
     /// <summary>Rarity weights of the Inmates already out when a run starts (10,950 first boards).</summary>
