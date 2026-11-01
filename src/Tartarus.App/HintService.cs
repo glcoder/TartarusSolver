@@ -19,6 +19,15 @@ public sealed record Hint(GameState State, SearchResult Result, bool ConsumeOnly
 
     /// <summary>The other moves as good as the best one.</summary>
     public IReadOnlyList<ActionValue> Ties => Shown.Skip(1).Where(a => Shown[0].Mean - a.Mean < TieWithin).ToList();
+
+    /// <summary>
+    /// The moves as the overlay ranks them: on the Consume target pick the best one but consuming (made by Cancel first)
+    /// among the targets.
+    /// </summary>
+    public IReadOnlyList<ActionValue> Ranked => ConsumeOnly
+        && Result.Actions.Where(a => a.Action.Kind is not (ActionKind.Consume or ActionKind.Chain)).MaxBy(a => a.Mean) is { } stop
+        ? Shown.Append(stop).OrderByDescending(a => a.Mean).ToList()
+        : Shown;
 }
 
 /// <summary>

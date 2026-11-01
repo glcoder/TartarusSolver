@@ -4,6 +4,36 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.28 — 2026-11-01
+
+- Hints come sooner after a move:
+  - a new position needs two alike readings of the screen as before, but no longer a third: a cell's change was
+    held back a scan for the display and then waited for another;
+  - the reading that confirms it is taken 0.2 s later, not a whole scan period;
+  - a click, a page or a new day in the game's log (now read every 0.15 s) starts a scan at once, and scans come
+    every 0.2 s for the next 1.5 s;
+  - once the log has the day's Destination clicked, the cards still going away are no Destination hint (two quick
+    readings alike took a card left for the only Destination).
+- The hint shown goes as soon as the screen shows another position (the Warden moved, another phase, other
+  Destinations, a new Inmate in the Warden's cell), not when the new one settles: no "Cell 16" over the Warden
+  walking into it.
+- After a Replace, the game's log tells when its new Inmate showed: one of the same Code and rarity as the old no
+  longer holds the hint back for 2 s.
+- The app's log has milliseconds.
+- The cell network reads the Prey mark (the Blood-Stained Trap's Hunt): retrained on 164 marked cells found by the
+  game's own icon and checked by hand (20 before); it missed most of them, or took them for a Tusk.
+- A Prey mark (the Blood-Stained Trap's Hunt) read as a Tusk is taken for what it is: a mark is the one the
+  instruments held can make, on an Inmate it can be on (a Prey mark on a Wolf or Rat, a Tusk with Iron Tongs of Lust).
+- The Consume target pick (the red screen) keeps the Tusk and Prey marks read just before it: the red hid a Prey
+  mark, and the Consume hinted a moment before was ranked under Cancel there.
+- The app's log names the best move on the Consume target pick as the overlay does (Cancel among the targets).
+- Text recognition for another language downloads from hf-mirror.com when Hugging Face sends nothing for 15 s (it is
+  blocked in China: a TapTap player's Chinese recognizer never came); the window says which host it comes from.
+- A graphics card reset no longer stands the app still: the overlay stays up while the game's window is captured
+  again (hiding it then waited 10 s on Windows).
+- The game language is asked for only from plain Sandbox frames: a Consume's red screen and fades darken the
+  Objective's panel, and a chain of Consumes asked for it with English read right.
+
 ## 0.7.27 — 2026-10-31
 
 - Game language in the window (Recognition): taken from the game's settings file by default ("Detect automatically"),

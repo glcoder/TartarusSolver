@@ -32,16 +32,23 @@ public partial class DownloadWindow : Window
         CancelButton.Content = "Cancel";
         Bar.Visibility = Status.Visibility = Visibility.Visible;
         _cancel = new CancellationTokenSource();
+        // Which host it comes from: Hugging Face, else its mirror (blocked in China).
+        string from = "";
         var progress = new Progress<(long Done, long Total)>(p =>
         {
             Bar.Value = p.Total > 0 ? (double)p.Done / p.Total : 0;
-            Status.Text = $"{p.Done / 1048576.0:0.0} of {p.Total / 1048576.0:0.0} MB";
+            Status.Text = $"{p.Done / 1048576.0:0.0} of {p.Total / 1048576.0:0.0} MB from {from}";
+        });
+        var host = new Progress<string>(h =>
+        {
+            from = h;
+            Status.Text = $"Connecting to {h}…";
         });
         try
         {
-            await OcrDownload.RunAsync(_pack, progress, _cancel.Token);
+            await OcrDownload.RunAsync(_pack, progress, _cancel.Token, host);
             _cancel = null;
-            Result = $"OCR: {_pack.Id} recognizer downloaded to {OcrPacks.DownloadDir}";
+            Result = $"OCR: {_pack.Id} recognizer downloaded from {from} to {OcrPacks.DownloadDir}";
             DialogResult = true;
         }
         catch (OperationCanceledException)

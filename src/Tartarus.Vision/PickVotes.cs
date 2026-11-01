@@ -15,6 +15,9 @@ public sealed class PickVotes
     private string? _kinds;
     // Each cell's Inmate as last read before the red screen (its Code must match for its rarity to hold).
     private readonly (Code? Code, Rarity Rarity)?[] _before = new (Code?, Rarity)?[16];
+    // Its Tusk or Prey mark then: the red screen hides a mark, it doesn't take it away (2026-11-01: a Prey mark lost
+    // under the red, the Consume hinted a moment before ranked under Cancel).
+    private readonly (bool Tusk, bool Prey)[] _beforeMarks = new (bool, bool)[16];
     // A cell read lower than before once: a second such reading in a row is a new Inmate, not the red.
     private readonly bool[] _lowerOnce = new bool[16];
 
@@ -37,6 +40,7 @@ public sealed class PickVotes
                 continue;
             }
             _before[n - 1] = c.Kind == CellKind.Inmate ? (c.Code, c.Rarity) : null;
+            _beforeMarks[n - 1] = c.Kind == CellKind.Inmate ? (c.Tusk, c.Prey) : (false, false);
             _lowerOnce[n - 1] = false;
         }
     }
@@ -61,7 +65,11 @@ public sealed class PickVotes
         {
             var c = b[n];
             if (c.Kind != CellKind.Inmate || c.Covered) continue;
-            if (_before[n - 1] is { } was && was.Code == c.Code && was.Rarity > c.Rarity) c.Rarity = was.Rarity;
+            if (_before[n - 1] is { } was && was.Code == c.Code)
+            {
+                if (was.Rarity > c.Rarity) c.Rarity = was.Rarity;
+                (c.Tusk, c.Prey) = (c.Tusk || _beforeMarks[n - 1].Tusk, c.Prey || _beforeMarks[n - 1].Prey);
+            }
             var read = (c.Code, c.Rarity);
             var votes = _votes[n - 1];
             votes[read] = votes.GetValueOrDefault(read) + 1;

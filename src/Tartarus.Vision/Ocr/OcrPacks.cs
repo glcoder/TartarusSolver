@@ -10,10 +10,10 @@ public sealed record OcrPack(string Id, string Script, string Folder, long Model
     public string Dictionary => $"dict_{Id}.txt";
     public long Size => ModelSize + DictionarySize;
 
-    /// <summary>The files to download: name, address, size, SHA-256.</summary>
-    public IEnumerable<(string Name, string Url, long Size, string Sha256)> Files()
+    /// <summary>The files to download: name, its path on a host of <see cref="OcrDownload.Hosts"/>, size, SHA-256.</summary>
+    public IEnumerable<(string Name, string Path, long Size, string Sha256)> Files()
     {
-        string root = $"https://huggingface.co/monkt/paddleocr-onnx/resolve/main/languages/{Folder}/";
+        string root = $"monkt/paddleocr-onnx/resolve/main/languages/{Folder}/";
         yield return (Model, root + "rec.onnx", ModelSize, ModelSha256);
         yield return (Dictionary, root + "dict.txt", DictionarySize, DictionarySha256);
     }

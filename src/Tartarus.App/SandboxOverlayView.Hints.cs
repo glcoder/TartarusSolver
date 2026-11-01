@@ -162,12 +162,9 @@ public sealed partial class SandboxOverlayView
     private static void DrawHintSummary(DrawingContext dc, Hint hint, double ppd)
     {
         // On the Consume target pick the best move but consuming is made by Cancel first: ranked with the targets.
-        var shown = hint.Shown;
-        if (hint.ConsumeOnly && hint.Result.Actions.Where(a => a.Action.Kind is not (ActionKind.Consume or ActionKind.Chain)).MaxBy(a => a.Mean) is { } stop)
-            shown = shown.Append(stop).OrderByDescending(a => a.Mean).ToList();
+        var shown = hint.Ranked;
         if (shown.Count == 0) return;
-        string Name(ActionValue a) => !hint.ConsumeOnly || a.Action.Kind is ActionKind.Consume or ActionKind.Chain ? ActionName(a.Action)
-            : a.Action.Kind == ActionKind.StopChain ? "Cancel" : $"Cancel → {ActionName(a.Action)}";
+        string Name(ActionValue a) => RankedName(hint, a);
         var best = shown[0];
         var ties = shown.Skip(1).Where(a => best.Mean - a.Mean < Hint.TieWithin).ToList();
         var next = shown.Skip(1 + ties.Count).FirstOrDefault();
@@ -180,6 +177,10 @@ public sealed partial class SandboxOverlayView
     }
 
     /// <summary>Human name of an action, in the game's terms (English: it goes to the log and bug reports too).</summary>
+    /// <summary>A move of <see cref="Hint.Ranked"/> by name: on the Consume target pick the rest but consuming go by Cancel.</summary>
+    public static string RankedName(Hint hint, ActionValue a) => !hint.ConsumeOnly || a.Action.Kind is ActionKind.Consume or ActionKind.Chain ? ActionName(a.Action)
+        : a.Action.Kind == ActionKind.StopChain ? "Cancel" : $"Cancel → {ActionName(a.Action)}";
+
     public static string ActionName(GameAction a) => a.Kind switch
     {
         ActionKind.Move => a.Arg == GameData.Room ? "Interrogation Room" : $"Cell {a.Arg + 1}",

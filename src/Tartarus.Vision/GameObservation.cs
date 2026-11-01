@@ -24,6 +24,8 @@ public static class GameObservation
         for (int n = 2; n <= 16; n++)
         {
             var c = b[n];
+            // The mark the instruments held can make, whatever the cell net took it for.
+            var (tusk, prey) = EditableSandbox.Mark(c, b.Instruments);
             o.Cells[n - 1] = new R.ObservedCell
             {
                 Kind = c.Kind switch { CellKind.Inmate => R.ObservedKind.Inmate, CellKind.Empty => R.ObservedKind.Empty, _ => R.ObservedKind.Unopened },
@@ -32,8 +34,8 @@ public static class GameObservation
                 Shown = c.Kind == CellKind.Unopened && c.VisibleRarity is { } v ? (R.Rarity)v : null,
                 Scratch = c.ScratchMarks,
                 Nest = c.Nest,
-                Tusk = c.Tusk,
-                Prey = c.Prey,
+                Tusk = tusk,
+                Prey = prey,
                 Marker = c.Incident,
             };
         }

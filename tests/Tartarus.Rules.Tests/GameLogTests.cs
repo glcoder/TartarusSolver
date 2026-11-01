@@ -240,4 +240,56 @@ public class GameLogTests
         memory.Days(15);
         Assert.Equal((0, 15), (memory.Chromatic, memory.LastDays));
     }
+
+    [Fact]
+    public void A_Replace_is_told_by_its_new_Inmate_s_reveal_not_a_Consume_or_an_End()
+    {
+        // 2026-10-31: a decision card's click, then the first telling sound: a new Inmate's reveal (Replace), the red
+        // screen (Consume) or the new day (End).
+        var log = new GameLog();
+        log.Feed("[2026.10.31-22.05.51:713][156]TLGame: Display: [Game] UIButton@ normal-click Btn_S16GamePlay_Start");
+        log.Feed("[2026.10.31-22.05.52:000][  1]TLLua: Display: [Game] [S16LastDay] check cur=3 max=20 played=false");
+        log.Feed("[2026.10.31-22.22.47:122][ 51]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_ActionCell");
+        log.Feed("[2026.10.31-22.22.47:215][ 52]TLLua: Display: [Game] AudioMgr@PlayAudio  AudioEnum  == UI_S16_Food_Target");
+        log.Feed("[2026.10.31-22.22.47:249][ 53]TLLua: Display: [Game] AudioMgr@PlayAudio  AudioEnum  == UI_S16_Basic_Quality");
+        var run = Assert.Single(log.Runs);
+        Assert.Equal(new DateTime(2026, 10, 31, 22, 22, 47, 249, DateTimeKind.Utc).ToLocalTime(), run.ReplacedAt);
+        log.Feed("[2026.10.31-22.22.49:029][ 98]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_ActionCell");
+        log.Feed("[2026.10.31-22.22.49:030][ 98]TLLua: Display: [Game] AudioMgr@PlayAudio  AudioEnum  == UI_S16_Eating_red_screen");
+        log.Feed("[2026.10.31-22.22.50:000][120]TLLua: Display: [Game] AudioMgr@PlayAudio  AudioEnum  == UI_S16_Mid_Quality");
+        log.Feed("[2026.10.31-22.24.51:131][  1]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_ActionCell");
+        log.Feed("[2026.10.31-22.24.51:548][  9]TLLua: Display: [Game] AudioMgr@PlayAudio  AudioEnum  == UI_S16_Date_Change");
+        log.Feed("[2026.10.31-22.24.52:340][ 40]TLLua: Display: [Game] AudioMgr@PlayAudio  AudioEnum  == UI_S16_Basic_Quality");
+        Assert.Equal(new DateTime(2026, 10, 31, 22, 22, 47, 249, DateTimeKind.Utc).ToLocalTime(), run.ReplacedAt);
+    }
+
+    [Fact]
+    public void The_day_s_move_is_made_from_its_click_to_the_next_day_s_banner()
+    {
+        // 2026-11-01: the new day's cards show under its banner, before the day counter reaches the log.
+        var log = new GameLog();
+        log.Feed("[2026.10.31-22.05.51:713][156]TLGame: Display: [Game] UIButton@ normal-click Btn_S16GamePlay_Start");
+        log.Feed("[2026.10.31-22.53.35:888][ 12]TLLua: Display: [Game] [S16LastDay] check cur=19 max=20 played=false");
+        var run = Assert.Single(log.Runs);
+        Assert.False(run.Moved);
+        log.Feed("[2026.10.31-22.53.36:729][ 40]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_RouteCell");
+        Assert.True(run.Moved);
+        log.Feed("[2026.10.31-22.53.39:990][ 99]TLLua: Display: [Game] S16BoardNewDayPop Run");
+        Assert.False(run.Moved);
+        log.Feed("[2026.10.31-22.53.40:774][120]TLLua: Display: [Game] [S16LastDay] check cur=20 max=20 played=false");
+        Assert.False(run.Moved);
+        Assert.Equal(new DateTime(2026, 10, 31, 22, 53, 39, 990, DateTimeKind.Utc).ToLocalTime(), run.DayStartedAt);
+        log.Feed("[2026.10.31-22.53.41:608][140]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_RouteCell");
+        Assert.True(run.Moved);
+    }
+
+    [Fact]
+    public void Clicks_pages_and_new_days_are_the_screen_about_to_change()
+    {
+        Assert.True(GameLogWatcher.IsActivity("[2026.10.31-22.24.54:188][ 61]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_RouteCell"));
+        Assert.True(GameLogWatcher.IsActivity("[2026.10.31-22.24.52:340][ 40]TLLua: Display: [Game] TipMsgShowMgr@DispatchPageRunChange PageName = S16BoardNewDayPop , PageRunState = Destory "));
+        Assert.True(GameLogWatcher.IsActivity("[2026.10.31-22.24.52:340][ 40]TLLua: Display: [Game] [S16LastDay] check cur=20 max=20 played=false"));
+        Assert.False(GameLogWatcher.IsActivity("[2026.10.31-22.24.52:340][ 40]TLLua: Display: [Game] AudioMgr@PlayAudio  AudioEnum  == UI_S16_Cell_Light"));
+        Assert.False(GameLogWatcher.IsActivity("[2026.10.31-22.24.52:340][ 40]TLGame: Display: [Game] UIButton@ normal-click Btn_Hideout_Stash"));
+    }
 }

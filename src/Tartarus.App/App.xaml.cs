@@ -50,7 +50,7 @@ public partial class App : Application
     private void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         e.Handled = true;
-        try { System.IO.File.AppendAllText(AppSettings.LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} Error: {e.Exception}{Environment.NewLine}"); }
+        try { System.IO.File.AppendAllText(AppSettings.LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} Error: {e.Exception}{Environment.NewLine}"); }
         catch { }
         // The app goes on: the player may send a report of it, with what was on screen.
         if (MainWindow is ControlWindow control && BugReports.Enabled) control.Report(e.Exception);

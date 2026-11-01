@@ -42,6 +42,8 @@ public partial class ControlWindow : Window
     private EditableSandbox? _scannedSandbox;
     // The last scan as read, before KeepCovered and Steady: what Steady compares the next one with.
     private EditableSandbox? _lastRead;
+    // The last scan's reading as the hints settle on it: tooltips filled in, not steadied (the Consume target pick's votes).
+    private EditableSandbox? _settleRead;
     private EditableSandbox? _sandbox;
     private int _selected = -1;
     private bool _editMode;
@@ -57,11 +59,13 @@ public partial class ControlWindow : Window
         _hints.Log += line => Dispatcher.BeginInvoke(() => Log("Hint: " + line));
         _hints.Ready += hint => Dispatcher.BeginInvoke(() =>
         {
-            var best = hint.Shown.Count > 0 ? hint.Shown[0] : null;
-            Tartarus.Rules.GameAction? before = _hint?.Shown is { Count: > 0 } prev ? prev[0].Action : null;
+            // As the overlay ranks them (on the Consume target pick, Cancel with the targets).
+            var ranked = hint.Ranked;
+            var best = ranked.Count > 0 ? ranked[0] : null;
+            Tartarus.Rules.GameAction? before = _hint?.Ranked is { Count: > 0 } prev ? prev[0].Action : null;
             if (best != null && before != best.Action)
-                Log($"Hint: {SandboxOverlayView.ActionName(best.Action)} worth ≈{best.Mean:0.000} ({best.Chromatic:0.00} Chromatic)"
-                    + string.Concat(hint.Ties.Select(t => $", tied with {SandboxOverlayView.ActionName(t.Action)} ≈{t.Mean:0.000}"))
+                Log($"Hint: {SandboxOverlayView.RankedName(hint, best)} worth ≈{best.Mean:0.000} ({best.Chromatic:0.00} Chromatic)"
+                    + string.Concat(ranked.Skip(1).Where(t => best.Mean - t.Mean < Hint.TieWithin).Select(t => $", tied with {SandboxOverlayView.RankedName(hint, t)} ≈{t.Mean:0.000}"))
                     + $" ({hint.Result.Elapsed.TotalMilliseconds:0} ms)");
             _hint = hint;
             HintStatus.Text = $"Last hint: {hint.Result.Elapsed.TotalMilliseconds:0} ms, {hint.Result.Playouts:N0} playouts"
@@ -360,10 +364,11 @@ public partial class ControlWindow : Window
         if (game.Hwnd != IntPtr.Zero && !Win32Windows.IsMinimized(game.Hwnd)) StartCapture(game);
     }
 
-    private async void StartCapture(WindowInfo w)
+    /// <summary>Captures <paramref name="w"/>; <paramref name="keepOverlay"/>: the same window again, the overlay stays up.</summary>
+    private async void StartCapture(WindowInfo w, bool keepOverlay = false)
     {
         if (_startingCapture) return;
-        StopCapture();
+        StopCapture(hideOverlay: !keepOverlay);
         _startingCapture = true;
         try
         {
@@ -394,7 +399,8 @@ public partial class ControlWindow : Window
         }
     }
 
-    private void StopCapture()
+    /// <summary>Stops capturing; <paramref name="hideOverlay"/> false when the same window is captured again at once.</summary>
+    private void StopCapture(bool hideOverlay = true)
     {
         // Off the UI thread too: closing the capture once hung in Windows' code (2026-10-30, Sentry, an Insider build).
         if (_capture is { } old) Task.Run(old.Dispose);
@@ -402,7 +408,7 @@ public partial class ControlWindow : Window
         _target = null;
         CaptureButton.Content = "Capture ▶";
         CaptureStatus.Text = "Not capturing";
-        if (_overlay.IsVisible) _overlay.Hide();
+        if (hideOverlay && _overlay.IsVisible) _overlay.Hide();
     }
 
     private void RefreshButton_Click(object sender, RoutedEventArgs e) => RefreshWindowList();
@@ -483,8 +489,14 @@ public partial class ControlWindow : Window
     // When the Sandbox the hints play on (_hintSandbox) was seen: the old one after the log's change leaves it older.
     private DateTime _hintBoardAt;
     private const double FadePresence = 0.45;
+    // A plain Sandbox's presence (0.55-0.72): no popup, fade or red screen over it.
+    private const double PlainPresence = 0.5;
     // Which Sandbox readings a hint is made of: read alike twice, and not the old Sandbox after the log's change.
     private readonly BoardSettle _boardSettle = new();
+    // The last reading wasn't settled: the scan loop reads the next frame soon (QuickConfirm), not a period later.
+    private bool _confirmSoon;
+    // The reading the hint shown was asked for (its Warden, phase, Destinations, Warden's Inmate).
+    private EditableSandbox? _hinted;
     // The Hunt card last offered: where the Warden stood, the day, the Sandbox and the text read with it.
     private (int Warden, int? Days, EditableSandbox Board, Vision.Ocr.ScreenText Text)? _huntOffer;
     // The hint is the eye button: the Sandbox changed under a pick (look at it), or it was read while the pick waits (go back).
@@ -492,6 +504,8 @@ public partial class ControlWindow : Window
     // The Warden's Inmate while the Replace card was offered: after the click the card leaves a moment before the new
     // Inmate shows.
     private (int Warden, Tartarus.Vision.Code? Code, Tartarus.Vision.Rarity Rarity, DateTime At)? _replaceOffer;
+    // How long after its reveal's sound a Replace's new Inmate is in its cell on screen.
+    private static readonly TimeSpan ReplaceReveal = TimeSpan.FromSeconds(0.4);
 
     /// <summary>The run going on, as the game's log tells it; null without a log or between runs.</summary>
     private LoggedRun? LiveLogRun => _logRun is { Finished: false } run && (run.MaxDays > 0 || run.Paged) ? run : null;
@@ -557,8 +571,10 @@ public partial class ControlWindow : Window
             if (capture != _capture) return false;
             Log("Capture: the graphics device was lost, capturing again (" + ex.Message.Trim() + ")");
             var target = _target;
-            StopCapture();
-            if (target is { } w && Win32Windows.Exists(w.Hwnd)) StartCapture(w);
+            // The overlay stays: hiding a window while the graphics card resets waits on the desktop compositor (2026-11-01,
+            // Sentry: the UI thread stood 10 s in ShowWindow).
+            StopCapture(hideOverlay: false);
+            if (target is { } w && Win32Windows.Exists(w.Hwnd)) StartCapture(w, keepOverlay: true);
             return false;
         }
         if (capture != _capture) return false;
@@ -591,17 +607,22 @@ public partial class ControlWindow : Window
         _scan = r;
         var read = EditableSandbox.FromScan(r);
         _scannedSandbox = read.Clone();
-        if (previous != null)
-        {
-            _scannedSandbox.KeepCovered(previous);
-            if (_lastRead != null) _scannedSandbox.Steady(previous, _lastRead);
-        }
+        if (previous != null) _scannedSandbox.KeepCovered(previous);
+        // A hint settles on this scan's own reading, not the steadied one: Steady holds a cell's change back a scan of
+        // its own, and the settling a second (a door opening waited three scans for its hint, 2026-11-01).
+        _settleRead = _scannedSandbox.Clone();
+        if (previous != null && _lastRead != null) _scannedSandbox.Steady(previous, _lastRead);
         _lastRead = read;
         if (r.Ok && WholeBoard(_scannedSandbox)) _lastBoardAt = frame.Timestamp.LocalDateTime;
         // The Consume target pick: the Sandbox stands still under the flickering red, so each Inmate shows its most
         // frequent reading over the pick's frames.
         bool targetPick = r.Ok && (r.Text?.ConsumePick == true || LiveLogRun is { ConsumePick: true } && r.Text?.Cards.Count == 0);
-        if (targetPick) _pickVotes.Apply(_scannedSandbox);
+        if (targetPick)
+        {
+            // The red flickers: there the votes are the reading.
+            _pickVotes.Apply(_scannedSandbox);
+            _settleRead = _scannedSandbox.Clone();
+        }
         else
         {
             _pickVotes.Clear();
@@ -613,6 +634,8 @@ public partial class ControlWindow : Window
         {
             _run.Days(read.Days);
             _scannedSandbox.Instruments = [.. _run.Instruments(read.Instruments)];
+            // A Tusk or Prey mark as the instruments held can make it, on the overlay and in the frames collected too.
+            _scannedSandbox.MarksByInstruments();
             _scannedSandbox.Chromatic = _run.ChromaticCount(read.Chromatic, r.Chromatic?.Covered == true, frame.Timestamp);
             // The log's count can miss one (a Chromatic's sound in a quick chain) but never adds one: the higher of the two.
             if (LiveLogRun is { FromStart: true } logged) _scannedSandbox.Chromatic = Math.Max(_scannedSandbox.Chromatic, logged.ChromaticAtLeast);
@@ -648,7 +671,10 @@ public partial class ControlWindow : Window
         if (manual || reading != _lastAutoDescription) Log((manual ? "Scan: " : "Changed: ") + description.Replace(Environment.NewLine, " | ").Replace("\n", " | "));
         _lastAutoDescription = reading;
         if (!manual) AutoCollect(frame, r);
-        if (r.Ok && r.Text != null) CheckTextReadable(r.Text, frame.Timestamp.LocalDateTime);
+        // Only a plain Sandbox tells whether the text reads: the red screen and a fade darken the Objective's panel
+        // (2026-11-01: a chain of Consumes asked for the game's language, 15 red frames in 5 s).
+        if (r.Ok && r.Text != null && !targetPick && LiveLogRun is not { ConsumePick: true } && r.Loc is { Score: >= PlainPresence })
+            CheckTextReadable(r.Text, frame.Timestamp.LocalDateTime);
         RequestHint(r);
         return true;
     }
@@ -743,6 +769,10 @@ public partial class ControlWindow : Window
                 watcher.Changed += run => Dispatcher.BeginInvoke(() =>
                 {
                     if (_gameLog == watcher) OnLogRun(run);
+                });
+                watcher.Activity += () => Dispatcher.BeginInvoke(() =>
+                {
+                    if (_gameLog == watcher) OnLogActivity();
                 });
             }
             Log(path != null ? $"Game log: {path}" : "Game log not found: screen recognition only");
@@ -872,8 +902,14 @@ public partial class ControlWindow : Window
     /// <summary>A Sandbox read whole: the Warden found and no more than a couple of cells under the interface.</summary>
     private static bool WholeBoard(EditableSandbox b) => b.Warden > 0 && b.Cells.Count(c => c.Covered) < 3;
 
+    /// <summary>Another decision than the one hinted on <paramref name="was"/>: the Warden, the phase, the Destinations or the Warden's Inmate.</summary>
+    private static bool MovedOn(EditableSandbox was, EditableSandbox now) =>
+        was.Warden != now.Warden || was.Phase != now.Phase || !was.Destinations.SequenceEqual(now.Destinations)
+        || now.Warden > 1 && SandboxText.CellShort(was[now.Warden]) != SandboxText.CellShort(now[now.Warden]);
+
     private void RequestHint(ScanResult r)
     {
+        _confirmSoon = false;
         if (!_settings.Hints || _editMode) return;
         try
         {
@@ -892,7 +928,9 @@ public partial class ControlWindow : Window
             }
             if (r.Ok && _sandbox != null)
             {
-                var settle = _boardSettle.Take(_sandbox, _lastBoardAt, LiveLogRun?.BoardChangedAt ?? default);
+                var settle = _boardSettle.Take(_settleRead ?? _sandbox, _lastBoardAt, LiveLogRun?.BoardChangedAt ?? default);
+                // A reading not settled yet: the next frame is read soon, not a whole scan period later.
+                _confirmSoon = settle == BoardSettle.Verdict.Unsettled;
                 // A frame caught as a popup comes or goes (presence well below a plain Sandbox's 0.6-0.7) reads wrong where
                 // it's dim: not taken unless the next scan reads it alike (2026-10-28: a Warden's Treasure hinted over
                 // one at 0.22, two Ultimates read Normal and the Warden elsewhere).
@@ -929,11 +967,18 @@ public partial class ControlWindow : Window
                     ClearHint();
                     return;
                 }
-                // A reading in the middle of an animation waits for the next scan (the hint shown stays); the old Sandbox
-                // still on screen after the log's bite, Chromatic or Prison Incident takes the hint away: it's for that one.
+                // A reading in the middle of an animation waits for the next scan: the hint shown stays, unless the position
+                // moved on (2026-11-01: "Cell 16" stood over the Warden walking into it, then went to the Consume card).
+                // The old Sandbox still on screen after the log's bite, Chromatic or Prison Incident takes the hint away:
+                // it's for that one.
                 switch (settle)
                 {
                     case BoardSettle.Verdict.Unsettled:
+                        if (_hinted is { } was && _settleRead is { } now && MovedOn(was, now))
+                        {
+                            _hints.Clear();
+                            ClearHint();
+                        }
                         return;
                     case BoardSettle.Verdict.Stale:
                         _hints.Clear();
@@ -943,6 +988,10 @@ public partial class ControlWindow : Window
                 // Only a screen that says what it asks: the Consume target pick's banner, Destination cards read, or a
                 // decision card. Frames in between (cards sliding in, a day's banner) would be taken for the wrong phase.
                 bool destinations = _sandbox.Phase == Phases.Destination && _sandbox.Destinations.Count > 0;
+                // The day's move clicked (the log tells): Destination cards still on screen are going away, and two quick
+                // readings alike took one left for the only Destination (2026-11-01: "Cell 16" flashed twice after Cell
+                // 2 was clicked).
+                if (destinations && live is { Moved: true } moved && _lastBoardAt > moved.MovedAt) destinations = false;
                 bool decision = r.Text?.Cards.Any(c => c.Meaning is var t
                     && (t.Contains("consume") || t.Contains("replace") || t.Contains("hunt") || t.Contains("instigate") || t.Contains("bestow") || t == "end" || t.EndsWith(" end"))) == true;
                 // The target pick: its banner read, or the log's red-screen sound with nothing else on screen (the
@@ -970,11 +1019,13 @@ public partial class ControlWindow : Window
                 if (decision && !consumeOnly && r.Text?.RatwayPick != true && here != null && here.Kind != CellKind.Inmate && !endOnly) decision = false;
                 // Replace clicked: its card is gone but the old Inmate is still in the Warden's cell; the day read as
                 // after the Replace would be the old Inmate's (an End). Wait for the new one, two seconds at most (it can
-                // come out the same).
+                // come out the same); a log with clicks tells when it showed (its reveal's sound), and a frame a moment
+                // after that is the new one, alike or not.
                 bool replaceCard = r.Text?.Cards.Any(c => c.Meaning.Contains("replace")) == true;
                 if (replaceCard && here is { Kind: CellKind.Inmate }) _replaceOffer = (_sandbox.Warden, here.Code, here.Rarity, DateTime.Now);
                 else if (decision && !consumeOnly && _replaceOffer is { } offer && offer.Warden == _sandbox.Warden && here is { Kind: CellKind.Inmate }
-                    && here.Code == offer.Code && here.Rarity == offer.Rarity && DateTime.Now - offer.At < TimeSpan.FromSeconds(2))
+                    && here.Code == offer.Code && here.Rarity == offer.Rarity && DateTime.Now - offer.At < TimeSpan.FromSeconds(2)
+                    && !(live is { } replaced && replaced.ReplacedAt > offer.At - TimeSpan.FromSeconds(1) && _lastBoardAt >= replaced.ReplacedAt + ReplaceReveal))
                     decision = false;
                 if (!consumeOnly && !destinations && !decision)
                 {
@@ -1003,6 +1054,7 @@ public partial class ControlWindow : Window
                     && (objective == Tartarus.Rules.ObjectiveKind.SurvivalOfTheFittest ? live.Consumes
                         : objective == Tartarus.Rules.ObjectiveKind.Undercurrents ? live.Incidents : -1) is int counted and >= 0)
                     observation.ObjectiveProgress = Math.Max(observation.ObjectiveProgress, Math.Min(counted, Tartarus.Rules.GameData.Target(objective)));
+                _hinted = _settleRead?.Clone();
                 if (_hints.Request(observation, consumeOnly, huntPick)) ClearHint();
             }
             else if (r.Pick is { } pick)
@@ -1175,14 +1227,34 @@ public partial class ControlWindow : Window
     }
 
     /// <summary>
-    /// Auto scan: a frame every <see cref="AppSettings.AutoScanSeconds"/> from the last one's start, never before the last
-    /// one's reading and hint are done (at 0, as soon as they are).
+    /// Scans come this soon after the last one's start, not a whole period: to confirm a reading not settled yet (a hint
+    /// waits for two alike), and for <see cref="BurstFor"/> after the game's log tells of a click or a page opening or
+    /// closing (the screen is about to change).
+    /// </summary>
+    private static readonly TimeSpan QuickScan = TimeSpan.FromSeconds(0.2);
+    private static readonly TimeSpan BurstFor = TimeSpan.FromSeconds(1.5);
+    private DateTime _burstUntil;
+    // Completed by the game's log: the scan loop's wait ends at once.
+    private TaskCompletionSource _wake = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    /// <summary>The game's log told of a click or a page: scan now and often for a moment.</summary>
+    private void OnLogActivity()
+    {
+        _burstUntil = DateTime.Now + BurstFor;
+        _wake.TrySetResult();
+    }
+
+    /// <summary>
+    /// Auto scan: a frame every <see cref="AppSettings.AutoScanSeconds"/> from the last one's start (<see cref="QuickScan"/>
+    /// to confirm a reading or after the log's activity), never before the last one's reading and hint are done (at 0,
+    /// as soon as they are).
     /// </summary>
     private async Task AutoScanLoopAsync()
     {
         int loop = ++_autoScanLoop;
         while (loop == _autoScanLoop)
         {
+            if (_wake.Task.IsCompleted) _wake = new(TaskCreationOptions.RunContinuationsAsynchronously);
             var started = Stopwatch.StartNew();
             bool scanned;
             try
@@ -1199,8 +1271,12 @@ public partial class ControlWindow : Window
                 return;
             }
             // Nothing to scan (no window, minimized, editing): no spinning at 0.
-            double wait = Math.Max(_settings.AutoScanSeconds, scanned ? 0 : 0.2) - started.Elapsed.TotalSeconds;
-            await Task.Delay(TimeSpan.FromSeconds(Math.Max(wait, 0.001)));
+            double period = _settings.AutoScanSeconds;
+            if (scanned && (_confirmSoon || DateTime.Now < _burstUntil)) period = Math.Min(period, QuickScan.TotalSeconds);
+            double wait = Math.Max(period, scanned ? 0 : 0.2) - started.Elapsed.TotalSeconds;
+            // The log's activity cuts the wait short (only a scan's own time apart: not when nothing was scanned).
+            var delay = Task.Delay(TimeSpan.FromSeconds(Math.Max(wait, 0.001)));
+            await (scanned ? Task.WhenAny(delay, _wake.Task) : delay);
         }
     }
 
@@ -1453,8 +1529,10 @@ public partial class ControlWindow : Window
 
     private void Log(string message)
     {
-        string line = $"{DateTime.Now:HH:mm:ss} {message}";
-        try { File.AppendAllText(AppSettings.LogPath, $"{DateTime.Now:yyyy-MM-dd} {line}{Environment.NewLine}"); }
+        var now = DateTime.Now;
+        string line = $"{now:HH:mm:ss} {message}";
+        // Milliseconds in the file: how long a hint takes after the game's click is told by them.
+        try { File.AppendAllText(AppSettings.LogPath, $"{now:yyyy-MM-dd HH:mm:ss.fff} {message}{Environment.NewLine}"); }
         catch { }
         LogList.Items.Add(line);
         while (LogList.Items.Count > 200) LogList.Items.RemoveAt(0);

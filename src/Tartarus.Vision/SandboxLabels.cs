@@ -316,6 +316,26 @@ public sealed class EditableSandbox
     }
 
     /// <summary>
+    /// Which mark an Inmate's cell bears, by what can make it rather than by the cell net, which has few Prey marks to
+    /// learn from (2026-11-01: a Hunt's Prey read as a Tusk). A Tusk comes with Iron Tongs of Lust, on a Mammoth, and
+    /// stays with the cell whoever comes in; a Prey mark with the Blood-Stained Trap's Hunt, on what a Lion counters (a
+    /// Wolf, a Rat), and goes as its Code changes. With neither instrument held, no mark.
+    /// </summary>
+    public static (bool Tusk, bool Prey) Mark(CellLabel c, IReadOnlyCollection<string> instruments)
+    {
+        bool mark = c.Tusk || c.Prey;
+        bool prey = mark && instruments.Contains("trap") && c.Code is Code.Wolf or Code.Rat;
+        return (mark && instruments.Contains("tongs") && !prey, prey);
+    }
+
+    /// <summary>Every cell's mark as <see cref="Mark"/> tells it, by the instruments held.</summary>
+    public void MarksByInstruments()
+    {
+        for (int n = 2; n <= 16; n++)
+            (this[n].Tusk, this[n].Prey) = Mark(this[n], Instruments);
+    }
+
+    /// <summary>
     /// Cells the game's UI covers now take what <paramref name="previous"/> read there (still marked Covered), so a
     /// tooltip doesn't wipe a cell out. <paramref name="previous"/> must be the same Sandbox, a moment earlier.
     /// </summary>

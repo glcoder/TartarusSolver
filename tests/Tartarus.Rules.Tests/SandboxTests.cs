@@ -149,4 +149,32 @@ public class SandboxTests
         Assert.Equal(BoardSettle.Verdict.Stale, settle.Take(board, t.AddSeconds(1), incident));
         Assert.Equal(BoardSettle.Verdict.Take, settle.Take(board, incident + BoardSettle.StaleFor, incident));
     }
+
+    [Fact]
+    public void A_mark_is_the_one_the_instruments_held_can_make()
+    {
+        // 2026-11-01: the Blood-Stained Trap's Hunt marked a Rat as its prey, and the cell net read the mark as a Tusk.
+        var b = EditableSandbox.Empty();
+        b.Warden = 3;
+        b[3].Kind = b[16].Kind = CellKind.Inmate;
+        (b[3].Code, b[3].Rarity) = (Vision.Code.Lion, Vision.Rarity.Magic);
+        (b[16].Code, b[16].Rarity, b[16].Tusk) = (Vision.Code.Rat, Vision.Rarity.Magic, true);
+        b.Instruments = ["blacklist", "trap"];
+        var cell = Tartarus.Vision.GameObservation.From(b).Cells[15];
+        Assert.Equal((false, true), (cell.Tusk, cell.Prey));
+        b.Instruments = ["blacklist"];
+        cell = Tartarus.Vision.GameObservation.From(b).Cells[15];
+        Assert.Equal((false, false), (cell.Tusk, cell.Prey));
+        // Both: a Prey mark only on what a Lion hunts, a Tusk on the rest (a Mammoth, or whoever came into its cell).
+        b.Instruments = ["tongs", "trap"];
+        cell = Tartarus.Vision.GameObservation.From(b).Cells[15];
+        Assert.Equal((false, true), (cell.Tusk, cell.Prey));
+        (b[16].Code, b[16].Tusk, b[16].Prey) = (Vision.Code.Mammoth, false, true);
+        cell = Tartarus.Vision.GameObservation.From(b).Cells[15];
+        Assert.Equal((true, false), (cell.Tusk, cell.Prey));
+        // The Trap alone: no Prey mark on a Mammoth.
+        b.Instruments = ["trap"];
+        cell = Tartarus.Vision.GameObservation.From(b).Cells[15];
+        Assert.Equal((false, false), (cell.Tusk, cell.Prey));
+    }
 }

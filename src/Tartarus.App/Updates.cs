@@ -160,7 +160,7 @@ public static class Updates
 
     private static void Write(string message)
     {
-        try { File.AppendAllText(AppSettings.LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} {message}{Environment.NewLine}"); }
+        try { File.AppendAllText(AppSettings.LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {message}{Environment.NewLine}"); }
         catch (IOException) { }
     }
 }

@@ -33,6 +33,14 @@ public sealed class LoggedRun
     public bool ConsumePick { get; set; }
     /// <summary>When the Sandbox last changed as far as the log tells (a bite, a Chromatic, a Prison Incident), local time.</summary>
     public DateTime BoardChangedAt { get; set; }
+    /// <summary>When a Replace's new Inmate last showed (its reveal's sound; logs with clicks only), local time.</summary>
+    public DateTime ReplacedAt { get; set; }
+    /// <summary>When a Destination was last clicked (logs with clicks only), local time.</summary>
+    public DateTime MovedAt { get; set; }
+    /// <summary>When the last day began: its banner, else its counter (logs with clicks only), local time.</summary>
+    public DateTime DayStartedAt { get; set; }
+    /// <summary>The day's move is made: Destination cards still on screen are going away (logs with clicks only).</summary>
+    public bool Moved => MovedAt > DayStartedAt;
 
     public int RemainingDays => MaxDays - Day;
     /// <summary>A pick (Torture Instrument, Warden's Treasure) is open, if out of sight while the Sandbox is viewed: its Confirm not clicked yet.</summary>
@@ -198,15 +206,39 @@ public sealed partial class GameLog
             // A new day: no pick is open any more, whatever click closed it (2026-10-31: an instrument pick taken by
             // "sim-click" stayed open for the whole run, and the Sandbox asked to go back to it).
             if (day > Current!.Day)
+            {
                 (Current.DayStartConsumes, Current.ConsumePick, Current.PickOpen, Current.TreasureOpen, Current.Looking) = (Current.Consumes, false, false, false, false);
+                // No new day's banner seen since the move: the day starts with its counter.
+                if (Current.DayStartedAt <= Current.MovedAt) Current.DayStartedAt = LocalTime(line);
+            }
             Current.Day = Math.Max(Current.Day, day);
             Current.MaxDays = max;
             return true;
         }
         var run = Current;
         if (run == null) return false;
+        // A decision card clicked: which one the first sound after it tells. A Replace's new Inmate shows at once (its
+        // reveal, ~0.1 s), a Consume's red screen, an End's new day.
+        if (_decisionAt is { } clicked && line.Contains("AudioEnum  == UI_S16_", StringComparison.Ordinal))
+        {
+            bool reveal = line.Contains("UI_S16_Piece_Disp", StringComparison.Ordinal) || line.Contains("_Quality", StringComparison.Ordinal);
+            if (reveal || line.Contains("UI_S16_Date_Change", StringComparison.Ordinal) || line.Contains("UI_S16_Click_Eat", StringComparison.Ordinal)
+                || line.Contains("UI_S16_Eating_red_screen", StringComparison.Ordinal))
+            {
+                _decisionAt = null;
+                if (reveal && LocalTime(line) - clicked < TimeSpan.FromSeconds(0.5)) run.ReplacedAt = LocalTime(line);
+            }
+        }
+        if (line.Contains("-click Btn_S16Board_ActionCell", StringComparison.Ordinal))
+        {
+            _decisionAt = LocalTime(line);
+            return false;
+        }
         if (line.Contains("AudioEnum  == UI_S16_Eating_red_screen", StringComparison.Ordinal)) run.ConsumePick = true;
-        else if (line.Contains("AudioEnum  == UI_S16_Click_Cancel", StringComparison.Ordinal) || line.Contains("] S16BoardNewDayPop Run", StringComparison.Ordinal)) run.ConsumePick = false;
+        else if (line.Contains("AudioEnum  == UI_S16_Click_Cancel", StringComparison.Ordinal)) run.ConsumePick = false;
+        // The new day's banner: its Destination cards show under it, before the day counter reaches the log.
+        else if (line.Contains("] S16BoardNewDayPop Run", StringComparison.Ordinal)) (run.ConsumePick, run.DayStartedAt) = (false, LocalTime(line));
+        else if (line.Contains("-click Btn_S16Board_RouteCell", StringComparison.Ordinal)) run.MovedAt = LocalTime(line);
         else if (line.Contains("-click Btn_S16Board_RelicPop_Reroll", StringComparison.Ordinal)) run.RerollsUsed++;
         else if (line.Contains("-click S16ViewBoardBtn_", StringComparison.Ordinal)) run.Looking = true;
         else if (line.Contains("-click Btn_S16Board_ViewReturn", StringComparison.Ordinal)) run.Looking = false;
@@ -239,6 +271,8 @@ public sealed partial class GameLog
 
     // The log has the day counter (and the sounds and clicks with it): its pages aren't needed.
     private bool _dayCounter;
+    // A decision card's click not told apart yet (local time).
+    private DateTime? _decisionAt;
     // Pages: the entry screen or a run's result was the last seen (true), a run's page (false), nothing yet (null).
     private bool? _pageLobby;
     // The log tells each Chromatic's panel slot lighting up (a missing animation's warning, just before its pick).
@@ -322,13 +356,19 @@ public sealed partial class GameLog
     private static partial Regex DayRx();
 }
 
-/// <summary>Follows the game's log as the game writes it (new lines every half second), from its current end.</summary>
+/// <summary>Follows the game's log as the game writes it (new lines every <see cref="Period"/> ms), from its current end.</summary>
 public sealed class GameLogWatcher : IDisposable
 {
+    /// <summary>How often the log is read: soon enough to scan the screen as a click's change comes (the game writes at once).</summary>
+    public const int Period = 150;
+
     private readonly string _path;
     private readonly Timer _timer;
     private readonly object _polling = new();
     private readonly System.Text.Decoder _decoder = System.Text.Encoding.UTF8.GetDecoder();
+    // The same buffers for every read (one every 150 ms).
+    private readonly byte[] _bytes = new byte[1 << 20];
+    private readonly char[] _chars = new char[System.Text.Encoding.UTF8.GetMaxCharCount(1 << 20)];
     private long _position;
     private string _partial = "";
 
@@ -337,12 +377,22 @@ public sealed class GameLogWatcher : IDisposable
     {
         _path = path;
         Log = log ?? new GameLog();
-        _timer = new Timer(_ => Poll(), null, 0, 500);
+        _timer = new Timer(_ => Poll(), null, 0, Period);
     }
 
     public GameLog Log { get; }
     /// <summary>Raised (on a timer thread) when the current run changed.</summary>
     public event Action<LoggedRun>? Changed;
+    /// <summary>
+    /// Raised (on a timer thread) when the Tartarus screen is about to change: a click, a page opening or closing, a new
+    /// day. Not for the lines the log already held when the watching began.
+    /// </summary>
+    public event Action? Activity;
+
+    /// <summary>A line telling of something about to change on the Tartarus screen.</summary>
+    public static bool IsActivity(string line) => line.Contains("S16", StringComparison.Ordinal)
+        && (line.Contains("-click ", StringComparison.Ordinal) || line.Contains("PageRunState", StringComparison.Ordinal)
+            || line.Contains("[S16LastDay]", StringComparison.Ordinal));
 
     private void Poll()
     {
@@ -355,22 +405,25 @@ public sealed class GameLogWatcher : IDisposable
             if (info.Length == _position) return;
             using var stream = new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
             stream.Seek(_position, SeekOrigin.Begin);
-            var bytes = new byte[1 << 20];
-            var chars = new char[System.Text.Encoding.UTF8.GetMaxCharCount(bytes.Length)];
-            bool changed = false;
+            // The log as it was (its first read, a new log's) is history: no activity in it.
+            bool history = _position == 0, changed = false, activity = false;
             int n;
-            while ((n = stream.Read(bytes, 0, bytes.Length)) > 0)
+            while ((n = stream.Read(_bytes, 0, _bytes.Length)) > 0)
             {
                 _position += n;
-                string text = _partial + new string(chars, 0, _decoder.GetChars(bytes, 0, n, chars, 0));
+                string text = _partial + new string(_chars, 0, _decoder.GetChars(_bytes, 0, n, _chars, 0));
                 int end = text.LastIndexOf('\n');
                 _partial = end < 0 ? text : text[(end + 1)..];
                 if (end < 0) continue;
                 lock (Log)
                     foreach (var line in text[..end].Split('\n'))
+                    {
                         changed |= Log.Feed(line);
+                        activity |= !history && IsActivity(line);
+                    }
             }
             if (changed && Log.Current is { } run) Changed?.Invoke(run);
+            if (activity) Activity?.Invoke();
         }
         catch (IOException)
         {
