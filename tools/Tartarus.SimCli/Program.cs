@@ -100,6 +100,8 @@ IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWe
 {
     var searchEngine = rules ?? engine;
     string p = spec ?? Opt("--policy") ?? "random";
+    // A last ":nolog": the game read as a log of pages only was before 0.7.33, a Warden's Inmate with no target taken for a used Consume.
+    if (p.EndsWith(":nolog", StringComparison.Ordinal)) return new NoTargetIsUsed(MakePolicy(seed, p[..^6], net, w, policy, instruments, rules));
     net ??= valueNet;
     var weights = w ?? globalWeights;
     if (p.StartsWith("mc:", StringComparison.Ordinal)) return new SearchPolicy(searchEngine, int.Parse(p[3..]), weights, threads: 1);
@@ -465,4 +467,16 @@ int Bench()
     double secs = sw.Elapsed.TotalSeconds;
     Console.WriteLine($"{runs} random runs in {secs:0.0} s: {runs / secs:0} runs/s, {decisions / secs / 1e6:0.00} M decisions/s, {decisions / (double)runs:0.0} decisions per run (one thread)");
     return 0;
+}
+
+/// <summary>The search told the day's Consume is used whenever the Warden's Inmate has no target to eat.</summary>
+sealed class NoTargetIsUsed(IPolicy inner) : IPolicy
+{
+    public GameAction Choose(Engine engine, in GameState s, ReadOnlySpan<GameAction> legal)
+    {
+        if (s.Phase != Phase.Act || s.Used != DayAction.None || !s.Cells[s.Position].HasInmate || Engine.HasTarget(s, s.Position)) return inner.Choose(engine, s, legal);
+        var told = s;
+        told.Used = DayAction.Consume;
+        return inner.Choose(engine, told, legal);
+    }
 }

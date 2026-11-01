@@ -4,6 +4,14 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.33 — 2026-11-02
+
+- Game logs of pages only (and no log): a Warden's Inmate with no target no longer reads as today's Consume used. The app
+  remembers the target picks it saw; a Replace's worth now counts the Consume it may bring, where End was hinted too often.
+- The game language list no longer throws when the OCR models are gone from the program's folder: it says so once and
+  what's downloaded still counts.
+- tools: `tartarus-sim` policy suffix `:nolog` (the old misreading, to measure it).
+
 ## 0.7.32 — 2026-11-01
 
 - The game's settings file (its language) is read off the UI thread: opening it on a slow drive stood the window still.

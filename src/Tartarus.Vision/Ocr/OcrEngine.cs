@@ -117,14 +117,18 @@ public sealed class OcrEngine : IDisposable
         File.Exists(Path.Combine(dir, DetectorFile)) && File.Exists(Path.Combine(dir, RecognizerFile)) && File.Exists(Path.Combine(dir, DictionaryFile));
 
     /// <summary>models/ocr next to the executable, else in the repository it runs from.</summary>
-    public static string FindModelDir()
+    public static string FindModelDir() =>
+        TryFindModelDir() ?? throw new DirectoryNotFoundException("OCR models not found (expected models/ocr with det.onnx, rec_en.onnx, dict_en.txt).");
+
+    /// <summary><see cref="FindModelDir"/>, null when they aren't there.</summary>
+    public static string? TryFindModelDir()
     {
         foreach (string dir in AppFiles.Folders)
         {
             string candidate = Path.Combine(dir, "models", "ocr");
             if (ModelsExist(candidate)) return candidate;
         }
-        throw new DirectoryNotFoundException("OCR models not found (expected models/ocr with det.onnx, rec_en.onnx, dict_en.txt).");
+        return null;
     }
 
     public sealed record Timing(double DetectMs, double RecognizeMs, int Regions, int Recognized, bool Reused = false);

@@ -276,8 +276,13 @@ public partial class ControlWindow : Window
         _gameLanguage = code;
         ShowGameLanguage(code);
         var pack = Tartarus.Vision.Ocr.OcrPacks.ForGame(code);
-        bool have = Tartarus.Vision.Ocr.OcrPacks.Locate(pack, Tartarus.Vision.Ocr.OcrEngine.FindModelDir()) != null;
+        // The program's own models gone from under it (2026-11-01: found at the start, not 6 s later, and the language
+        // list threw at every choice): what's downloaded still counts, and the running engine reads on.
+        string? modelDir = Tartarus.Vision.Ocr.OcrEngine.TryFindModelDir();
+        if (modelDir == null) WarnModelsGone();
+        bool have = Tartarus.Vision.Ocr.OcrPacks.Locate(pack, modelDir ?? Tartarus.Vision.Ocr.OcrPacks.DownloadDir) != null;
         Log($"Game language: {code}{(_settings.GameLanguage != null ? " (set)" : "")} · OCR {(have ? pack.Id : $"{pack.Id} recognizer not installed")}");
+        if (!have && modelDir == null) return;
         if (!have && !_declinedOcr.Contains(pack.Id))
         {
             // After the window is up: this runs from its start too.
@@ -285,6 +290,18 @@ public partial class ControlWindow : Window
             return;
         }
         _scans.SetGameLanguage(code);
+    }
+
+    private bool _warnedModelsGone;
+
+    private void WarnModelsGone()
+    {
+        if (_warnedModelsGone) return;
+        _warnedModelsGone = true;
+        Log($"OCR models not found in {AppContext.BaseDirectory}");
+        Dispatcher.BeginInvoke(() => MessageBox.Show(this, "The program's files are missing from its folder (models/ocr), so the game's text may not be read.\n\n"
+            + "Unpack the whole archive into a folder of its own and run the program from there, not from inside the archive.",
+            "Tartarus Solver", MessageBoxButton.OK, MessageBoxImage.Warning), DispatcherPriority.ApplicationIdle);
     }
 
     private void ShowGameLanguage(string code)
@@ -611,6 +628,7 @@ public partial class ControlWindow : Window
     private List<string>? _rerolledCards;
     // The last Sandbox read before the Consume target pick's red screen.
     private Vision.Ocr.ScreenText? _textBeforeRed;
+    private int? _daysBeforeRed;
 
     private void RefreshOverlay()
     {
@@ -1145,7 +1163,8 @@ public partial class ControlWindow : Window
                     return;
                 }
                 // The red screen spoils the panels' text too (the Objective): the last text read before it stands in.
-                if (!consumeOnly && !huntPick) _textBeforeRed = r.Text;
+                if (!consumeOnly && !huntPick) (_textBeforeRed, _daysBeforeRed) = (r.Text, _hintSandbox.Days);
+                else _run.ConsumeSeen(_daysBeforeRed);
                 if (huntPick) _hintSandbox = _huntOffer!.Value.Board.Clone();
                 var text = consumeOnly ? _textBeforeRed ?? r.Text : huntPick ? _huntOffer!.Value.Text : r.Text;
                 var observation = Tartarus.Vision.GameObservation.From(_hintSandbox, text, _rerolls);
@@ -1158,6 +1177,9 @@ public partial class ControlWindow : Window
                     bool consumeCard = r.Text?.Cards.Any(c => c.Meaning.Contains("consume")) == true;
                     observation.ChainGoesOn = live.ConsumedToday && (consumeOnly || consumeCard);
                 }
+                // A log of pages only, or none, doesn't tell: the target pick seen on this day does (2026-11-01: a missing
+                // card taken for a used Consume made a Replace worth less, and End was hinted on 34 of a player's 79 arrivals).
+                else if (live is not { Paged: false } && _hintSandbox.Days is { } dayHere) observation.ConsumedToday = _run.ConsumedOn(dayHere);
                 if (live is { FromStart: true, ObjectiveDone: true }) observation.ObjectiveDone = true;
                 // Survival of the Fittest counts every bite, chain bites too: over the red screen the panel is the one
                 // read before it, while the log counts on.

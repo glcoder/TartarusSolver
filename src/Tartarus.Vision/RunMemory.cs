@@ -21,6 +21,8 @@ public sealed class RunMemory
     private (R.ObjectiveKind Kind, int Times)? _otherObjective;
     private readonly HashSet<int> _kept = [];
     private int? _lastDays;
+    // The Remaining Days of the last day a Consume's or Hunt's target pick was seen on.
+    private int? _consumeDays;
     private int _chromatic;
     private int? _chromaticSeen;
     private DateTimeOffset _chromaticSince;
@@ -54,6 +56,15 @@ public sealed class RunMemory
         _lastDays = days;
         _themeComing = false;
     }
+
+    /// <summary>Notes a Consume's or Hunt's target pick, on the day with these Remaining Days.</summary>
+    public void ConsumeSeen(int? days)
+    {
+        if (days != null) _consumeDays = days;
+    }
+
+    /// <summary>A target pick was seen on the day with these Remaining Days: for logs that don't tell (pages only, or no log).</summary>
+    public bool ConsumedOn(int days) => _consumeDays == days;
 
     /// <summary>A new run begins: everything goes but a theme seen just before it (the lobby shows it first).</summary>
     public void NewRun()
@@ -175,6 +186,7 @@ public sealed class RunMemory
 
     public void Clear()
     {
+        _consumeDays = null;
         _held.Clear();
         _otherRead.Clear();
         (_objective, _otherObjective) = (null, null);

@@ -377,4 +377,18 @@ public class GameLogTests
             File.Delete(path);
         }
     }
+
+    [Fact]
+    public void RunMemory_RemembersTheDayOfAConsumesTargetPick()
+    {
+        var run = new RunMemory();
+        Assert.False(run.ConsumedOn(12));
+        run.ConsumeSeen(null);
+        Assert.False(run.ConsumedOn(12));
+        run.ConsumeSeen(12);
+        Assert.True(run.ConsumedOn(12));
+        Assert.False(run.ConsumedOn(11));
+        run.NewRun();
+        Assert.False(run.ConsumedOn(12));
+    }
 }
