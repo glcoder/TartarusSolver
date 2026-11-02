@@ -4,6 +4,13 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.39 — 2026-11-03
+
+- A scale taken from a pick's cards is a rough one: until the Sandbox reads, the scales near it are tried every second. It
+  stayed unread until a restart, where the game's log doesn't tell the scale (logs of pages only, UI scale other than 1).
+- The language window asks in all of the game's languages, each beside its name.
+- A Destination's number is the card's one number wherever it stands: more of them read with the wrong language taken.
+
 ## 0.7.38 — 2026-11-02
 
 - The -full release brings the Visual C++ runtime the OCR needs: without it the scanner didn't start on some PCs. The other

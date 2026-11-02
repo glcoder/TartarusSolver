@@ -92,6 +92,23 @@ public class GameTextTests
 
     private const double Pitch = ScreenLayout.CardPitch;
 
+    [Theory]
+    [InlineData("2f", 2)] // Chinese cards read as English
+    [InlineData("$4\\f$", 4)]
+    [InlineData("7f", 7)]
+    [InlineData("Go to Cell 9", 9)]
+    [InlineData("122", null)] // no cell
+    [InlineData("1", null)]
+    [InlineData("3 12", 12)] // the number at the end still goes first
+    [InlineData("3 4f", null)] // two numbers, none at the end: no telling
+    [InlineData("f", null)]
+    public void A_Destination_s_number_is_the_card_s_lone_number(string read, int? cell)
+    {
+        var text = Parse(("cards", read));
+        text.ApplyCardKinds(new ScreenLayout(1920, 1200), _ => "cell");
+        Assert.Equal(cell, text.Cards[0].DestinationCell);
+    }
+
     [Fact]
     public void The_log_is_written_in_order_and_the_caller_does_not_wait_for_the_file()
     {

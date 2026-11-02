@@ -45,6 +45,13 @@ public sealed class LayoutScanner : ISandboxScanner
     private static readonly TimeSpan ScaleSearchEvery = TimeSpan.FromSeconds(5);
     /// <summary>The scales tried around a frame size's own, as its fractions.</summary>
     private static readonly double[] ScaleSteps = Enumerable.Range(0, 35).Select(i => 0.5 + 0.03 * i).ToArray();
+    // The scale is a pick's measure, a few percent off at best, while the Sandbox reads within about 2.5% of its own: until
+    // one reads, the scales near it are tried, and soon (2026-11-02: 0.663 for 0.64, the Sandbox unread until a restart;
+    // logs of pages only don't tell the scale, so they still come this way).
+    private bool _scaleRough;
+    private static readonly TimeSpan RoughSearchEvery = TimeSpan.FromSeconds(1);
+    /// <summary>The scales tried around a rough one, as its fractions.</summary>
+    private static readonly double[] RoughSteps = Enumerable.Range(0, 17).Select(i => 0.88 + 0.015 * i).ToArray();
 
     /// <summary>
     /// The game's UI scale as its log says it, a fraction of the frame size's own; null when it doesn't say. It sets the
@@ -75,19 +82,24 @@ public sealed class LayoutScanner : ISandboxScanner
             if (resized) _oldK = _layout?.K;
             _layout = new ScreenLayout(frame.Width, frame.Height, logged);
             _scaleKnown = false;
+            _scaleRough = false;
             _scaleSearchedAt = default;
         }
         _loggedK = logged;
         var r = ScanAt(frame, _layout!);
-        if ((PickScale(r) ?? SandboxScale(frame, r)) is double k)
+        double? measured = PickScale(r);
+        if ((measured ?? SandboxScale(frame, r)) is double k)
         {
             _layout = new ScreenLayout(frame.Width, frame.Height, k);
             _scaleKnown = true;
+            _scaleRough = measured != null && k != _loggedK && k != _oldK;
             var again = ScanAt(frame, _layout);
+            if (again.Ok) _scaleRough = false;
             (again.Notes ??= []).Add($"The game's UI is drawn at scale {k / ScreenLayout.DefaultK(frame.Width, frame.Height):0.00} of this frame size's.");
             return again;
         }
         if (r.Ok || r.Pick != null) _scaleKnown = true;
+        if (r.Ok) _scaleRough = false;
         return r;
     }
 
@@ -116,8 +128,16 @@ public sealed class LayoutScanner : ISandboxScanner
     private double? SandboxScale(Frame frame, ScanResult r)
     {
         double own = ScreenLayout.DefaultK(frame.Width, frame.Height);
-        if (r.Ok || r.Pick != null || r.Theme != null || _scaleKnown && r.Layout!.K == own
-            || DateTime.UtcNow - _scaleSearchedAt < ScaleSearchEvery) return null;
+        if (r.Ok || r.Pick != null || r.Theme != null) return null;
+        if (_scaleRough && Presence != null)
+        {
+            if (DateTime.UtcNow - _scaleSearchedAt < RoughSearchEvery) return null;
+            _scaleSearchedAt = DateTime.UtcNow;
+            double rough = r.Layout!.K;
+            var (near, likeness) = BestScale(frame, RoughSteps.Select(f => f * rough).Append(own));
+            return likeness >= ScalePresence ? near : null;
+        }
+        if (_scaleKnown && r.Layout!.K == own || DateTime.UtcNow - _scaleSearchedAt < ScaleSearchEvery) return null;
         _scaleSearchedAt = DateTime.UtcNow;
         if (_scaleKnown)
         {
@@ -127,8 +147,17 @@ public sealed class LayoutScanner : ISandboxScanner
         }
         if (Presence == null) return null;
         var tried = ScaleSteps.Select(f => f * own).Append(_oldK ?? own).Where(k => Math.Abs(k / r.Layout!.K - 1) > 0.02);
-        var (best, score) = tried.Select(k => (k, Presence.Score(frame, new ScreenLayout(frame.Width, frame.Height, k)))).MaxBy(t => t.Item2);
+        var (best, score) = BestScale(frame, tried);
         return score >= ScalePresence ? best : null;
+    }
+
+    /// <summary>The scale the presence likes best among these, then closer in around it: the steps are as wide as the peak.</summary>
+    private (double K, float Score) BestScale(Frame frame, IEnumerable<double> tried)
+    {
+        float Score(double k) => Presence!.Score(frame, new ScreenLayout(frame.Width, frame.Height, k));
+        var (best, score) = tried.Select(k => (k, Score(k))).MaxBy(t => t.Item2);
+        if (score < 0.15f) return (best, score);
+        return Enumerable.Range(-4, 9).Select(i => best * (1 + i * 0.005)).Select(k => (k, Score(k))).MaxBy(t => t.Item2);
     }
 
     private ScanResult ScanAt(Frame frame, ScreenLayout layout)

@@ -19,13 +19,14 @@ public partial class GameLanguageWindow : Window
     {
         InitializeComponent();
         Message.Text = first
-            ? "Which language does the game show? The app reads the game's text and needs the right language for it. The one found in the game's settings is marked."
-            : $"The game's text can't be read as {OcrPacks.LanguageName(current)}: move hints may be missing or wrong. "
-                + "Which language does the game show?";
+            ? "The language found in the game's settings is marked."
+            : $"The game's text can't be read as {OcrPacks.LanguageName(current)}: move hints may be missing or wrong.";
         foreach (var code in OcrPacks.GameLanguages)
         {
             string name = OcrPacks.LanguageName(code), native = OcrPacks.NativeName(code);
-            var item = new ListBoxItem { Content = name == native ? name : $"{name} · {native}", Tag = code };
+            // The question in each language beside it: the player who most needs this window may read no English
+            // (2026-11-02: a third of those asked said "Not now", and played on hints that couldn't see the cards).
+            var item = new ListBoxItem { Content = $"{(name == native ? name : $"{name} · {native}")} — {OcrPacks.ChooseLanguage(code)}", Tag = code };
             LanguageList.Items.Add(item);
             if (first && name == OcrPacks.LanguageName(current)) LanguageList.SelectedItem = item;
         }

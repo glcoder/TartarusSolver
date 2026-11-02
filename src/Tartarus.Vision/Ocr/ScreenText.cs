@@ -144,10 +144,20 @@ public sealed partial class ScreenText
             Cards[i] = card with
             {
                 Kind = kind,
-                DestinationCell = kind switch { "room" => 1, "cell" => card.DestinationCell, _ => null },
+                DestinationCell = kind switch { "room" => 1, "cell" => card.DestinationCell ?? LoneNumber(card.Text), _ => null },
             };
         }
     }
+
+    /// <summary>
+    /// The one number on a card that's a Destination by its icon, wherever it stands: "2f" for "去2号" read as English. Digits
+    /// read in any language, the words around them don't.
+    /// </summary>
+    private static int? LoneNumber(string text) =>
+        NumberRx().Matches(text) is { Count: 1 } one && int.TryParse(one[0].Value, out int n) && n is >= 2 and <= 16 ? n : null;
+
+    [GeneratedRegex(@"\d+")]
+    private static partial Regex NumberRx();
 
     /// <summary>What a card whose place is sure and whose icon didn't tell it is: it stands there, so nothing is used for it.</summary>
     public const string UnreadCard = "unread";
