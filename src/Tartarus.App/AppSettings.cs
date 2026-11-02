@@ -44,8 +44,13 @@ public sealed class AppSettings
     /// Legendary, Ultimate. The hints weigh a sure cache against a chance at a Chromatic with it.
     /// </summary>
     public double[] CacheWorth { get; set; } = [.. Tartarus.Rules.RunScore.DefaultWorth];
-    /// <summary>The game's language for OCR (en, ru, de, ..., zhCN); null: read from the game's GameUserSettings.ini.</summary>
+    /// <summary>
+    /// The language the player chose for the game (en, ru, de, ..., zhCN), in the language window or the list; empty: none
+    /// yet, asked as the app connects to the game. Read only with <see cref="DetectGameLanguage"/> off.
+    /// </summary>
     public string? GameLanguage { get; set; }
+    /// <summary>"Detect automatically": the language from the game's GameUserSettings.ini, not <see cref="GameLanguage"/>.</summary>
+    public bool DetectGameLanguage { get; set; } = true;
     /// <summary>The game's UE_game.log; null: looked for under the usual Steam libraries.</summary>
     public string? GameLogPath { get; set; }
     /// <summary>
@@ -63,7 +68,7 @@ public sealed class AppSettings
     };
     /// <summary>The defaults this file was last brought up to (see <see cref="Upgrade"/>); 0 in files older than it.</summary>
     public int SettingsVersion { get; set; }
-    private const int CurrentVersion = 2;
+    private const int CurrentVersion = 3;
     /// <summary>Where bug reports go (a Sentry DSN); empty: the app's own (BugReports.DefaultDsn).</summary>
     public string? ReportDsn { get; set; }
     /// <summary>A random id of this install: tells one tester's reports from another's, and nothing else about them.</summary>
@@ -109,6 +114,8 @@ public sealed class AppSettings
                     Hotkeys[action] = now;
             if (AutoScanSeconds == 1.0) AutoScanSeconds = defaults.AutoScanSeconds;
         }
+        // A language set meant detection off, before detection had a setting of its own.
+        if (SettingsVersion < 3) DetectGameLanguage = string.IsNullOrEmpty(GameLanguage);
         foreach (var (action, gesture) in defaults.Hotkeys) Hotkeys.TryAdd(action, gesture);
         SettingsVersion = CurrentVersion;
     }

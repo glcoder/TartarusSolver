@@ -25,7 +25,7 @@ public sealed record OcrPack(string Id, string Script, string Folder, long Model
 
 /// <summary>
 /// Which recognizer reads which of the game's languages (its GameUserSettings.ini LanguageCode). English and East
-/// Slavic ship with the program; the others are downloaded when the game is set to one of their languages.
+/// Slavic and Chinese ship with the program; the others are downloaded when the game is set to one of their languages.
 /// </summary>
 public static class OcrPacks
 {

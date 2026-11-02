@@ -37,6 +37,14 @@ public class GameLogTests
     }
 
     [Fact]
+    public void The_Chinese_recognizer_ships_with_the_program()
+    {
+        var dir = Tartarus.Vision.Ocr.OcrEngine.TryFindModelDir();
+        Assert.NotNull(dir);
+        Assert.True(Tartarus.Vision.Ocr.OcrPacks.Exists(Tartarus.Vision.Ocr.OcrPacks.Chinese, dir));
+    }
+
+    [Fact]
     public void The_UI_scale_is_the_last_one_the_log_tells()
     {
         var log = new GameLog();

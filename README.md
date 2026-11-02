@@ -26,8 +26,8 @@ chests).
   network at their horizon.
 - **Reading the screen:** a convolutional network for the cells (Code, rarity, marks), small networks for the
   Torture Instrument and Chromatic slots, card and pick screens told by their pictures, and OCR (PaddleOCR, ONNX)
-  for the text. Works in any of the game's languages: English and Russian OCR ship, others are downloaded on asking;
-  the language is taken from the game's settings, or chosen in the window (asked for when the text doesn't read).
+  for the text. Works in any of the game's languages: English, Russian and Chinese OCR ship, others are downloaded on
+  asking; the language is asked for at the first connection to the game, with the one in the game's settings marked.
 - **The game's log:** run start, days, Consumes, Chromatics, Prison Incidents and picks, read from the log file the
   game writes, to fill in what the screen hides (a red Consume screen, a popup).
 - **Statistics:** the runs played and the Chromatic Inmates they ended with (in all and per run), from the game's
@@ -69,8 +69,9 @@ Settings live in `%LOCALAPPDATA%\TartarusSolver\settings.json`, among them:
 
 - `CacheWorth`: what a Riot chest per Inmate left is worth, in Chromatics, by rarity (Normal … Ultimate); the
   solver weighs a sure chest against a chance at a Chromatic with it.
-- `GameLanguage`: the game's language for OCR (`en`, `ru`, `zh`, …; also Game language in the window); null: read
-  from the game's own settings.
+- `DetectGameLanguage`: take the game's language from its own settings (Detect automatically in the window).
+- `GameLanguage`: the language chosen for the game (`en`, `ru`, `zh`, …; in the language window or the Game language list),
+  read with `DetectGameLanguage` off; empty: asked at the first connection to the game.
 - `HintPlayouts`, `HintSeconds`: how hard the solver thinks per move (also the slider in the control window).
 - `CheckUpdates`: ask GitHub for new versions (the checkbox in the window).
 - `Hotkeys`, `GameLogPath`, `ReportDsn`.

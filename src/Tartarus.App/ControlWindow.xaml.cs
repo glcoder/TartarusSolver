@@ -117,9 +117,9 @@ public partial class ControlWindow : Window
             string name = Tartarus.Vision.Ocr.OcrPacks.LanguageName(code), native = Tartarus.Vision.Ocr.OcrPacks.NativeName(code);
             GameLanguageCombo.Items.Add(new ComboBoxItem { Content = name == native ? name : $"{name} · {native}", Tag = code });
         }
-        GameLanguageAutoCheck.IsChecked = settings.GameLanguage == null;
-        GameLanguageCombo.IsEnabled = settings.GameLanguage != null;
-        ShowGameLanguage(settings.GameLanguage ?? "en");
+        GameLanguageAutoCheck.IsChecked = settings.DetectGameLanguage;
+        GameLanguageCombo.IsEnabled = !settings.DetectGameLanguage;
+        ShowGameLanguage(ManualLanguage ?? "en");
         GameLanguageAutoCheck.Checked += GameLanguageAuto_Changed;
         GameLanguageAutoCheck.Unchecked += GameLanguageAuto_Changed;
         GameLanguageCombo.SelectionChanged += GameLanguageCombo_SelectionChanged;
@@ -223,6 +223,9 @@ public partial class ControlWindow : Window
     // The list showing a language, not the player choosing one.
     private bool _showingLanguage;
 
+    /// <summary>The language to read by the player's choice; null: the game's settings file says.</summary>
+    private string? ManualLanguage => !_settings.DetectGameLanguage && !string.IsNullOrEmpty(_settings.GameLanguage) ? _settings.GameLanguage : null;
+
     // The language in the game's settings file beside _iniPath (the log it was read for).
     private string? _iniLanguage, _iniPath;
     private bool _readingIni;
@@ -233,7 +236,7 @@ public partial class ControlWindow : Window
     /// </summary>
     private async void ReadGameIni()
     {
-        if (_readingIni || _settings.GameLanguage != null || _gameLogPath is not { } path) return;
+        if (_readingIni || ManualLanguage != null || _gameLogPath is not { } path) return;
         _readingIni = true;
         try
         {
@@ -260,7 +263,7 @@ public partial class ControlWindow : Window
     {
         if (_askingOcr) return;
         string? fromIni = null;
-        if (_settings.GameLanguage == null && _gameLogPath is { } log)
+        if (ManualLanguage == null && _gameLogPath is { } log)
         {
             // This log's settings file not read yet: its language is waited for rather than English taken first.
             if (!string.Equals(_iniPath, log, StringComparison.OrdinalIgnoreCase))
@@ -270,7 +273,17 @@ public partial class ControlWindow : Window
             }
             fromIni = _iniLanguage;
         }
-        string code = _settings.GameLanguage ?? fromIni ?? "en";
+        string code = ManualLanguage ?? fromIni ?? "en";
+        // No language chosen yet: asked as the game connects, the one found marked (2026-11-02: many reports came from
+        // clients whose settings file says "en" with the game in Chinese, and the text-unread prompt came late or never).
+        if (string.IsNullOrEmpty(_settings.GameLanguage) && !_askedFirstLanguage && _capture != null && _target is { } target
+            && new Regex(_settings.WindowTitle).IsMatch(target.Title) && !Win32Windows.IsLauncher(target))
+        {
+            _askedFirstLanguage = true;
+            _askingOcr = true;
+            Dispatcher.BeginInvoke(() => AskGameLanguage(code, first: true), DispatcherPriority.ApplicationIdle);
+            return;
+        }
         if (code == _gameLanguage && !(_reofferOcrAt is { } at && DateTime.Now >= at)) return;
         _reofferOcrAt = null;
         _gameLanguage = code;
@@ -281,7 +294,7 @@ public partial class ControlWindow : Window
         string? modelDir = Tartarus.Vision.Ocr.OcrEngine.TryFindModelDir();
         if (modelDir == null) WarnModelsGone();
         bool have = Tartarus.Vision.Ocr.OcrPacks.Locate(pack, modelDir ?? Tartarus.Vision.Ocr.OcrPacks.DownloadDir) != null;
-        Log($"Game language: {code}{(_settings.GameLanguage != null ? " (set)" : "")} · OCR {(have ? pack.Id : $"{pack.Id} recognizer not installed")}");
+        Log($"Game language: {code}{(ManualLanguage != null ? " (set)" : "")} · OCR {(have ? pack.Id : $"{pack.Id} recognizer not installed")}");
         if (!have && modelDir == null) return;
         if (!have && !_declinedOcr.Contains(pack.Id))
         {
@@ -313,14 +326,16 @@ public partial class ControlWindow : Window
     }
 
     /// <summary>
-    /// Detected: the game's settings file says (the list shows it, greyed); off: the player's choice in the list (the
-    /// settings file may not tell what the game shows: 2026-10-31, a TapTap client in Chinese with "en" in it).
+    /// Detected: the game's settings file says (the list shows it, greyed); off: the player's choice, which stays in the
+    /// settings either way (the settings file may not tell what the game shows: 2026-10-31, a TapTap client in Chinese with
+    /// "en" in it).
     /// </summary>
     private void GameLanguageAuto_Changed(object sender, RoutedEventArgs e)
     {
         bool auto = GameLanguageAutoCheck.IsChecked == true;
         GameLanguageCombo.IsEnabled = !auto;
-        _settings.GameLanguage = auto ? null : (GameLanguageCombo.SelectedItem as ComboBoxItem)?.Tag as string ?? _gameLanguage ?? "en";
+        _settings.DetectGameLanguage = auto;
+        if (ManualLanguage is { } chosen) ShowGameLanguage(chosen);
         _settings.Save();
         CheckGameLanguage();
     }
@@ -341,6 +356,8 @@ public partial class ControlWindow : Window
     private string? _unreadLanguage;
     // Languages the player was asked about this session: not asked again until the next start.
     private readonly HashSet<string> _askedLanguage = [];
+    // No language chosen and asked this session: "Not now" asks again at the next start.
+    private bool _askedFirstLanguage;
 
     /// <summary>
     /// The Objective panel's words read as no Objective's name on Sandbox after Sandbox for a while: the game shows
@@ -365,14 +382,15 @@ public partial class ControlWindow : Window
         Dispatcher.BeginInvoke(() => AskGameLanguage(language), DispatcherPriority.ApplicationIdle);
     }
 
-    private void AskGameLanguage(string current)
+    /// <param name="first"><paramref name="current"/> is the language found, not one that failed to read.</param>
+    private void AskGameLanguage(string current, bool first = false)
     {
         _askingOcr = true;
         PlaceOverlay();
         string? chosen;
         try
         {
-            var window = new GameLanguageWindow(current);
+            var window = new GameLanguageWindow(current, first);
             if (IsVisible) window.Owner = this;
             chosen = window.ShowDialog() == true ? window.Chosen : null;
         }
@@ -384,12 +402,20 @@ public partial class ControlWindow : Window
         if (chosen == null)
         {
             Log("Game language: the player kept " + current);
+            if (first) CheckGameLanguage();
             return;
         }
         Log("Game language: the player chose " + chosen);
-        // The list shows the choice, then auto detection goes off: its handler takes the list's language.
-        ShowGameLanguage(chosen);
         _settings.GameLanguage = chosen;
+        // The language found, confirmed: detection goes on following the game.
+        if (first && GameLanguageAutoCheck.IsChecked == true && Tartarus.Vision.Ocr.OcrPacks.LanguageName(chosen) == Tartarus.Vision.Ocr.OcrPacks.LanguageName(current))
+        {
+            _settings.Save();
+            CheckGameLanguage();
+            return;
+        }
+        // Auto detection goes off: its handler shows the choice in the list.
+        ShowGameLanguage(chosen);
         if (GameLanguageAutoCheck.IsChecked == true) GameLanguageAutoCheck.IsChecked = false;
         else _settings.Save();
         _declinedOcr.Remove(Tartarus.Vision.Ocr.OcrPacks.ForGame(chosen).Id);
@@ -481,6 +507,7 @@ public partial class ControlWindow : Window
             Log($"Capturing window \"{w.Title}\" ({w.Process}), {Win32Windows.VisibleBounds(w.Hwnd)}");
             // The log of the very install that's running, from its executable's path.
             if (Win32Windows.ImagePath(w.Pid) is { } exe) StartGameLog(exe);
+            CheckGameLanguage();
         }
         catch (Exception ex) when (WindowCapture.IsUnsupported(ex))
         {

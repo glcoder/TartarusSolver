@@ -4,6 +4,14 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.35 — 2026-11-02
+
+- The game's language is asked for at the first connection to the game, with the one found in the game's settings marked,
+  and kept in `GameLanguage`. "Detect automatically" is a setting of its own (`DetectGameLanguage`): turned off, it goes back
+  to that language. A language already set in the app is not asked for again.
+- The Chinese OCR recognizer ships with the program (also read for Japanese): 13 MB more in each zip, no download to wait
+  for or to fail.
+
 ## 0.7.34 — 2026-11-02
 
 - The game's UI scale comes from its log where the log tells it (`PageScale`); measuring stays for logs that don't. A UI
