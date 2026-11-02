@@ -39,7 +39,9 @@ chests).
 ## Requirements
 
 - Windows 10 (2004) or 11, x64.
-- [.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0) (not needed with the `-full` release).
+- [.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0) and
+  [Microsoft Visual C++ Redistributable (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe) (neither needed with the
+  `-full` release).
 - *Torchlight: Infinite* in windowed or borderless mode: an overlay can't draw over exclusive fullscreen.
 
 ## Install and use

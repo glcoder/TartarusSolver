@@ -90,6 +90,7 @@ public partial class ControlWindow
         var json = new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
         report.AddText("report.json", JsonSerializer.Serialize(State(crash), json));
         report.AddText("settings.json", JsonSerializer.Serialize(_settings, json));
+        AppLog.Flush();
         report.AddText("app.log", BugReports.Tail(AppSettings.LogPath, 3000));
         if (_gameLogPath != null)
         {

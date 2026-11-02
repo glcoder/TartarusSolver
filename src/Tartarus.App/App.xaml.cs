@@ -38,6 +38,7 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
             if (e.ExceptionObject is Exception ex) BugReports.Crash(ex, fatal: true);
+            AppLog.Flush(1000);
         };
         ControlWindow? main = null;
         _watchdog = new UiWatchdog(Dispatcher, () => main?.GameLogPath);
@@ -52,14 +53,14 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _watchdog?.Dispose();
+        AppLog.Flush(2000);
         base.OnExit(e);
     }
 
     private void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         e.Handled = true;
-        try { System.IO.File.AppendAllText(AppSettings.LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} Error: {e.Exception}{Environment.NewLine}"); }
-        catch { }
+        AppLog.Write($"Error: {e.Exception}");
         // The app goes on: the player may send a report of it, with what was on screen.
         if (MainWindow is ControlWindow control && BugReports.Enabled) control.Report(e.Exception);
         else MessageBox.Show(e.Exception.ToString(), "Tartarus Solver: error", MessageBoxButton.OK, MessageBoxImage.Error);

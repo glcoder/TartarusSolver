@@ -85,6 +85,7 @@ public sealed class UiWatchdog : IDisposable
         {
             var report = new BugReport();
             report.AddText("stacks.txt", stacks);
+            AppLog.Flush();
             report.AddText("app.log", BugReports.Tail(AppSettings.LogPath, 3000));
             if (_gameLogPath() is { } log) report.AddText("game_s16.log", BugReports.GameLogRun(log));
             Write("Hang report: " + BugReports.SendHang(report, top, stacks));
@@ -135,8 +136,7 @@ public sealed class UiWatchdog : IDisposable
 
     private static void Write(string message)
     {
-        try { File.AppendAllText(AppSettings.LogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {message}{Environment.NewLine}"); }
-        catch (IOException) { }
+        AppLog.Write(message);
     }
 
     public void Dispose() => _stop.Set();

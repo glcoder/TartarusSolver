@@ -40,7 +40,10 @@ The hint: the best move framed bold green, as good ones thin; over it the chests
 If something looks wrong, press Ctrl+Shift+B right away and say what you expected.
 Settings: %LOCALAPPDATA%\\TartarusSolver\\settings.json
 """
-NEEDS_RUNTIME = "\nNeeds the .NET 9 Desktop Runtime (x64): https://dotnet.microsoft.com/download/dotnet/9.0\n"
+NEEDS_RUNTIME = ("\nNeeds the .NET 9 Desktop Runtime (x64): https://dotnet.microsoft.com/download/dotnet/9.0\n"
+                 "and the Microsoft Visual C++ Redistributable (x64): https://aka.ms/vs/17/release/vc_redist.x64.exe\n")
+# What onnxruntime.dll needs beside Windows: the -full zip brings them, so that it has nothing to install.
+VC_RUNTIME = ["msvcp140.dll", "msvcp140_1.dll", "vcruntime140.dll", "vcruntime140_1.dll"]
 
 
 def main():
@@ -69,6 +72,12 @@ def main():
     for junk in list(app.rglob("*.pdb")) + list(app.rglob("*.lib")):
         junk.unlink()
     shutil.rmtree(app / "js", ignore_errors=True)
+    if a.full:
+        system = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
+        for dll in VC_RUNTIME:
+            if not (system / dll).exists():
+                raise SystemExit(f"{dll} missing in {system}: install the Visual C++ Redistributable (x64)")
+            shutil.copy2(system / dll, app / dll)
 
     missing = []
     for pattern in MODELS:

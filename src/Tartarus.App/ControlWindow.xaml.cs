@@ -1814,9 +1814,7 @@ public partial class ControlWindow : Window
     {
         var now = DateTime.Now;
         string line = $"{now:HH:mm:ss} {message}";
-        // Milliseconds in the file: how long a hint takes after the game's click is told by them.
-        try { File.AppendAllText(AppSettings.LogPath, $"{now:yyyy-MM-dd HH:mm:ss.fff} {message}{Environment.NewLine}"); }
-        catch { }
+        AppLog.Write(message);
         LogList.Items.Add(line);
         while (LogList.Items.Count > 200) LogList.Items.RemoveAt(0);
         LogList.ScrollIntoView(LogList.Items[^1]);

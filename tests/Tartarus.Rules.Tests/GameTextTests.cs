@@ -93,6 +93,32 @@ public class GameTextTests
     private const double Pitch = ScreenLayout.CardPitch;
 
     [Fact]
+    public void The_log_is_written_in_order_and_the_caller_does_not_wait_for_the_file()
+    {
+        string path = Path.Combine(Path.GetTempPath(), "tartarus-log-" + Guid.NewGuid().ToString("N") + ".txt");
+        try
+        {
+            using var log = new BackgroundLog(path);
+            log.Write("one");
+            Assert.True(log.Flush(5000));
+            using (var held = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+                var clock = System.Diagnostics.Stopwatch.StartNew();
+                for (int i = 0; i < 100; i++) log.Write("line " + i);
+                Assert.True(clock.ElapsedMilliseconds < 200, $"{clock.ElapsedMilliseconds} ms");
+                // The file is held: nothing reaches it, and waiting gives up.
+                Assert.False(log.Flush(100));
+            }
+            Assert.True(log.Flush(10000));
+            Assert.Equal(new[] { "one" }.Concat(Enumerable.Range(0, 100).Select(i => "line " + i)), File.ReadAllLines(path));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
     public void The_language_is_asked_for_in_each_of_the_game_s_languages()
     {
         var lines = OcrPacks.GameLanguages.Select(OcrPacks.ChooseLanguage).ToList();

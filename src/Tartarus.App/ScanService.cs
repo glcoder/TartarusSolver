@@ -39,9 +39,27 @@ public sealed class ScanService : IDisposable
         }
         catch (Exception ex)
         {
-            Problem = ex.Message;
-            return new UnavailableScanner(ex.Message);
+            Problem = Reason(ex);
+            return new UnavailableScanner(Problem);
         }
+    }
+
+    /// <summary>
+    /// The exception and what's inside it: a library that doesn't load says only "the type initializer threw" on top
+    /// (2026-11-02: two players with no scanner at all, and no telling why). A DLL not found is most often the Visual C++
+    /// runtime, which only the -full release brings along.
+    /// </summary>
+    private static string Reason(Exception ex)
+    {
+        var parts = new List<string>();
+        bool dll = false;
+        for (Exception? e = ex; e != null; e = e.InnerException)
+        {
+            parts.Add(e == ex ? e.Message : $"{e.GetType().Name}: {e.Message}");
+            dll |= e is DllNotFoundException;
+        }
+        string reason = string.Join(" <- ", parts);
+        return dll ? reason + " Install the Microsoft Visual C++ Redistributable (x64): https://aka.ms/vs/17/release/vc_redist.x64.exe" : reason;
     }
 
     /// <summary>Stands in when the scanner can't start: every scan fails with the reason.</summary>

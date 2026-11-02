@@ -4,6 +4,12 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.38 — 2026-11-02
+
+- The -full release brings the Visual C++ runtime the OCR needs: without it the scanner didn't start on some PCs. The other
+  zip needs it installed, as it says now, and a scanner that can't start says why and where to get it.
+- The log is written off the window's thread: a slow disk or an antivirus stood the window and the overlay still.
+
 ## 0.7.37 — 2026-11-02
 
 - On the Consume target pick the Warden reads right at once after a bite through Scratch Marks: the old Inmate stayed for up
