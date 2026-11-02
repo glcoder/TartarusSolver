@@ -17,7 +17,11 @@ public partial class ControlWindow
     /// two before it's reported. Six whole frames held 88 MB at 2560x1440 and 390 MB at 7680x2112 (2026-11-01).
     /// </summary>
     private readonly Queue<(DateTimeOffset At, byte[] Jpeg)> _history = new();
-    private const int HistoryFrames = 6;
+    private const int HistoryFrames = 4;
+    // A report's pictures. Two PNGs made a report 4 MB, 11 at 4K, and the reports used up Sentry's attachment quota
+    // (2026-11-02). A whole frame at 85 reads as its PNG does (48 of 48 report frames) at a seventh of the size; half a
+    // frame doesn't (8 of 48 differ), so only those too big to need the detail are halved. The rest is only looked at.
+    private const int ScreenQuality = 85, GlanceQuality = 70, WholeScreenWidth = 2560;
     private bool _reporting;
 
     /// <summary><paramref name="frame"/> takes the current one's place: that one goes to the history, its buffer back to the pool.</summary>
@@ -28,7 +32,7 @@ public partial class ControlWindow
         {
             var small = HalfSize(old, _halves);
             _pixels.Return(old);
-            return (old.Timestamp, Encode(new JpegBitmapEncoder { QualityLevel = 85 }, small));
+            return (old.Timestamp, Encode(new JpegBitmapEncoder { QualityLevel = GlanceQuality }, small));
         }).ContinueWith(t => Dispatcher.BeginInvoke(() =>
         {
             if (!t.IsCompletedSuccessfully) return;
@@ -75,14 +79,9 @@ public partial class ControlWindow
         if (_frame is { } frame)
         {
             var screen = ToBitmap(frame);
-            report.Files["screen.png"] = Encode(new PngBitmapEncoder(), screen);
-            if (_overlay.View.Model is { } model && model.FrameWidth == frame.Width && model.FrameHeight == frame.Height)
-            {
-                var shot = WithOverlay(screen, model);
-                report.Files["overlay.png"] = Encode(new PngBitmapEncoder(), shot);
-                report.Screenshot = Encode(new JpegBitmapEncoder { QualityLevel = 85 }, shot);
-            }
-            else report.Screenshot = Encode(new JpegBitmapEncoder { QualityLevel = 85 }, screen);
+            report.Files["screen.jpg"] = Encode(new JpegBitmapEncoder { QualityLevel = ScreenQuality }, frame.Width > WholeScreenWidth ? Halved(screen) : screen);
+            var shot = _overlay.View.Model is { } model && model.FrameWidth == frame.Width && model.FrameHeight == frame.Height ? WithOverlay(screen, model) : screen;
+            report.Screenshot = Encode(new JpegBitmapEncoder { QualityLevel = GlanceQuality }, Halved(shot));
             foreach (var (at, jpeg) in _history)
                 report.Files[$"history/{at.LocalDateTime:HHmmss_fff}.jpg"] = jpeg;
         }
@@ -188,6 +187,13 @@ public partial class ControlWindow
         bitmap.Freeze();
         pool.Return(half);
         return bitmap;
+    }
+
+    private static BitmapSource Halved(BitmapSource bitmap)
+    {
+        var half = new TransformedBitmap(bitmap, new ScaleTransform(0.5, 0.5));
+        half.Freeze();
+        return half;
     }
 
     private static BitmapSource ToBitmap(Frame frame)

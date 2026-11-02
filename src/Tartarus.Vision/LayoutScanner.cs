@@ -45,9 +45,21 @@ public sealed class LayoutScanner : ISandboxScanner
     /// <summary>The scales tried around a frame size's own, as its fractions.</summary>
     private static readonly double[] ScaleSteps = Enumerable.Range(0, 35).Select(i => 0.5 + 0.03 * i).ToArray();
 
+    /// <summary>
+    /// The game's UI scale as its log says it, a fraction of the frame size's own; null when it doesn't say. It sets the
+    /// scale whenever it changes (it matched the Sandbox's on every report frame, 0.64 included); what's measured below
+    /// takes over only where a screen doesn't read at it.
+    /// </summary>
+    public double? LoggedUiScale { get; set; }
+    private double? _loggedK;
+    /// <summary>A pick's measure this near the log's scale is the log's: the measure is a few percent off (0.663 for 0.64).</summary>
+    private const double LoggedScaleNear = 0.08;
+
     public ScanResult Scan(Frame frame)
     {
         var picture = GamePicture.Of(frame);
+        // The Sandbox in the whole frame: its dark bottom was no band.
+        if (picture != frame && Presence?.IsBoard(frame, new ScreenLayout(frame.Width, frame.Height)) == true) picture = frame;
         var r = ScanPicture(picture);
         if (picture != frame) (r.Notes ??= []).Add($"{GamePicture.Note} {picture.Height} rows tall at the top left of the {frame.Width}x{frame.Height} window, read as {picture.Width}x{picture.Height}.");
         return r;
@@ -55,14 +67,17 @@ public sealed class LayoutScanner : ISandboxScanner
 
     private ScanResult ScanPicture(Frame frame)
     {
-        if (_layout == null || _layout.Width != frame.Width || _layout.Height != frame.Height)
+        double? logged = LoggedUiScale * ScreenLayout.DefaultK(frame.Width, frame.Height);
+        bool resized = _layout == null || _layout.Width != frame.Width || _layout.Height != frame.Height;
+        if (resized || logged != null && logged != _loggedK)
         {
-            _oldK = _layout?.K;
-            _layout = new ScreenLayout(frame.Width, frame.Height);
+            if (resized) _oldK = _layout?.K;
+            _layout = new ScreenLayout(frame.Width, frame.Height, logged);
             _scaleKnown = false;
             _scaleSearchedAt = default;
         }
-        var r = ScanAt(frame, _layout);
+        _loggedK = logged;
+        var r = ScanAt(frame, _layout!);
         if ((PickScale(r) ?? SandboxScale(frame, r)) is double k)
         {
             _layout = new ScreenLayout(frame.Width, frame.Height, k);
@@ -87,6 +102,7 @@ public sealed class LayoutScanner : ISandboxScanner
         if (ks.Count == 0) return null;
         double k = ks.Average();
         if (_oldK is double old && Math.Abs(k / old - 1) < 0.06) k = old;
+        if (_loggedK is double told && Math.Abs(k / told - 1) < LoggedScaleNear) k = told;
         return Math.Abs(k / layout.K - 1) > 0.05 && k > 0 ? k : null;
     }
 

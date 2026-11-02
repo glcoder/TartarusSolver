@@ -19,7 +19,8 @@ public sealed class BugReport
 
     public void AddText(string path, string text) => Files[path] = Encoding.UTF8.GetBytes(BugReports.Scrub(text));
 
-    public byte[] Zip(string comment)
+    /// <param name="withScreenshot">The screenshot in it too: the copy kept here (sent, it goes apart).</param>
+    public byte[] Zip(string comment, bool withScreenshot = false)
     {
         using var buffer = new MemoryStream();
         using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
@@ -33,6 +34,7 @@ public sealed class BugReport
             }
             Add("comment.txt", Encoding.UTF8.GetBytes(BugReports.Scrub(comment)));
             foreach (var (path, data) in Files) Add(path, data);
+            if (withScreenshot && Screenshot is { } shot) Add("screenshot.jpg", shot);
         }
         return buffer.ToArray();
     }
@@ -92,7 +94,7 @@ public static partial class BugReports
     public static async Task<string> SendAsync(BugReport report, string comment)
     {
         byte[] zip = report.Zip(comment);
-        string saved = Keep(report, zip);
+        string saved = Keep(report, report.Zip(comment, withScreenshot: true));
         if (!Enabled) return $"Bug report saved (sending not set up): {saved}";
         try
         {

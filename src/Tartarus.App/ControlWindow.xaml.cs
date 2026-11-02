@@ -423,7 +423,9 @@ public partial class ControlWindow : Window
     // Windows.Graphics.Capture missing on this PC: auto attach stops trying (2026-11-01, Windows 10 1909: tried every
     // 2 s, 1904 lines of the same failure in the log, nothing on screen to tell the player why).
     private bool _captureUnsupported;
-    private const string UnsupportedStatus = "Not capturing: Windows can't capture windows on this PC (Windows.Graphics.Capture unsupported)";
+    private static string UnsupportedStatus => WindowCapture.WindowsTooOld
+        ? "Not capturing: this Windows is too old, the app needs Windows 10 version 1903 or later"
+        : "Not capturing: Windows can't capture windows on this PC (Windows.Graphics.Capture unsupported)";
 
     private async void TryAutoAttach()
     {
@@ -480,11 +482,16 @@ public partial class ControlWindow : Window
             // The log of the very install that's running, from its executable's path.
             if (Win32Windows.ImagePath(w.Pid) is { } exe) StartGameLog(exe);
         }
-        catch (PlatformNotSupportedException ex)
+        catch (Exception ex) when (WindowCapture.IsUnsupported(ex))
         {
             if (!_captureUnsupported)
-                Log($"Could not start capturing \"{w.Title}\": {ex.Message} Usually a remote desktop session, a virtual machine "
-                    + "or a display driver without Direct3D 11. Not tried again automatically.");
+            {
+                Log($"Could not start capturing \"{w.Title}\": {ex.Message} Usually Windows 10 older than version 1903, a remote "
+                    + "desktop session, a virtual machine or a display driver without Direct3D 11. Not tried again automatically.");
+                if (WindowCapture.WindowsTooOld)
+                    MessageBox.Show(this, "This version of Windows can't capture the game's window, so the app can't read the game.\n\n"
+                        + "The app needs Windows 10 version 1903 or later.", "Tartarus Solver", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
             _captureUnsupported = true;
             CaptureStatus.Text = UnsupportedStatus;
         }
@@ -694,7 +701,7 @@ public partial class ControlWindow : Window
         ScanResult r;
         try
         {
-            r = await _scans.ScanAsync(frame);
+            r = await _scans.ScanAsync(frame, _gameLog?.Log.UiScale);
         }
         catch (Exception ex)
         {

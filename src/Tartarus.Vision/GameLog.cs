@@ -87,6 +87,13 @@ public sealed partial class GameLog
     public List<LoggedRun> Runs { get; } = [];
     public LoggedRun? Current => Runs.Count > 0 ? Runs[^1] : null;
 
+    /// <summary>
+    /// The game's UI scale as a fraction of the frame size's own, from the Tartarus pages it opens; null when the log
+    /// doesn't say (logs of pages only). Read while the watcher's timer writes it.
+    /// </summary>
+    public double? UiScale => Volatile.Read(ref _uiScale) is > 0 and var scale ? scale : null;
+    private double _uiScale;
+
     private const string LogInGame = @"UE_game\TorchLight\Saved\Logs\UE_game.log";
 
     /// <summary>
@@ -192,6 +199,12 @@ public sealed partial class GameLog
     {
         if (!line.Contains("S16", StringComparison.Ordinal)) return false;
         if (line.Contains("requested row", StringComparison.Ordinal)) return false;
+        if (line.Contains("PageViewSetUIScale", StringComparison.Ordinal))
+        {
+            if (UiScaleRx().Match(line) is { Success: true } scale && double.TryParse(scale.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out double told) && told > 0)
+                Volatile.Write(ref _uiScale, told);
+            return false;
+        }
         // Another client's log: the game's pages, no sounds, clicks or day counter. Not where the counter shows.
         if (line.Contains("Page@ ", StringComparison.Ordinal)) return !_dayCounter && FeedPage(line);
         // A new run: its Start button (then the objective, the Sandbox, day 0 and the first instrument pick).
@@ -364,6 +377,9 @@ public sealed partial class GameLog
 
     [GeneratedRegex(@"\[S16LastDay\] check cur=(\d+) max=(\d+)")]
     private static partial Regex DayRx();
+
+    [GeneratedRegex(@"PageScale = ([0-9.]+)")]
+    private static partial Regex UiScaleRx();
 }
 
 /// <summary>Follows the game's log as the game writes it (new lines every <see cref="Period"/> ms), from its current end.</summary>

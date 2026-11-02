@@ -10,7 +10,7 @@ namespace Tartarus.App;
 /// </summary>
 public sealed class ScanService : IDisposable
 {
-    private readonly BlockingCollection<(Frame? Frame, TaskCompletionSource<ScanResult> Done)> _queue = new();
+    private readonly BlockingCollection<(Frame? Frame, double? UiScale, TaskCompletionSource<ScanResult> Done)> _queue = new();
     private readonly Thread _thread;
     private readonly Func<ISandboxScanner> _factory;
     private ISandboxScanner? _scanner;
@@ -65,19 +65,20 @@ public sealed class ScanService : IDisposable
     /// <summary>Loads the models now instead of at the first scan.</summary>
     public Task WarmUpAsync() => Enqueue(null);
 
-    public Task<ScanResult> ScanAsync(Frame frame) => Enqueue(frame);
+    /// <param name="uiScale">The game's UI scale as its log says it (<see cref="GameLog.UiScale"/>).</param>
+    public Task<ScanResult> ScanAsync(Frame frame, double? uiScale = null) => Enqueue(frame, uiScale);
 
-    private Task<ScanResult> Enqueue(Frame? frame)
+    private Task<ScanResult> Enqueue(Frame? frame, double? uiScale = null)
     {
         var tcs = new TaskCompletionSource<ScanResult>(TaskCreationOptions.RunContinuationsAsynchronously);
         _busy = true;
-        _queue.Add((frame, tcs));
+        _queue.Add((frame, uiScale, tcs));
         return tcs.Task;
     }
 
     private void Run()
     {
-        foreach (var (frame, done) in _queue.GetConsumingEnumerable())
+        foreach (var (frame, uiScale, done) in _queue.GetConsumingEnumerable())
         {
             try
             {
@@ -88,6 +89,7 @@ public sealed class ScanService : IDisposable
                     if (_scanner is LayoutScanner layout) layout.Ocr.RequestLanguage(_gameLanguage);
                     ScannerInfo = _scanner.Name + (_scanner is LayoutScanner { Presence: null } ? " (no Sandbox template: tartarus-scan sandbox-template)" : "") + (Problem != null ? $" (scanner failed to start: {Problem})" : "");
                 }
+                if (_scanner is LayoutScanner scanner) scanner.LoggedUiScale = uiScale;
                 done.SetResult(frame == null ? ScanJson.Failure("warm-up", _scanner.Name) : _scanner.Scan(frame));
             }
             catch (Exception ex)

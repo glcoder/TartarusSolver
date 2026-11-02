@@ -14,6 +14,9 @@ public static class GamePicture
     /// <summary>The least band under the picture, in rows: a dark Sandbox's bottom is no band.</summary>
     private const int MinBand = 16;
 
+    /// <summary>How many times bigger than the window holds a picture must be to be an old one: seen 1.105 and 1.11 fitting, 1.16 and 1.19 old.</summary>
+    private const double MinOldPicture = 1.135;
+
     /// <summary>
     /// The frame as the game drew it: the picture at the top left, padded with black on the right to its 16:9 width
     /// (or cut there), and without the band under it; the frame itself when it is no such case. Coordinates in it are
@@ -29,9 +32,9 @@ public static class GamePicture
         if (band < Math.Max(MinBand, h / 20) || EvenRows(frame, fromBottom: false) >= band / 2) return frame;
         int ph = h - band;
         if (ph < h * 2 / 5) return frame;
-        // A picture that fits the window leaves dark rows under the Sandbox too (16:10 windows: 60-70 rows): only one
-        // a tenth bigger than the window holds is an old one (that player's: 0.80 for 0.69).
-        if (ph / ScreenLayout.CanvasHeight < 1.1 * ScreenLayout.DefaultK(w, h)) return frame;
+        // A picture that fits the window leaves dark rows under the Sandbox too (16:10 windows: 60-70 rows; 1124x782: 80,
+        // reads as 1.11 times, and the Sandbox went unread): an old one is bigger than that (that player's: 0.80 for 0.69).
+        if (ph / ScreenLayout.CanvasHeight < MinOldPicture * ScreenLayout.DefaultK(w, h)) return frame;
         // The picture's last rows can blur into the band (a JPEG's 718 for 720): a height of 9's multiple near it.
         if (Math.Abs((int)Math.Round(ph / 9.0) * 9 - ph) <= 3) ph = Math.Min(h, (int)Math.Round(ph / 9.0) * 9);
         int pw = (int)Math.Round(ph * 16.0 / 9.0);

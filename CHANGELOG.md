@@ -4,6 +4,18 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.34 — 2026-11-02
+
+- The game's UI scale comes from its log where the log tells it (`PageScale`); measuring stays for logs that don't. A UI
+  drawn smaller than the window's size calls for (a 4K player's 0.64) took a pick's rough measure, and the Sandbox went
+  unread until the app restarted.
+- A dark bottom of the screen no longer reads as a band under an old picture of the game: the frame was cut, the Sandbox
+  went unread and the overlay warned of the window's size (1124x782 windows, one reading at 1650x1087).
+- Bug reports about six times smaller: a JPEG of the frame instead of two PNGs (4K frames at half size), a smaller
+  screenshot, four frames of history instead of six. In the report's zip, `screen.png` is now `screen.jpg`.
+- Windows 10 older than version 1903: said once in a message and the status line that the app needs 1903 or later; the
+  capture is no longer retried every second.
+
 ## 0.7.33 — 2026-11-02
 
 - Game logs of pages only (and no log): a Warden's Inmate with no target no longer reads as today's Consume used. The app

@@ -51,6 +51,15 @@ public sealed unsafe class WindowCapture : IDisposable
         _session.StartCapture();
     }
 
+    /// <summary>
+    /// The capture can't work on this system, so trying again won't help. CLASS_E_CLASSNOTAVAILABLE: Windows 10 1809 has
+    /// no capture of a window by its handle (that takes 1903; 2026-11-02, a player's log of the same error every second).
+    /// </summary>
+    public static bool IsUnsupported(Exception ex) => ex is PlatformNotSupportedException || ex.HResult == unchecked((int)0x80040111);
+
+    /// <summary>Windows older than Windows 10 1903, the first to capture a window by its handle.</summary>
+    public static bool WindowsTooOld => !OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362);
+
     public IntPtr Hwnd { get; }
     public string DisplayName => _item.DisplayName;
     public long FrameCount { get; private set; }

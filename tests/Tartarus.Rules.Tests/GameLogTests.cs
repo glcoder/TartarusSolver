@@ -15,6 +15,42 @@ public class GameLogTests
         Page(time, "CloseView 3535_S16BoardColoredPopCtrl"),
     ];
 
+    private static Frame WithBand(int width, int height, int rows)
+    {
+        var pixels = new byte[width * height * 4];
+        var random = new Random(1);
+        for (int y = 0; y < rows; y++)
+            for (int x = 0; x < width; x++)
+                pixels[(y * width + x) * 4 + random.Next(3)] = (byte)random.Next(256);
+        return new Frame(width, height, pixels, PixelFormat.Bgra32, DateTime.Now);
+    }
+
+    [Theory]
+    [InlineData(1124, 782, 702, false)] // a window that fits: the Sandbox's dark bottom, 1.11 times
+    [InlineData(1650, 1087, 1026, false)] // 1.105 times
+    [InlineData(1106, 851, 720, true)] // an old picture: 1.16 times
+    [InlineData(1120, 858, 747, true)] // 1.19 times
+    public void Only_a_picture_well_bigger_than_the_window_holds_is_an_old_one(int width, int height, int rows, bool old)
+    {
+        var frame = WithBand(width, height, rows);
+        Assert.Equal(old, GamePicture.Of(frame) != frame);
+    }
+
+    [Fact]
+    public void The_UI_scale_is_the_last_one_the_log_tells()
+    {
+        var log = new GameLog();
+        Assert.Null(log.UiScale);
+        Assert.False(log.Feed("[2026.11.01-21.18.15:099][978]TLLua: Display: [Game] PageView@PageViewSetUIScale PageId = 178027_S16BoardTaskPopCtrl, PageScale = 0.64 0.640 0.64"));
+        Assert.Equal(0.64, log.UiScale);
+        log.Feed("[2026.11.01-21.18.17:912][246]TLLua: Display: [Game] PageView@PageViewSetUIScale PageId = 178031_S16BoardMainCtrl, PageScale = 0.7492092192173 0.749 0.749");
+        Assert.Equal(0.7492092192173, log.UiScale);
+        // Not a Tartarus page: the log's reading doesn't look at it.
+        log.Feed("[2026.11.01-21.18.17:912][246]TLLua: Display: [Game] PageView@PageViewSetUIScale PageId = 100_LobbyCtrl, PageScale = 1 1.000 1");
+        Assert.Equal(0.7492092192173, log.UiScale);
+        Assert.Null(log.Current);
+    }
+
     [Fact]
     public void A_Warden_s_Treasure_taken_changes_the_Sandbox()
     {
