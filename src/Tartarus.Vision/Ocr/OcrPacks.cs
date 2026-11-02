@@ -83,6 +83,16 @@ public static class OcrPacks
         _ => code ?? "?",
     };
 
+    /// <summary>"Choose the game's language" in a game language: the overlay asks in all of them, the text being unread.</summary>
+    public static string ChooseLanguage(string? code) => code?.ToLowerInvariant() switch
+    {
+        "ru" => "Выберите язык игры", "de" => "Spielsprache wählen", "es" => "Elige el idioma del juego",
+        "fr" => "Choisissez la langue du jeu", "pt" => "Escolha o idioma do jogo", "id" => "Pilih bahasa game",
+        "vi" => "Chọn ngôn ngữ trò chơi", "ja" => "ゲームの言語を選択", "ko" => "게임 언어를 선택하세요", "th" => "เลือกภาษาของเกม",
+        "zh" or "zhcn" => "请选择游戏语言", "zhtw" => "請選擇遊戲語言",
+        _ => "Choose the game's language",
+    };
+
     /// <summary>Where downloaded packs go (the program's own folder may not be writable).</summary>
     public static string DownloadDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TartarusSolver", "models", "ocr");
 

@@ -47,6 +47,8 @@ public static class GameObservation
             // Bestow in the Interrogation Room.
             var cards = text.Cards.Select(c => c.Meaning).ToList();
             // A card missing from a decision row: that one is used today (a Consume or Hunt, a Replace), or isn't possible.
+            // A card standing there unread leaves both open.
+            bool unread = cards.Contains(ScreenText.UnreadCard);
             bool replace = cards.Any(c => c.Contains("replace"));
             bool consume = cards.Any(c => c.Contains("consume") || c.Contains("hunt"));
             bool end = cards.Any(c => c == "end" || c.EndsWith(" end") || c.Contains("end turn"));
@@ -54,8 +56,8 @@ public static class GameObservation
             o.Ratway = text.RatwayPick;
             if (!o.Interrogation && (replace || consume || end))
             {
-                o.ReplaceUsed = !replace;
-                o.DecisionUsed = !consume;
+                o.ReplaceUsed = !replace && !unread;
+                o.DecisionUsed = !consume && !unread;
             }
         }
         if (text != null && Objective(text) is { } objective)

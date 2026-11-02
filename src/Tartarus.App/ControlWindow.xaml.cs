@@ -118,7 +118,6 @@ public partial class ControlWindow : Window
             GameLanguageCombo.Items.Add(new ComboBoxItem { Content = name == native ? name : $"{name} · {native}", Tag = code });
         }
         GameLanguageAutoCheck.IsChecked = settings.DetectGameLanguage;
-        GameLanguageCombo.IsEnabled = !settings.DetectGameLanguage;
         ShowGameLanguage(ManualLanguage ?? "en");
         GameLanguageAutoCheck.Checked += GameLanguageAuto_Changed;
         GameLanguageAutoCheck.Unchecked += GameLanguageAuto_Changed;
@@ -287,6 +286,7 @@ public partial class ControlWindow : Window
         if (code == _gameLanguage && !(_reofferOcrAt is { } at && DateTime.Now >= at)) return;
         _reofferOcrAt = null;
         _gameLanguage = code;
+        _textUnread = false;
         ShowGameLanguage(code);
         var pack = Tartarus.Vision.Ocr.OcrPacks.ForGame(code);
         // The program's own models gone from under it (2026-11-01: found at the start, not 6 s later, and the language
@@ -326,14 +326,13 @@ public partial class ControlWindow : Window
     }
 
     /// <summary>
-    /// Detected: the game's settings file says (the list shows it, greyed); off: the player's choice, which stays in the
+    /// Detected: the game's settings file says (the list shows it); off: the player's choice, which stays in the
     /// settings either way (the settings file may not tell what the game shows: 2026-10-31, a TapTap client in Chinese with
     /// "en" in it).
     /// </summary>
     private void GameLanguageAuto_Changed(object sender, RoutedEventArgs e)
     {
         bool auto = GameLanguageAutoCheck.IsChecked == true;
-        GameLanguageCombo.IsEnabled = !auto;
         _settings.DetectGameLanguage = auto;
         if (ManualLanguage is { } chosen) ShowGameLanguage(chosen);
         _settings.Save();
@@ -342,8 +341,10 @@ public partial class ControlWindow : Window
 
     private void GameLanguageCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_showingLanguage || GameLanguageAutoCheck.IsChecked == true || (GameLanguageCombo.SelectedItem as ComboBoxItem)?.Tag is not string code) return;
+        if (_showingLanguage || (GameLanguageCombo.SelectedItem as ComboBoxItem)?.Tag is not string code) return;
         _settings.GameLanguage = code;
+        // A language chosen is the one to read: detection goes off, or the choice would do nothing.
+        if (GameLanguageAutoCheck.IsChecked == true) GameLanguageAutoCheck.IsChecked = false;
         _settings.Save();
         // Chosen by hand: its recognizer is offered again, even if declined before.
         _declinedOcr.Remove(Tartarus.Vision.Ocr.OcrPacks.ForGame(code).Id);
@@ -354,6 +355,11 @@ public partial class ControlWindow : Window
     private int _unreadFrames;
     private DateTime _unreadSince;
     private string? _unreadLanguage;
+    // The game's text doesn't read in the language taken, until a frame's does: the overlay says so.
+    private bool _textUnread;
+    // In every language of the game: which one the player reads is what isn't known.
+    private static readonly string LanguageAsk = "Tartarus Solver: Game language\n"
+        + string.Join("\n", Tartarus.Vision.Ocr.OcrPacks.GameLanguages.Select(Tartarus.Vision.Ocr.OcrPacks.ChooseLanguage));
     // Languages the player was asked about this session: not asked again until the next start.
     private readonly HashSet<string> _askedLanguage = [];
     // No language chosen and asked this session: "Not now" asks again at the next start.
@@ -362,22 +368,24 @@ public partial class ControlWindow : Window
     /// <summary>
     /// The Objective panel's words read as no Objective's name on Sandbox after Sandbox for a while: the game shows
     /// another language than the one taken (one frame in 60 misreads mid-fade, a wrong language every frame), so the
-    /// player is asked which one.
+    /// player is asked which one, once, and the overlay keeps asking while it lasts (2026-11-02: a third of those asked
+    /// said "Not now", and played a run on hints that couldn't see the cards).
     /// </summary>
     private void CheckTextReadable(Tartarus.Vision.Ocr.ScreenText text, DateTime at)
     {
-        if (_gameLanguage is not { } language || _askingOcr || _askedLanguage.Contains(language)) return;
+        if (_gameLanguage is not { } language || _askingOcr) return;
         // Its recognizer isn't there (declined, or still loading): unread text is expected.
         if (_scans.OcrPack != Tartarus.Vision.Ocr.OcrPacks.ForGame(language).Id) return;
         if (language != _unreadLanguage) { _unreadLanguage = language; _unreadFrames = 0; }
         switch (Tartarus.Vision.GameObservation.TextReadable(text))
         {
-            case true: _unreadFrames = 0; return;
+            case true: (_unreadFrames, _textUnread) = (0, false); return;
             case null: return;
         }
         if (_unreadFrames++ == 0) _unreadSince = at;
         if (_unreadFrames < 10 || at - _unreadSince < TimeSpan.FromSeconds(5)) return;
-        _askedLanguage.Add(language);
+        _textUnread = true;
+        if (!_askedLanguage.Add(language)) return;
         Log($"Game language: the game's text doesn't read as {language} ({_unreadFrames} Sandbox frames in {(at - _unreadSince).TotalSeconds:0} s), asking");
         Dispatcher.BeginInvoke(() => AskGameLanguage(language), DispatcherPriority.ApplicationIdle);
     }
@@ -685,6 +693,7 @@ public partial class ControlWindow : Window
             Warning = _scan?.Notes?.Any(n => n.StartsWith(Vision.GamePicture.Note, StringComparison.Ordinal)) == true
                 ? "The game's picture doesn't fill its window: set the window size in the game's settings, or press Alt+Enter twice"
                 : null,
+            LanguageAsk = _textUnread && _scan is { Ok: true } ? LanguageAsk : null,
             EyeHint = !stale && _settings.Hints && _eyeHint,
             HintsOnly = _settings.Hints && _settings.HintsOnly,
             HintLine = _settings.Debug,

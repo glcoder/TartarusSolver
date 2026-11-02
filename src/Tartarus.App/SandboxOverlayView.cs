@@ -27,6 +27,8 @@ public sealed class OverlayModel
     public string? Status { get; set; }
     /// <summary>Something the player should do for the hint to hold, drawn large at the top.</summary>
     public string? Warning { get; init; }
+    /// <summary>Asking for the game's language, line by line in each of them: drawn in the bottom left corner, off the Sandbox.</summary>
+    public string? LanguageAsk { get; init; }
     /// <summary>The hint is the eye button: to look at the Sandbox under a pick, or to go back to the pick once it's read.</summary>
     public bool EyeHint { get; init; }
     /// <summary>Only the hint's frames and summary (and warnings): no cells, instruments, Chromatic Inmates or read text.</summary>
@@ -102,7 +104,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
     {
         if (m is not { HintsOnly: true, EditMode: false }) return null;
         var key = new System.Text.StringBuilder();
-        key.Append(m.FrameWidth).Append('x').Append(m.FrameHeight).Append('|').Append(m.Status).Append('|').Append(m.Warning)
+        key.Append(m.FrameWidth).Append('x').Append(m.FrameHeight).Append('|').Append(m.Status).Append('|').Append(m.Warning).Append('|').Append(m.LanguageAsk)
             .Append('|').Append(m.EyeHint).Append('|').Append(m.HintLine).Append('|').Append(m.Sandbox != null);
         var scan = m.Scan;
         if (scan?.Layout is { } layout) key.Append("|L").Append(layout.Width).Append(',').Append(layout.Height).Append(',').Append(layout.K.ToString("0.####", CultureInfo.InvariantCulture));
@@ -155,6 +157,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
 
         if (m.Status is { Length: > 0 } status) Pill(dc, status, new Point(8, 8), Brushes.White, 12, ppd);
         if (m.Warning is { Length: > 0 } warning) Pill(dc, warning, new Point(m.FrameWidth * sx / 2, 64), IncidentBrush, 16, ppd, centerX: true);
+        if (m.LanguageAsk is { Length: > 0 } ask) Pill(dc, ask, new Point(8, m.FrameHeight * sy - 8), IncidentBrush, 14, ppd, above: true);
 
         if (m.ShowText && !m.HintsOnly && m.Scan is { } textScan) DrawText(dc, textScan, sx, sy, ppd);
         if (m.EyeHint && m.Scan?.Layout is { } eyeLayout) DrawEyeHint(dc, eyeLayout, sx, sy);

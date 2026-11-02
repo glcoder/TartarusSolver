@@ -75,6 +75,81 @@ public class GameTextTests
         Assert.Single(o.Treasures);
     }
 
+    private static (ScreenText Text, ScreenLayout Layout) Row(params (double Middle, string Kind)[] read)
+    {
+        var layout = new ScreenLayout(1920, 1200);
+        var byRole = ScreenLayout.TextRegions.ToDictionary(r => r.Role, _ => new List<TextLine>());
+        foreach (var (middle, _) in read)
+        {
+            int x = (int)Math.Round(960 + middle * layout.K);
+            var box = new PixelBox(x - 40, 800, x + 40, 824);
+            byRole["cards"].Add(new TextLine { Text = "?", Box = box, Ink = box, Conf = 1, DetScore = 1, Chars = [] });
+        }
+        var text = ScreenText.Parse(byRole, layout);
+        text.ApplyCardKinds(layout, cx => read.MinBy(r => Math.Abs(r.Middle - cx)).Kind);
+        return (text, layout);
+    }
+
+    private const double Pitch = ScreenLayout.CardPitch;
+
+    [Fact]
+    public void The_language_is_asked_for_in_each_of_the_game_s_languages()
+    {
+        var lines = OcrPacks.GameLanguages.Select(OcrPacks.ChooseLanguage).ToList();
+        Assert.All(lines, l => Assert.False(string.IsNullOrWhiteSpace(l)));
+        Assert.Equal(lines.Count, lines.Distinct().Count());
+    }
+
+    [Fact]
+    public void End_alone_in_the_middle_is_the_whole_row_and_needs_no_looking()
+    {
+        var (text, layout) = Row((0, "end"));
+        text.AddUnreadCards(layout, _ => throw new InvalidOperationException("looked"));
+        Assert.Equal(["end"], text.Cards.Select(c => c.Meaning));
+    }
+
+    [Fact]
+    public void Cards_left_of_End_are_told_by_their_icons()
+    {
+        var (text, layout) = Row((Pitch, "end"));
+        text.AddUnreadCards(layout, x => x < 0 ? "consume" : "replace");
+        Assert.Equal(["consume", "replace", "end"], text.Cards.Select(c => c.Meaning));
+    }
+
+    [Fact]
+    public void A_card_left_of_End_stands_there_even_if_its_icon_does_not_read()
+    {
+        var (text, layout) = Row((Pitch / 2, "end"));
+        text.AddUnreadCards(layout, _ => null);
+        Assert.Equal([ScreenText.UnreadCard, "end"], text.Cards.Select(c => c.Meaning));
+    }
+
+    [Fact]
+    public void A_card_read_is_not_looked_for_again_and_the_row_of_four_is_counted()
+    {
+        var (text, layout) = Row((-Pitch / 2, "replace"), (1.5 * Pitch, "end"));
+        var asked = new List<double>();
+        text.AddUnreadCards(layout, x => { asked.Add(x); return x < -Pitch ? "consume" : "hunt"; });
+        Assert.Equal([Pitch / 2, -1.5 * Pitch], asked);
+        Assert.Equal(["consume", "replace", "hunt", "end"], text.Cards.Select(c => c.Meaning));
+    }
+
+    [Fact]
+    public void Without_End_only_an_icon_adds_a_card()
+    {
+        var (text, layout) = Row((0, "replace"));
+        text.AddUnreadCards(layout, x => x == Pitch ? "end" : null);
+        Assert.Equal(["replace", "end"], text.Cards.Select(c => c.Meaning));
+    }
+
+    [Fact]
+    public void Destination_cards_are_left_alone()
+    {
+        var (text, layout) = Row((-Pitch, "cell"), (0, "cell"), (Pitch, "cell"));
+        text.AddUnreadCards(layout, _ => throw new InvalidOperationException("looked"));
+        Assert.Equal(3, text.Cards.Count);
+    }
+
     /// <summary>Lines as OCR gives them, by region, laid out on a 1920x1200 screen (cards left to right).</summary>
     private static ScreenText Parse(params (string Role, string Text)[] lines)
     {

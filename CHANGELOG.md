@@ -4,6 +4,15 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.36 — 2026-11-02
+
+- A decision row read in part no longer means the other cards are used: End's place tells how many cards stand left of it,
+  and their icons what they are. With the game in another language than the one taken, "End" alone read and End was hinted
+  most days.
+- While the game's text doesn't read in the language taken, the overlay asks to choose the game's language, in all of the
+  game's languages, also after "Not now".
+- The Game language list works with "Detect automatically" on: a language chosen in it turns detection off.
+
 ## 0.7.35 — 2026-11-02
 
 - The game's language is asked for at the first connection to the game, with the one found in the game's settings marked,

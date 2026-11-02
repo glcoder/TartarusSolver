@@ -54,7 +54,7 @@
       <TextBlock Text="Game language" Margin="0,0,6,0" />
       <ComboBox x:Name="GameLanguageCombo" Width="230" />
       <CheckBox x:Name="GameLanguageAutoCheck" Content="Detect automatically" Margin="10,0,0,0"
-                ToolTip="Take the language from the game's settings file; off: choose it in the list yourself" />
+                ToolTip="Take the language from the game's settings file; choosing one in the list turns this off" />
     </StackPanel>
     <StackPanel x:Name="ViewPanel" Orientation="Horizontal" Margin="0,6,0,0">
       <CheckBox x:Name="OverlayCheck" Content="Overlay" Checked="OverlayCheck_Changed" Unchecked="OverlayCheck_Changed" />

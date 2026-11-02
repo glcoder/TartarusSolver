@@ -149,6 +149,48 @@ public sealed partial class ScreenText
         }
     }
 
+    /// <summary>What a card whose place is sure and whose icon didn't tell it is: it stands there, so nothing is used for it.</summary>
+    public const string UnreadCard = "unread";
+
+    /// <summary>
+    /// The decision cards whose words weren't found, told by their icons (<paramref name="kindAt"/>, asked with a place in
+    /// canvas units from the screen's middle; null: no icon there). The cards stand centred with End last, so End's place
+    /// says how many there are: alone in the middle it needs no looking, and a place left of it holds a card whatever
+    /// its icon reads. With a Chinese game read as English only "End" may read, and the two cards unread were taken for used
+    /// (2026-11-02: End hinted on half the arrivals of a run that ended with 1 Chromatic).
+    /// </summary>
+    public void AddUnreadCards(ScreenLayout layout, Func<double, string?> kindAt)
+    {
+        double Middle(CardText c) => (c.Line.Box.CenterX - layout.Width / 2.0) / layout.K;
+        var decisions = Cards.Where(c => c.Kind is "consume" or "hunt" or "replace" or "end").ToList();
+        if (decisions.Count == 0) return;
+        double half = ScreenLayout.CardPitch / 2;
+        double[] places;
+        bool sure = decisions.FirstOrDefault(c => c.Kind == "end") is { } end;
+        if (sure)
+        {
+            int left = (int)Math.Round(Middle(decisions.First(c => c.Kind == "end")) / half);
+            places = Enumerable.Range(1, Math.Max(0, left)).Select(i => (left - 2 * i) * half).ToArray();
+        }
+        else places = [-3 * half, -2 * half, -half, 0, half, 2 * half, 3 * half];
+        var anchor = decisions[0];
+        foreach (double place in places)
+        {
+            if (Cards.Any(c => Math.Abs(Middle(c) - place) < half / 2)) continue;
+            string? kind = kindAt(place);
+            if (kind is "consume" or "hunt" or "replace" or "end" || sure && (kind ??= UnreadCard) != null)
+            {
+                int dx = (int)Math.Round((place - Middle(anchor)) * layout.K);
+                var box = anchor.Line.Box;
+                box = new PixelBox(box.X0 + dx, box.Y0, box.X1 + dx, box.Y1);
+                var line = new TextLine { Text = "", Box = box, Ink = box, Conf = 0, DetScore = 0, Chars = [] };
+                int index = Math.Clamp((int)Math.Round(place / ScreenLayout.CardPitch) + 1, 0, ScreenLayout.CardCount - 1);
+                Cards.Add(new CardText(index, "", line, null) { Kind = kind });
+            }
+        }
+        Cards.Sort((a, b) => a.Line.Box.CenterX.CompareTo(b.Line.Box.CenterX));
+    }
+
     /// <summary>The day counter's number, read apart from its line (see LayoutScanner's ReadDaysNumber).</summary>
     internal void SetDays(int days, TextLine line)
     {

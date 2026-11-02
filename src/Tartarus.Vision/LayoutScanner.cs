@@ -201,7 +201,11 @@ public sealed class LayoutScanner : ISandboxScanner
         foreach (var (role, rect) in ScreenLayout.TextRegions) byRole[role] = _ocr.Read(frame, layout.ToPixels(rect));
         var text = ScreenText.Parse(byRole, layout, sw.Elapsed.TotalMilliseconds);
         if (text.Days == null && byRole["days"].Count > 0) ReadDaysNumber(frame, layout, text);
-        if (_cardIcons != null && text.Cards.Count > 0) text.ApplyCardKinds(layout, cx => _cardIcons.Classify(frame, layout, cx).Kind ?? "cell");
+        if (_cardIcons != null && text.Cards.Count > 0)
+        {
+            text.ApplyCardKinds(layout, cx => _cardIcons.Classify(frame, layout, cx).Kind ?? "cell");
+            text.AddUnreadCards(layout, cx => _cardIcons.Classify(frame, layout, cx).Kind);
+        }
         return text;
     }
 
