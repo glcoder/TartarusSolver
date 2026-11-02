@@ -638,6 +638,7 @@ public partial class ControlWindow : Window
     private const double FadePresence = 0.45;
     // A plain Sandbox's presence (0.55-0.72): no popup, fade or red screen over it.
     private const double PlainPresence = 0.5;
+    private static readonly TimeSpan ChromaticGoing = TimeSpan.FromSeconds(2.5);
     // Which Sandbox readings a hint is made of: read alike twice, and not the old Sandbox after the log's change.
     private readonly BoardSettle _boardSettle = new();
     // The last reading wasn't settled: the scan loop reads the next frame soon (QuickConfirm), not a period later.
@@ -824,8 +825,20 @@ public partial class ControlWindow : Window
         if (!manual) AutoCollect(frame, r);
         // Only a plain Sandbox tells whether the text reads: the red screen and a fade darken the Objective's panel
         // (2026-11-01: a chain of Consumes asked for the game's language, 15 red frames in 5 s).
-        if (r.Ok && r.Text != null && !targetPick && LiveLogRun is not { ConsumePick: true } && r.Loc is { Score: >= PlainPresence })
-            CheckTextReadable(r.Text, frame.Timestamp.LocalDateTime);
+        if (r.Ok && !targetPick && LiveLogRun is not { ConsumePick: true } && r.Loc is { Score: >= PlainPresence })
+        {
+            if (r.Text != null) CheckTextReadable(r.Text, frame.Timestamp.LocalDateTime);
+            // The theme's icon, not on a run that's over: the result's Sandbox would carry its theme into the next.
+            if (_logRun is not { Finished: true } && _run.ThemeIcon(r.ThemeIcon) && _run.Theme is { } iconTheme)
+            {
+                Log($"Run theme: {RunThemes.NameOf(iconTheme)} (its icon)");
+                if (_logRun is { } running)
+                {
+                    KeepTheme(running, iconTheme);
+                    PagedDays(running);
+                }
+            }
+        }
         RequestHint(r);
         return true;
     }
@@ -945,7 +958,7 @@ public partial class ControlWindow : Window
     /// <summary>The run's theme when the app doesn't know it: the one kept for this run, or Iron Law by the run's 30 days.</summary>
     private void RestoreTheme(LoggedRun run)
     {
-        if (_run.Theme != null || _themeChecked is { } c && c.Run == run && c.MaxDays == run.MaxDays) return;
+        if (run.Finished || _run.Theme != null || _themeChecked is { } c && c.Run == run && c.MaxDays == run.MaxDays) return;
         _themeChecked = (run, run.MaxDays);
         string? theme = null;
         try
@@ -1017,6 +1030,7 @@ public partial class ControlWindow : Window
         {
             _logRunFinished = true;
             Log($"Log: run finished — Chromatic {run.Chromatic}, Prison Incidents {run.Incidents}, Consume {run.Consumes}");
+            _run.ThemeOver();
         }
         CountRuns();
     }
@@ -1199,6 +1213,17 @@ public partial class ControlWindow : Window
                     bool huntComing = _hint?.Ranked is { Count: > 0 } shown && shown[0].Action.Kind == Tartarus.Rules.ActionKind.Hunt
                         && live is { CardTold: false } clicked && clicked.CardClickedAt > _hintShownAt && DateTime.Now - clicked.CardClickedAt < TimeSpan.FromSeconds(4);
                     if (!ahead && !huntComing)
+                    {
+                        _hints.Clear();
+                        ClearHint();
+                    }
+                    return;
+                }
+                // A chain's end: the Warden's Inmate reached Chromatic and goes, or has gone, and the red fades before its
+                // Treasure comes. Nothing to decide there (2026-11-02: "Cancel, End" hinted for a second at each).
+                if (consumeOnly && (here is { Kind: not CellKind.Inmate, Covered: false } || live is { } risen && DateTime.Now - risen.ChromaticAt < ChromaticGoing))
+                {
+                    if (!ahead)
                     {
                         _hints.Clear();
                         ClearHint();

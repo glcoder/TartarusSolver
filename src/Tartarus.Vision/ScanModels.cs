@@ -24,6 +24,8 @@ public sealed class ScanResult
     public PickRead? Pick { get; set; }
     /// <summary>The run theme screen before a run (Tyranny, Opulence, Iron Law, Cage Fight): the theme's id.</summary>
     public string? Theme { get; set; }
+    /// <summary>The theme whose icon hangs at the Sandbox's bottom left (<see cref="ThemeIcons"/>); null: none read.</summary>
+    public string? ThemeIcon { get; set; }
     public List<string>? Notes { get; set; }
     public double Ms { get; set; }
 

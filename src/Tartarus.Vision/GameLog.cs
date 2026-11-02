@@ -64,6 +64,8 @@ public sealed class LoggedRun
     /// comes up again (2026-10-30: 12 Confirms for 4 Chromatics read as 10).
     /// </summary>
     public int ChromaticAtLeast => Math.Min(10, Math.Max(Chromatic, PanelLights));
+    /// <summary>When an Inmate last reached Chromatic: it leaves the Sandbox, and what's on screen until its Treasure is the going.</summary>
+    public DateTime ChromaticAt { get; set; }
     /// <summary>The Chromatic panel's slots lit up (an animation the log names): one per Chromatic.</summary>
     public int PanelLights { get; set; }
     /// <summary>
@@ -269,8 +271,8 @@ public sealed partial class GameLog
         // often empty by then, and a reading after it like those before looked like the old Sandbox still on screen
         // (2026-10-28: the eye button asked for again and again over a Warden's Treasure).
         else if (line.Contains("AudioEnum  == UI_S16_Premium_Quality_Fly", StringComparison.Ordinal)) { }
-        else if (line.Contains("AudioEnum  == UI_S16_Premium_Quality", StringComparison.Ordinal)) (run.Chromatic, run.BoardChangedAt) = (run.Chromatic + 1, LocalTime(line));
-        else if (line.Contains("Anim_Archive_LightUp", StringComparison.Ordinal)) (run.PanelLights, _panelLights) = (run.PanelLights + 1, true);
+        else if (line.Contains("AudioEnum  == UI_S16_Premium_Quality", StringComparison.Ordinal)) (run.Chromatic, run.BoardChangedAt, run.ChromaticAt) = (run.Chromatic + 1, LocalTime(line), LocalTime(line));
+        else if (line.Contains("Anim_Archive_LightUp", StringComparison.Ordinal)) (run.PanelLights, _panelLights, run.ChromaticAt) = (run.PanelLights + 1, true, LocalTime(line));
         // The Prison Incident works on the Sandbox as its window is confirmed, not as it opens: a reading between the two
         // is the Sandbox before it (2026-10-31: a cell the incident opened on an Ultimate, the Objective's pick hinted
         // over it still Unopened). Its opening is no change of its own (2026-11-01: an instrument pick taken as the

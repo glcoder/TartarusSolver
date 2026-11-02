@@ -2,6 +2,9 @@
   <!-- WPF shell: click-through overlay over the game + small control window. JIT (WPF). -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+    <!-- Off: .NET 9's hardware stack protection fails at the start on Windows 10 with a CPU that has it
+         ("Assert failure: !AreShadowStacksEnabled() || UseSpecialUserModeApc()", GitHub issue 1). -->
+    <CETCompat>false</CETCompat>
     <TargetFramework>$(WinTfm)</TargetFramework>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <UseWPF>true</UseWPF>

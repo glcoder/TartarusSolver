@@ -42,6 +42,24 @@ public sealed class RunMemory
     /// <summary>The run's theme by id (<see cref="RunThemes"/>), or null.</summary>
     public string? Theme => _theme;
 
+    /// <summary>Reads of the theme's icon in a row that make it the run's: a theme doesn't change within a run.</summary>
+    public const int ThemeIconReads = 3;
+    private string? _iconRead;
+    private int _iconReads;
+
+    /// <summary>Notes a plain Sandbox's theme icon (null: none read). True when this makes it the run's theme.</summary>
+    public bool ThemeIcon(string? id)
+    {
+        _iconReads = id != null && id == _iconRead ? _iconReads + 1 : id != null ? 1 : 0;
+        _iconRead = id;
+        if (id == null || _iconReads < ThemeIconReads || _theme == id) return false;
+        (_theme, _themeComing) = (id, false);
+        return true;
+    }
+
+    /// <summary>The run is over: its theme goes, whatever screens stay up, not to reach the next run.</summary>
+    public void ThemeOver() => (_theme, _themeComing, _iconRead, _iconReads) = (null, false, null, 0);
+
     /// <summary>
     /// Whether more Remaining Days than before means a new run. Off while the game's log tells runs apart: a misread
     /// day count would otherwise wipe the run's memory.
@@ -194,7 +212,6 @@ public sealed class RunMemory
         _lastDays = null;
         _chromatic = 0;
         _chromaticSeen = null;
-        _theme = null;
-        _themeComing = false;
+        ThemeOver();
     }
 }

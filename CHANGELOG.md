@@ -4,6 +4,16 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.37 — 2026-11-02
+
+- On the Consume target pick the Warden reads right at once after a bite through Scratch Marks: the old Inmate stayed for up
+  to some seconds, and its target was hinted where the game no longer offered it.
+- No hint on a chain's end while the Chromatic Inmate goes ("Cancel, End" showed for a second).
+- The run's theme from its icon at the Sandbox's bottom left, in any language and whenever the app starts: three reads in a
+  row make it the run's, and it ends with the run.
+- The app no longer fails right at the start on Windows 10 with a recent CPU ("FailFast exception"): .NET's hardware stack
+  protection (CET) is off.
+
 ## 0.7.36 — 2026-11-02
 
 - A decision row read in part no longer means the other cards are used: End's place tells how many cards stand left of it,

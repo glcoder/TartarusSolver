@@ -65,6 +65,63 @@ public class SandboxTests
     }
 
     [Fact]
+    public void A_bite_through_Scratch_Marks_starts_the_votes_over()
+    {
+        // 2026-11-02: a Wolf Magic in cell 9 ate through the marks on cell 10, the door shut again, and it stood there
+        // Wolf Magic for as many scans as it had been voted before: its target was hinted, not the Mammoth Ultimate's.
+        var pick = EditableSandbox.Empty();
+        pick.Warden = 9;
+        (pick[9].Kind, pick[9].Code, pick[9].Rarity) = (CellKind.Inmate, Vision.Code.Wolf, Vision.Rarity.Magic);
+        pick[10].Kind = CellKind.Unopened;
+        pick[10].ScratchMarks = true;
+        var votes = new PickVotes();
+        for (int i = 0; i < 6; i++) votes.Apply(pick.Clone());
+        var bitten = pick.Clone();
+        (bitten[9].Code, bitten[9].Rarity) = (Vision.Code.Mammoth, Vision.Rarity.Ultimate);
+        bitten[10].ScratchMarks = false;
+        votes.Apply(bitten);
+        Assert.Equal(Vision.Code.Mammoth, bitten[9].Code);
+        Assert.Equal(Vision.Rarity.Ultimate, bitten[9].Rarity);
+    }
+
+    [Fact]
+    public void The_theme_comes_from_three_reads_of_its_icon_in_a_row_and_ends_with_the_run()
+    {
+        var run = new RunMemory();
+        Assert.False(run.ThemeIcon("ironlaw"));
+        Assert.False(run.ThemeIcon("ironlaw"));
+        Assert.Null(run.Theme);
+        // A frame without the icon, or another's, starts over.
+        Assert.False(run.ThemeIcon(null));
+        Assert.False(run.ThemeIcon("ironlaw"));
+        Assert.False(run.ThemeIcon("tyranny"));
+        Assert.False(run.ThemeIcon("ironlaw"));
+        Assert.False(run.ThemeIcon("ironlaw"));
+        Assert.True(run.ThemeIcon("ironlaw"));
+        Assert.Equal("ironlaw", run.Theme);
+        // Once is enough to say so.
+        Assert.False(run.ThemeIcon("ironlaw"));
+        run.ThemeOver();
+        Assert.Null(run.Theme);
+        Assert.False(run.ThemeIcon("ironlaw"));
+        Assert.Null(run.Theme);
+        // A new run leaves nothing of the last's icon.
+        run.ThemeIcon("ironlaw");
+        run.ThemeIcon("ironlaw");
+        run.NewRun();
+        Assert.False(run.ThemeIcon("ironlaw"));
+        Assert.Null(run.Theme);
+    }
+
+    [Fact]
+    public void The_icons_of_all_themes_ship()
+    {
+        var icons = ThemeIcons.Load();
+        Assert.NotNull(icons);
+        Assert.Equal(RunThemes.All.Select(t => t.Id), icons.Loaded);
+    }
+
+    [Fact]
     public void A_new_Inmate_of_the_same_Code_reads_as_it_is_on_the_red_screen()
     {
         // 2026-10-27: a Lion Ultimate in cell 9 became Chromatic, a Lion Magic came; the red screen showed it Ultimate,

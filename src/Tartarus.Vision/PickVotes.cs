@@ -4,7 +4,9 @@ namespace Tartarus.Vision;
 /// On the Consume target pick (the red screen) nothing on the Sandbox changes until a bite, while the red flickers
 /// over it (the glows, the target's jaws, the small mouth over each eater). Each Inmate there shows what its readings
 /// over the pick's frames say most often, so one frame's misread doesn't flip it. The votes start over when the pick
-/// ends or the cells' kinds change (a bite empties its meal's cell, Avenger's Casket opens one). No Inmate reads lower
+/// ends or the cells' kinds change (a bite empties its meal's cell, Avenger's Casket opens one) or a door loses its
+/// Scratch Marks (a bite through them leaves the cell Unopened: 2026-11-02, the old Warden hinted for 5.6 s after one,
+/// for a target the game no longer offered). No Inmate reads lower
 /// than it was read just before the red screen: an Inmate's rarity never drops in its cell, while the red takes an
 /// Ultimate's red frame away (a Mammoth Ultimate read Normal, and taken for a target).
 /// </summary>
@@ -55,7 +57,7 @@ public sealed class PickVotes
     /// <summary>Adds this frame's readings of <paramref name="b"/>'s Inmates and sets each to its most read Code and rarity.</summary>
     public void Apply(EditableSandbox b)
     {
-        string kinds = string.Concat(Enumerable.Range(2, 15).Select(n => b[n].Kind == CellKind.Inmate || b[n].Covered ? 'I' : 'o'));
+        string kinds = string.Concat(Enumerable.Range(2, 15).Select(n => b[n].Kind == CellKind.Inmate || b[n].Covered ? 'I' : b[n].ScratchMarks ? 's' : 'o'));
         if (kinds != _kinds)
         {
             Clear();

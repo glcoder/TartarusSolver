@@ -15,6 +15,7 @@ public sealed class LayoutScanner : ISandboxScanner
     private readonly ICellReader _cells;
     private readonly CardIcons? _cardIcons = CardIcons.Load();
     private readonly PickIcons? _instrumentIcons = PickIcons.Instruments(), _treasureIcons = PickIcons.Treasures();
+    private readonly ThemeIcons? _themeIcons = ThemeIcons.Load();
     private ScreenLayout? _layout;
 
     /// <param name="presence">Tells Sandbox screens from others; without it, a Sandbox is on screen when the day counter reads.</param>
@@ -171,6 +172,7 @@ public sealed class LayoutScanner : ISandboxScanner
         // The layout always "finds" a Sandbox; whether it is on screen is the presence check's (the cell reader
         // finds "inmates" in a pick screen's art). Without a template: the day counter reads.
         r.Ok = r.Cells is { Count: 16 } && (presence is float p ? p >= Presence!.Threshold : text?.Days != null);
+        if (r.Ok && _themeIcons != null) r.ThemeIcon = _themeIcons.Classify(frame, layout).Id;
         if (!r.Ok)
         {
             var pickSw = Stopwatch.StartNew();

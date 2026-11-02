@@ -18,7 +18,7 @@ MODELS = [
     "slots/*.onnx", "slots/*.json",
     "sandbox/template.bin",
     "solver/value.bin", "solver/policy.bin", "solver/weights.txt", "solver/levels.txt", "solver/chests.txt",
-    "cards/*.png",
+    "cards/*.png", "themes/*.png",
     "instruments/*.png", "instruments/pick/*.png", "instruments/pick/pick.json",
     "treasures/*.png",
     "chests/*.png",
