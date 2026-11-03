@@ -44,7 +44,7 @@ public sealed unsafe class WindowCapture : IDisposable
                 [FeatureLevel.Level_11_1, FeatureLevel.Level_11_0], out _device!, out _context!).CheckError();
             step = "WinRT device";
             _winrtDevice = CreateWinRtDevice(_device);
-            step = "capture item";
+            step = ItemStep;
             _item = CreateItemForWindow(hwnd);
             _item.Closed += (_, _) => Closed?.Invoke();
             _poolSize = _item.Size;
@@ -74,8 +74,24 @@ public sealed unsafe class WindowCapture : IDisposable
     /// <summary>A capture that didn't start: at which step, and what the system said ("E_FAIL" alone tells nothing).</summary>
     public sealed class CaptureStartException : Exception
     {
-        public CaptureStartException(string step, Exception inner) : base($"{step}: {inner.Message.Trim()} (0x{inner.HResult:X8})", inner) => HResult = inner.HResult;
+        public CaptureStartException(string step, Exception inner) : base($"{step}: {inner.Message.Trim()} (0x{inner.HResult:X8})", inner)
+        {
+            Step = step;
+            HResult = inner.HResult;
+        }
+
+        public string Step { get; }
     }
+
+    private const string ItemStep = "capture item";
+    private const int E_INVALIDARG = unchecked((int)0x80070057), REGDB_E_CLASSNOTREG = unchecked((int)0x80040154), ERROR_SERVICE_DISABLED = unchecked((int)0x80070422);
+
+    /// <summary>
+    /// Windows itself won't capture a window here, whichever it is (2026-11-03: E_FAIL, class not registered, service disabled at
+    /// the capture item on Windows 10 19045, never a frame on those installs). A bad argument is a window just gone.
+    /// </summary>
+    public static bool IsRefused(Exception ex) => ex.HResult is REGDB_E_CLASSNOTREG or ERROR_SERVICE_DISABLED
+        || ex is CaptureStartException { Step: ItemStep } && ex.HResult != E_INVALIDARG;
 
     /// <summary>
     /// The capture can't work on this system, so trying again won't help. CLASS_E_CLASSNOTAVAILABLE: Windows 10 1809 has
@@ -140,6 +156,14 @@ public sealed unsafe class WindowCapture : IDisposable
     /// <summary>Where the last grabbed frame sits on screen (physical pixels): the client area, or the whole window.</summary>
     public PixelRect LastBounds { get; private set; }
 
+    /// <summary>What's unusual about the frames, each thing once; raised on the thread that grabs them.</summary>
+    public event Action<string>? Note;
+    private readonly HashSet<string> _told = [];
+    private void Tell(string note)
+    {
+        if (_told.Add(note)) Note?.Invoke(note);
+    }
+
     /// <summary>
     /// The graphics device is gone (driver reset or update, sleep, a GPU timeout): this capture is done for, a new one
     /// works. DXGI_ERROR_DEVICE_REMOVED, _HUNG, _RESET, DRIVER_INTERNAL_ERROR.
@@ -169,15 +193,18 @@ public sealed unsafe class WindowCapture : IDisposable
             var visible = Win32Windows.VisibleBounds(Hwnd);
             int x0 = 0, y0 = 0, w = fw, h = fh;
             LastBounds = new PixelRect(visible.Left, visible.Top, visible.Left + fw, visible.Top + fh);
-            if (CropToClient && Win32Windows.ClientBounds(Hwnd) is { IsEmpty: false } client
-                && visible.Width <= fw && visible.Height <= fh)
+            if (CropToClient && Win32Windows.ClientBounds(Hwnd) is { IsEmpty: false } client)
             {
-                int cx = client.Left - visible.Left, cy = client.Top - visible.Top;
-                if (cx >= 0 && cy >= 0 && cx + client.Width <= fw && cy + client.Height <= fh)
+                bool cutByMonitor = visible.Width > fw || visible.Height > fh;
+                var monitor = cutByMonitor ? Win32Windows.MonitorBounds(Hwnd) : default;
+                if (GamePicture.ClientAt((visible.Left, visible.Top, visible.Width, visible.Height), (monitor.Left, monitor.Top),
+                    (client.Left, client.Top, client.Width, client.Height), fw, fh) is { } at)
                 {
-                    (x0, y0, w, h) = (cx, cy, client.Width, client.Height);
+                    (x0, y0, w, h) = (at.X, at.Y, client.Width, client.Height);
                     LastBounds = client;
+                    if (cutByMonitor) Tell($"Frame {fw}x{fh} is what the monitor {monitor} shows of the window {visible}, its client area {client} cut out");
                 }
+                else Tell($"Frame {fw}x{fh} left whole: the client area {client} doesn't fit it, window {visible}");
             }
 
             if (_staging == null || _staging.Description.Width != w || _staging.Description.Height != h)

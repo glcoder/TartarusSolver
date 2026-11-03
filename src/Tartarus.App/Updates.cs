@@ -60,7 +60,8 @@ public static class Updates
     public static async Task<string> DownloadAsync(Release release, IProgress<double>? progress = null, CancellationToken ct = default)
     {
         if (release.Url == null || release.Sha256 == null || release.Asset == null) throw new InvalidOperationException("the release has no zip for this install");
-        CleanUp();
+        await _cleaning;
+        await Task.Run(CleanUp, ct);
         Directory.CreateDirectory(Staging);
         string zip = Path.Combine(Staging, release.Asset);
         using (var response = await Http.GetAsync(release.Url, HttpCompletionOption.ResponseHeadersRead, ct))
@@ -149,6 +150,13 @@ public static class Updates
             Process.Start(new ProcessStartInfo("explorer.exe", $"\"{AppDir}\"") { UseShellExecute = true });
         }
     }
+
+    /// <summary>
+    /// <see cref="CleanUp"/> off the UI thread, for the start: hundreds of files, an antivirus looks at each (2026-11-03: the
+    /// window stood still for 30 s on the first start after an update).
+    /// </summary>
+    public static void CleanUpBehind() => _cleaning = Task.Run(CleanUp);
+    private static Task _cleaning = Task.CompletedTask;
 
     /// <summary>What an update left behind (its zip, the unpacked version), unless it's running from there.</summary>
     public static void CleanUp()

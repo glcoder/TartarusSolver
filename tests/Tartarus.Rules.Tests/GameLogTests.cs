@@ -4,6 +4,22 @@ namespace Tartarus.Rules.Tests;
 
 public class GameLogTests
 {
+    [Theory]
+    // The frames of reports: window off the top of the screen. Whole frame, then the same window cut to the monitor.
+    [InlineData(-2, -11, 2564, 1541, 0, 0, 0, 34, 2560, 1494, 2564, 1541, 2, 45)]
+    [InlineData(-2, -11, 2564, 1541, 0, 0, 0, 34, 2560, 1494, 2560, 1528, 0, 34)]
+    [InlineData(-1, -8, 2562, 1409, 0, 0, 0, 23, 2560, 1377, 2560, 1400, 0, 23)]
+    // On a monitor left of the main one, and a plain window that fits.
+    [InlineData(-1928, -8, 1936, 1056, -1920, 0, -1920, 23, 1920, 1017, 1920, 1040, 0, 23)]
+    [InlineData(100, 50, 1282, 751, 0, 0, 101, 81, 1280, 720, 1282, 751, 1, 31)]
+    public void A_frame_is_cut_to_the_client_area_also_when_the_monitor_cut_it(int vl, int vt, int vw, int vh, int ml, int mt,
+        int cl, int ct, int cw, int ch, int fw, int fh, int x, int y) =>
+        Assert.Equal((x, y), GamePicture.ClientAt((vl, vt, vw, vh), (ml, mt), (cl, ct, cw, ch), fw, fh));
+
+    [Fact]
+    public void A_frame_too_small_for_the_client_area_is_left_whole() =>
+        Assert.Null(GamePicture.ClientAt((0, 0, 1920, 1080), (0, 0), (0, 31, 1920, 1049), 1280, 720));
+
     private static string Page(string time, string what) => $"[2026.10.27-{time}:000][ 46]TLShipping: Display: [Game] Page@ {what}";
 
     private static IEnumerable<string> Day(string time) => [Page(time, "OpenView S16BoardNewDayPop"), Page(time, "CloseView 3490_S16BoardNewDayPopCtrl")];

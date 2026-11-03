@@ -136,6 +136,26 @@ public class GameTextTests
     }
 
     [Fact]
+    public void A_refused_capture_is_told_in_each_of_the_game_s_languages()
+    {
+        var lines = OcrPacks.GameLanguages.Select(OcrPacks.CaptureRefused).ToList();
+        Assert.All(lines, l => Assert.Contains("CaptureService", l));
+        Assert.Equal(lines.Count, lines.Distinct().Count());
+    }
+
+    [Theory]
+    [InlineData("zh-CN", "zh")]
+    [InlineData("zh-Hans-CN", "zh")]
+    [InlineData("zh-TW", "zhTw")]
+    [InlineData("zh-Hant-HK", "zhTw")]
+    [InlineData("pt-BR", "pt")]
+    [InlineData("ko-KR", "ko")]
+    [InlineData("pl-PL", "en")]
+    [InlineData("", "en")]
+    public void Windows_s_language_gives_the_game_language_nearest_to_it(string culture, string code) =>
+        Assert.Equal(code, OcrPacks.FromCulture(culture));
+
+    [Fact]
     public void The_report_window_says_where_to_report_in_each_of_the_game_s_languages()
     {
         var lines = OcrPacks.GameLanguages.Select(OcrPacks.ReportOnlyTartarus).ToList();

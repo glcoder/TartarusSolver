@@ -4,6 +4,15 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.41 — 2026-11-03
+
+- A window maximized past the screen's top: Windows at times sends frames cut to the monitor, the title bar stayed in them and
+  the Sandbox didn't read. They are cut to the game's picture now.
+- No more stalls of the window on the first start after an update and while gathering a bug report.
+- When Windows itself refuses to capture the game window, the status says so in Windows's language, with the error code and the
+  service to check, instead of advice about the game's window mode.
+- Hang reports tell what the system says of the window's thread (a window being moved, a menu open, what's in front).
+
 ## 0.7.40 — 2026-11-03
 
 - A window capture that fails no longer leaves its Direct3D device behind (out of video memory after hours of tries), is tried

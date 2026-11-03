@@ -141,6 +141,14 @@ public static partial class Win32Windows
         return new PixelRect(origin.X, origin.Y, origin.X + c.Right, origin.Y + c.Bottom);
     }
 
+    /// <summary>The monitor the window is mostly on, in screen pixels.</summary>
+    public static PixelRect MonitorBounds(IntPtr h)
+    {
+        var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+        if (!GetMonitorInfo(MonitorFromWindow(h, MONITOR_DEFAULTTONEAREST), ref info)) return default;
+        return new PixelRect(info.rcMonitor.Left, info.rcMonitor.Top, info.rcMonitor.Right, info.rcMonitor.Bottom);
+    }
+
     /// <summary>
     /// Makes this process per-monitor DPI aware (V2), so window rectangles come in physical pixels like the
     /// captured frames. The WPF app declares it in its manifest; console tools call this first.
@@ -170,6 +178,18 @@ public static partial class Win32Windows
     private const long WS_EX_TOOLWINDOW = 0x80;
     private const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
     private const int DWMWA_CLOAKED = 14;
+    private const uint MONITOR_DEFAULTTONEAREST = 2;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MONITORINFO
+    {
+        public int cbSize;
+        public RECT rcMonitor, rcWork;
+        public uint dwFlags;
+    }
+
+    [DllImport("user32.dll")] private static extern IntPtr MonitorFromWindow(IntPtr h, uint flags);
+    [DllImport("user32.dll", EntryPoint = "GetMonitorInfoW")] private static extern bool GetMonitorInfo(IntPtr monitor, ref MONITORINFO info);
 
     [DllImport("user32.dll")] private static extern bool EnumWindows(EnumWindowsProc cb, IntPtr lParam);
     [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr h);

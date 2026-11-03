@@ -39,6 +39,22 @@ internal static class Native
     [DllImport("user32.dll")] public static extern bool UnregisterHotKey(IntPtr h, int id);
     [DllImport("user32.dll")] public static extern bool SetWindowDisplayAffinity(IntPtr h, uint affinity);
 
+    public const uint GUI_INMOVESIZE = 2, GUI_INMENUMODE = 4, GUI_SYSTEMMENUMODE = 8, GUI_POPUPMENUMODE = 0x10;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GUITHREADINFO
+    {
+        public int cbSize;
+        public uint flags;
+        public IntPtr hwndActive, hwndFocus, hwndCapture, hwndMenuOwner, hwndMoveSize, hwndCaret;
+        public int caretLeft, caretTop, caretRight, caretBottom;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)] public static extern bool GetGUIThreadInfo(uint thread, ref GUITHREADINFO info);
+    [DllImport("user32.dll")] public static extern bool IsHungAppWindow(IntPtr h);
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out int pid);
+    [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
+
     public static void AddExStyle(IntPtr h, long add) => SetWindowLongPtr(h, GWL_EXSTYLE, GetWindowLongPtr(h, GWL_EXSTYLE) | add);
     public static void RemoveExStyle(IntPtr h, long remove) => SetWindowLongPtr(h, GWL_EXSTYLE, GetWindowLongPtr(h, GWL_EXSTYLE) & ~remove);
 }

@@ -516,6 +516,7 @@ public partial class ControlWindow : Window
             // Off the UI thread: on a Windows Insider build (28000) the capture item's Closed event never got subscribed
             // to from it, and the window stood still at every start (2026-10-30, a player's hang reports).
             var capture = await Task.Run(() => new WindowCapture(w.Hwnd));
+            capture.Note += AppLog.Write;
             capture.Closed += () => Dispatcher.BeginInvoke(() =>
             {
                 if (_capture != capture) return;
@@ -553,7 +554,9 @@ public partial class ControlWindow : Window
             _captureFailure = ex.Message;
             double wait = Math.Min(CaptureRetryMax.TotalSeconds, Math.Pow(2, Math.Min(_captureFails, 10)));
             _captureNextTry = DateTime.Now.AddSeconds(wait);
-            CaptureStatus.Text = CaptureFailedStatus;
+            CaptureStatus.Text = WindowCapture.IsRefused(ex)
+                ? $"{Tartarus.Vision.Ocr.OcrPacks.CaptureRefused(Tartarus.Vision.Ocr.OcrPacks.FromCulture(System.Globalization.CultureInfo.CurrentUICulture.Name))} (0x{ex.HResult:X8})"
+                : CaptureFailedStatus;
         }
         finally
         {

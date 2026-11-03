@@ -50,7 +50,7 @@ public partial class ControlWindow
     private void ReportButton_Click(object sender, RoutedEventArgs e) => Report();
 
     /// <summary>Gathers a report now and asks for its comment; <paramref name="crash"/> when an exception brought it up.</summary>
-    public void Report(Exception? crash = null)
+    public async void Report(Exception? crash = null)
     {
         if (_reporting) return;
         _reporting = true;
@@ -60,6 +60,9 @@ public partial class ControlWindow
             try
             {
                 report = Gather(crash);
+                // The logs off the UI thread: a game's log may be hundreds of MB (2026-11-03: a hang in it).
+                string? gameLog = _gameLogPath;
+                await Task.Run(() => AddLogs(report, gameLog));
             }
             catch (Exception ex)
             {
@@ -96,15 +99,17 @@ public partial class ControlWindow
         var json = new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
         report.AddText("report.json", JsonSerializer.Serialize(State(crash), json));
         report.AddText("settings.json", JsonSerializer.Serialize(_settings, json));
-        AppLog.Flush();
-        report.AddText("app.log", BugReports.Tail(AppSettings.LogPath, 3000));
-        if (_gameLogPath != null)
-        {
-            try { report.AddText("game_s16.log", BugReports.GameLogRun(_gameLogPath)); }
-            catch (IOException ex) { report.AddText("game_s16.log", "unreadable: " + ex.Message); }
-        }
         if (crash != null) report.AddText("crash.txt", crash.ToString());
         return report;
+    }
+
+    private static void AddLogs(BugReport report, string? gameLog)
+    {
+        AppLog.Flush();
+        report.AddText("app.log", BugReports.Tail(AppSettings.LogPath, 3000));
+        if (gameLog == null) return;
+        try { report.AddText("game_s16.log", BugReports.GameLogRun(gameLog)); }
+        catch (IOException ex) { report.AddText("game_s16.log", "unreadable: " + ex.Message); }
     }
 
     /// <summary>What the app knew: version, window, what it read, the run's memory and the log's, the hint and its ranking.</summary>

@@ -108,6 +108,38 @@ public static class OcrPacks
         _ => "Report only problems in the Tartarus Prison mode.",
     };
 
+    /// <summary>The game language nearest to a Windows display language, like "zh-CN" or "pt-BR".</summary>
+    public static string FromCulture(string culture)
+    {
+        string name = culture.ToLowerInvariant();
+        if (name.StartsWith("zh", StringComparison.Ordinal))
+            return name.Contains("hant") || name.EndsWith("-tw", StringComparison.Ordinal) || name.EndsWith("-hk", StringComparison.Ordinal) || name.EndsWith("-mo", StringComparison.Ordinal) ? "zhTw" : "zh";
+        string language = name.Split('-')[0];
+        return GameLanguages.Contains(language) ? language : "en";
+    }
+
+    /// <summary>
+    /// "Windows refuses to capture the game's window" in a game language: the status for players whose Windows won't capture
+    /// any window. They restarted the app for hours (2026-11-03), and it's said in Windows's language, as the game's may be
+    /// read wrong (clients with "en" in their settings and the game in Chinese).
+    /// </summary>
+    public static string CaptureRefused(string? code) => code?.ToLowerInvariant() switch
+    {
+        "ru" => "Нет захвата: Windows отказывается захватывать окно игры. Возможно, захват экрана отключён или удалён в этой Windows: проверьте службу CaptureService. Без него приложение не видит игру.",
+        "de" => "Keine Aufnahme: Windows verweigert die Aufnahme des Spielfensters. Die Bildschirmaufnahme ist in diesem Windows vielleicht deaktiviert oder entfernt: Prüfen Sie den Dienst CaptureService. Ohne sie sieht die App das Spiel nicht.",
+        "es" => "Sin captura: Windows se niega a capturar la ventana del juego. Es posible que la captura de pantalla esté desactivada o eliminada en este Windows: comprueba el servicio CaptureService. Sin ella, la aplicación no ve el juego.",
+        "fr" => "Pas de capture : Windows refuse de capturer la fenêtre du jeu. La capture d'écran est peut-être désactivée ou supprimée dans ce Windows : vérifiez le service CaptureService. Sans elle, l'application ne voit pas le jeu.",
+        "pt" => "Sem captura: o Windows recusa capturar a janela do jogo. A captura de tela pode estar desativada ou removida neste Windows: verifique o serviço CaptureService. Sem ela, o aplicativo não vê o jogo.",
+        "id" => "Tidak menangkap: Windows menolak menangkap jendela game. Penangkapan layar mungkin dimatikan atau dihapus di Windows ini: periksa layanan CaptureService. Tanpa itu aplikasi tidak bisa melihat game.",
+        "vi" => "Không chụp được: Windows từ chối chụp cửa sổ trò chơi. Có thể tính năng chụp màn hình đã bị tắt hoặc gỡ bỏ trong Windows này: hãy kiểm tra dịch vụ CaptureService. Nếu không có nó, ứng dụng không thấy được trò chơi.",
+        "ja" => "キャプチャできません: Windows がゲームウィンドウのキャプチャを拒否しています。この Windows では画面キャプチャが無効化または削除されている可能性があります。CaptureService サービスを確認してください。これがないとアプリはゲームを認識できません。",
+        "ko" => "캡처 불가: Windows가 게임 창 캡처를 거부합니다. 이 Windows에서 화면 캡처가 꺼졌거나 제거되었을 수 있습니다. CaptureService 서비스를 확인해 주세요. 이 기능 없이는 앱이 게임을 볼 수 없습니다.",
+        "th" => "จับภาพไม่ได้: Windows ปฏิเสธการจับภาพหน้าต่างเกม การจับภาพหน้าจออาจถูกปิดหรือลบออกจาก Windows นี้ โปรดตรวจสอบบริการ CaptureService หากไม่มีบริการนี้ แอปจะมองไม่เห็นเกม",
+        "zh" or "zhcn" => "未能捕获：Windows 拒绝捕获游戏窗口。此 Windows 中的屏幕捕获可能已被关闭或移除，请检查 CaptureService 服务。没有它，本程序无法看到游戏。",
+        "zhtw" => "未能擷取：Windows 拒絕擷取遊戲視窗。此 Windows 中的螢幕擷取可能已被關閉或移除，請檢查 CaptureService 服務。沒有它，本程式無法看到遊戲。",
+        _ => "Not capturing: Windows refuses to capture the game window. Screen capture may be turned off or removed in this Windows: check the CaptureService service. Without it the app can't see the game.",
+    };
+
     /// <summary>Where downloaded packs go (the program's own folder may not be writable).</summary>
     public static string DownloadDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TartarusSolver", "models", "ocr");
 

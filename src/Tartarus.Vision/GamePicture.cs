@@ -48,6 +48,21 @@ public static class GamePicture
         return new Frame(pw, ph, pixels, frame.Format, frame.Timestamp);
     }
 
+    /// <summary>
+    /// Where the window's client area stands in a captured frame, null when it doesn't fit there. The frame starts at the
+    /// window's visible bounds; one smaller than them is what the monitor shows of them (2026-11-03: a window reaching 11 rows
+    /// above the screen, frames of 2564x1541 or at times 2560x1528, whose 34 rows of title bar stayed in and nothing read).
+    /// </summary>
+    public static (int X, int Y)? ClientAt((int Left, int Top, int Width, int Height) visible, (int Left, int Top) monitor,
+        (int Left, int Top, int Width, int Height) client, int frameWidth, int frameHeight)
+    {
+        var (originX, originY) = (visible.Left, visible.Top);
+        if (visible.Width > frameWidth || visible.Height > frameHeight)
+            (originX, originY) = (Math.Max(originX, monitor.Left), Math.Max(originY, monitor.Top));
+        int x = client.Left - originX, y = client.Top - originY;
+        return x >= 0 && y >= 0 && x + client.Width <= frameWidth && y + client.Height <= frameHeight ? (x, y) : null;
+    }
+
     /// <summary>How many rows at the bottom (or top) are one even color.</summary>
     private static int EvenRows(Frame frame, bool fromBottom)
     {

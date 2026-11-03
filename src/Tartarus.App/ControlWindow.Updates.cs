@@ -19,7 +19,7 @@ public partial class ControlWindow
             UpdatePanel.Visibility = Visibility.Collapsed;
             return;
         }
-        Updates.CleanUp();
+        Updates.CleanUpBehind();
         UpdateCheck.IsChecked = _settings.CheckUpdates;
     }
 

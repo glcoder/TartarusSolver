@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Threading;
 using Microsoft.Diagnostics.Runtime;
+using Tartarus.Capture;
 
 namespace Tartarus.App;
 
@@ -18,6 +20,7 @@ public sealed class UiWatchdog : IDisposable
     private static readonly TimeSpan Check = TimeSpan.FromMilliseconds(500);
     private readonly Dispatcher _dispatcher;
     private readonly int _uiThread = Environment.CurrentManagedThreadId;
+    private readonly uint _uiNativeThread = Native.GetCurrentThreadId();
     private readonly Func<string?> _gameLogPath;
     private readonly ManualResetEventSlim _stop = new();
     private volatile bool _answered = true;
@@ -64,6 +67,7 @@ public sealed class UiWatchdog : IDisposable
 
     private void Report(TimeSpan hung)
     {
+        string gui = GuiState();
         string stacks;
         try { stacks = Stacks(); }
         catch (Exception ex) { stacks = "stack not read: " + ex.Message; }
@@ -77,10 +81,11 @@ public sealed class UiWatchdog : IDisposable
         bool idle = ui.Any(l => l.StartsWith(wait)) && ui.TakeWhile(l => !l.StartsWith(wait)).All(l => l.Contains("GetMessage") || l.StartsWith("ILStubClass."));
         if (_answered || idle)
         {
-            Write($"UI thread late by {hung.TotalSeconds:0} s, idle by the time its stack was read (not reported)");
+            Write($"UI thread late by {hung.TotalSeconds:0} s, idle by the time its stack was read (not reported); {gui}");
             return;
         }
-        Write($"UI thread not answering for {hung.TotalSeconds:0} s, at {top}{Environment.NewLine}  {string.Join(Environment.NewLine + "  ", ui)}");
+        stacks += gui + Environment.NewLine;
+        Write($"UI thread not answering for {hung.TotalSeconds:0} s, {gui}, at {top}{Environment.NewLine}  {string.Join(Environment.NewLine + "  ", ui)}");
         try
         {
             var report = new BugReport();
@@ -94,6 +99,35 @@ public sealed class UiWatchdog : IDisposable
         {
             Write("Hang report failed: " + ex.Message);
         }
+    }
+
+    /// <summary>
+    /// What the system says of the UI thread: a window being moved or a menu open keep it in the system's own loop, with
+    /// nothing of ours on the stack (2026-11-03: 95 such hangs, all in DefWindowProc); and whose window is in front. No
+    /// window's title: another's may be anything, and asking our own for it would wait for the UI thread.
+    /// </summary>
+    private string GuiState()
+    {
+        var info = new Native.GUITHREADINFO { cbSize = Marshal.SizeOf<Native.GUITHREADINFO>() };
+        if (!Native.GetGUIThreadInfo(_uiNativeThread, ref info)) return $"GUI state not read: {Marshal.GetLastWin32Error()}";
+        var state = new List<string>();
+        if ((info.flags & Native.GUI_INMOVESIZE) != 0) state.Add("moving or sizing a window");
+        if ((info.flags & Native.GUI_INMENUMODE) != 0) state.Add("in a menu");
+        if ((info.flags & Native.GUI_SYSTEMMENUMODE) != 0) state.Add("in a system menu");
+        if ((info.flags & Native.GUI_POPUPMENUMODE) != 0) state.Add("in a popup menu");
+        if (info.hwndCapture != IntPtr.Zero) state.Add("mouse captured by " + Whose(info.hwndCapture));
+        if (info.hwndMoveSize != IntPtr.Zero) state.Add("moved window " + Whose(info.hwndMoveSize));
+        if (info.hwndMenuOwner != IntPtr.Zero) state.Add("menu of " + Whose(info.hwndMenuOwner));
+        var front = Win32Windows.Foreground;
+        state.Add($"in front {Whose(front)}{(front != IntPtr.Zero && Native.IsHungAppWindow(front) ? " (not responding)" : "")}");
+        return "GUI state: " + string.Join(", ", state);
+    }
+
+    private static string Whose(IntPtr window)
+    {
+        if (window == IntPtr.Zero) return "nothing";
+        Native.GetWindowThreadProcessId(window, out int pid);
+        return pid == Environment.ProcessId ? "ours" : Win32Windows.GameTitle.IsMatch(Win32Windows.GetTitle(window)) ? "the game's" : "another's";
     }
 
     /// <summary>
