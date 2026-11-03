@@ -14,7 +14,13 @@ public partial class ReportWindow : Window
     {
         _report = report;
         InitializeComponent();
-        if (report.Crash != null) Prompt.Text = "The app caught an error. What were you doing just before it?";
+        OnlyTartarus.Text = string.Join("\n", Tartarus.Vision.Ocr.OcrPacks.GameLanguages.Select(Tartarus.Vision.Ocr.OcrPacks.ReportOnlyTartarus));
+        if (report.Crash != null)
+        {
+            // The app's own error: wherever it happened, it's worth telling.
+            OnlyTartarus.Visibility = Visibility.Collapsed;
+            Prompt.Text = "The app caught an error. What were you doing just before it?";
+        }
         Loaded += (_, _) =>
         {
             Activate();

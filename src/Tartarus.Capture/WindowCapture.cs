@@ -37,18 +37,44 @@ public sealed unsafe class WindowCapture : IDisposable
     {
         if (!GraphicsCaptureSession.IsSupported()) throw new PlatformNotSupportedException("Windows.Graphics.Capture is not supported on this system.");
         Hwnd = hwnd;
-        D3D11.D3D11CreateDevice(null, DriverType.Hardware, DeviceCreationFlags.BgraSupport,
-            [FeatureLevel.Level_11_1, FeatureLevel.Level_11_0], out _device!, out _context!).CheckError();
-        _winrtDevice = CreateWinRtDevice(_device);
-        _item = CreateItemForWindow(hwnd);
-        _item.Closed += (_, _) => Closed?.Invoke();
-        _poolSize = _item.Size;
-        _pool = Direct3D11CaptureFramePool.CreateFreeThreaded(_winrtDevice, Format, 2, _poolSize);
-        _pool.FrameArrived += OnFrameArrived;
-        _session = _pool.CreateCaptureSession(_item);
-        TryHideCursor(_session);
-        TryDisableBorder(_session);
-        _session.StartCapture();
+        string step = "Direct3D device";
+        try
+        {
+            D3D11.D3D11CreateDevice(null, DriverType.Hardware, DeviceCreationFlags.BgraSupport,
+                [FeatureLevel.Level_11_1, FeatureLevel.Level_11_0], out _device!, out _context!).CheckError();
+            step = "WinRT device";
+            _winrtDevice = CreateWinRtDevice(_device);
+            step = "capture item";
+            _item = CreateItemForWindow(hwnd);
+            _item.Closed += (_, _) => Closed?.Invoke();
+            _poolSize = _item.Size;
+            step = "frame pool";
+            _pool = Direct3D11CaptureFramePool.CreateFreeThreaded(_winrtDevice, Format, 2, _poolSize);
+            _pool.FrameArrived += OnFrameArrived;
+            step = "capture session";
+            _session = _pool.CreateCaptureSession(_item);
+            TryHideCursor(_session);
+            TryDisableBorder(_session);
+            step = "starting the capture";
+            _session.StartCapture();
+        }
+        catch (Exception ex)
+        {
+            // What's made so far goes: a capture that fails is tried again, and each try left a Direct3D device behind
+            // (28 MB and 570 handles a try; 2026-11-03: out of video memory, 0x8876017C, after about 850 tries every 2 s).
+            _session?.Dispose();
+            _pool?.Dispose();
+            _winrtDevice?.Dispose();
+            _context?.Dispose();
+            _device?.Dispose();
+            throw new CaptureStartException(step, ex);
+        }
+    }
+
+    /// <summary>A capture that didn't start: at which step, and what the system said ("E_FAIL" alone tells nothing).</summary>
+    public sealed class CaptureStartException : Exception
+    {
+        public CaptureStartException(string step, Exception inner) : base($"{step}: {inner.Message.Trim()} (0x{inner.HResult:X8})", inner) => HResult = inner.HResult;
     }
 
     /// <summary>

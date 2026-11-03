@@ -30,13 +30,19 @@ public partial class ControlWindow
         if (_frame is not { } old || old == frame) return;
         _ = Task.Run(() =>
         {
-            var small = HalfSize(old, _halves);
-            _pixels.Return(old);
-            return (old.Timestamp, Encode(new JpegBitmapEncoder { QualityLevel = GlanceQuality }, small));
+            // Out of memory with the PC's memory nearly full (2026-11-03): the report does without this frame.
+            try
+            {
+                BitmapSource small;
+                try { small = HalfSize(old, _halves); }
+                finally { _pixels.Return(old); }
+                return ((DateTimeOffset At, byte[] Jpeg)?)(old.Timestamp, Encode(new JpegBitmapEncoder { QualityLevel = GlanceQuality }, small));
+            }
+            catch (OutOfMemoryException) { return null; }
         }).ContinueWith(t => Dispatcher.BeginInvoke(() =>
         {
-            if (!t.IsCompletedSuccessfully) return;
-            _history.Enqueue(t.Result);
+            if (!t.IsCompletedSuccessfully || t.Result is not { } kept) return;
+            _history.Enqueue(kept);
             while (_history.Count > HistoryFrames) _history.Dequeue();
         }));
     }
@@ -184,10 +190,16 @@ public partial class ControlWindow
                 half[o + 2] = (byte)((src[i + r] + src[i + 4 + r] + src[j + r] + src[j + 4 + r] + 2) >> 2);
             }
         }
-        var bitmap = BitmapSource.Create(w, h, 96, 96, PixelFormats.Bgr32, null, half, w * 4);
-        bitmap.Freeze();
-        pool.Return(half);
-        return bitmap;
+        try
+        {
+            var bitmap = BitmapSource.Create(w, h, 96, 96, PixelFormats.Bgr32, null, half, w * 4);
+            bitmap.Freeze();
+            return bitmap;
+        }
+        finally
+        {
+            pool.Return(half);
+        }
     }
 
     private static BitmapSource Halved(BitmapSource bitmap)

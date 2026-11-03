@@ -5,6 +5,7 @@
         Topmost="True" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" ShowInTaskbar="True"
         FontFamily="Segoe UI" FontSize="12" Background="#1E1F24" Foreground="#E8E8EC">
   <StackPanel Margin="12">
+    <TextBlock x:Name="OnlyTartarus" Margin="0,0,0,10" Foreground="#E6B46E" TextWrapping="Wrap" />
     <TextBlock x:Name="Prompt" Text="What went wrong?" Margin="0,0,0,6" TextWrapping="Wrap" />
     <TextBox x:Name="CommentBox" Height="120" PreviewKeyDown="CommentBox_PreviewKeyDown" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
              Background="#15161A" Foreground="#E8E8EC" BorderBrush="#3A3C44" CaretBrush="#E8E8EC" Padding="4" />

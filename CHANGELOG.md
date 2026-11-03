@@ -4,6 +4,13 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.40 — 2026-11-03
+
+- A window capture that fails no longer leaves its Direct3D device behind (out of video memory after hours of tries), is tried
+  later and later, and says at which step it failed, with the system's error code.
+- The report window asks, in all of the game's languages, to report only problems in the Tartarus Prison mode.
+- Out of memory while keeping a frame for bug reports: the report does without that frame.
+
 ## 0.7.39 — 2026-11-03
 
 - A scale taken from a pick's cards is a rough one: until the Sandbox reads, the scales near it are tried every second. It

@@ -136,6 +136,14 @@ public class GameTextTests
     }
 
     [Fact]
+    public void The_report_window_says_where_to_report_in_each_of_the_game_s_languages()
+    {
+        var lines = OcrPacks.GameLanguages.Select(OcrPacks.ReportOnlyTartarus).ToList();
+        Assert.All(lines, l => Assert.False(string.IsNullOrWhiteSpace(l)));
+        Assert.Equal(lines.Count, lines.Distinct().Count());
+    }
+
+    [Fact]
     public void The_language_is_asked_for_in_each_of_the_game_s_languages()
     {
         var lines = OcrPacks.GameLanguages.Select(OcrPacks.ChooseLanguage).ToList();

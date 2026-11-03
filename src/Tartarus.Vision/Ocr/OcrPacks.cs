@@ -93,6 +93,21 @@ public static class OcrPacks
         _ => "Choose the game's language",
     };
 
+    /// <summary>
+    /// "Report only problems in Tartarus Prison" in a game language, the mode by the game's own name in it (the game's text
+    /// tables, Func_S16GamePlay_Title): most reports came from other modes, the Hideout, or with the game not on screen.
+    /// </summary>
+    public static string ReportOnlyTartarus(string? code) => code?.ToLowerInvariant() switch
+    {
+        "ru" => "Сообщайте только о проблемах в режиме «Тюрьма Талоса».", "de" => "Melden Sie nur Probleme im Modus „Talos-Gefängnis“.",
+        "es" => "Informa solo de problemas en el modo «Prisión de Talos».", "fr" => "Signalez uniquement les problèmes du mode « Prison de Taros ».",
+        "pt" => "Relate apenas problemas no modo “Prisão de Taros”.", "id" => "Laporkan hanya masalah di mode \"Penjara Talos\".",
+        "vi" => "Chỉ báo lỗi trong chế độ \"Nhà Ngục Talos\".", "ja" => "「タロス監獄」モードの問題のみ報告してください。",
+        "ko" => "\"타르타로스 감옥\" 모드의 문제만 신고해 주세요.", "th" => "โปรดแจ้งเฉพาะปัญหาในโหมด \"คุกทาลอส\"",
+        "zh" or "zhcn" => "请仅反馈“塔罗斯监狱”模式中的问题。", "zhtw" => "請僅回報「塔羅斯監獄」模式中的問題。",
+        _ => "Report only problems in the Tartarus Prison mode.",
+    };
+
     /// <summary>Where downloaded packs go (the program's own folder may not be writable).</summary>
     public static string DownloadDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TartarusSolver", "models", "ocr");
 

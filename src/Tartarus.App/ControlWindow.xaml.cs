@@ -461,6 +461,14 @@ public partial class ControlWindow : Window
         ? "Not capturing: this Windows is too old, the app needs Windows 10 version 1903 or later"
         : "Not capturing: Windows can't capture windows on this PC (Windows.Graphics.Capture unsupported)";
 
+    // A capture that fails is tried again later and later, the failure said when it changes and at each tenth try (2026-11-03:
+    // tried every 2 s for hours, 859 lines of the same failure in a log, and a Direct3D device left behind by each).
+    private int _captureFails;
+    private string? _captureFailure;
+    private DateTime _captureNextTry;
+    private static readonly TimeSpan CaptureRetryMax = TimeSpan.FromMinutes(1);
+    private const string CaptureFailedStatus = "Not capturing: Windows won't capture the game window, trying again. Set the game to windowed or borderless";
+
     private async void TryAutoAttach()
     {
         CheckGameLanguage();
@@ -477,6 +485,7 @@ public partial class ControlWindow : Window
             CaptureStatus.Text = UnsupportedStatus;
             return;
         }
+        if (DateTime.Now < _captureNextTry) return;
         var pattern = new Regex(_settings.WindowTitle);
         // Every window on the desktop is looked at: off the UI thread, so a slow one can't stand the window still.
         _findingGame = true;
@@ -486,7 +495,12 @@ public partial class ControlWindow : Window
         if (_capture != null || AutoAttachCheck.IsChecked != true) return;
         // What it waits for, said (2026-11-01: players started the app with the game minimized or not yet running, saw
         // only "Not capturing" and sent bug reports).
-        if (game.Hwnd == IntPtr.Zero) CaptureStatus.Text = "Not capturing: waiting for the game window (Torchlight: Infinite)…";
+        if (game.Hwnd == IntPtr.Zero)
+        {
+            // A new game window starts afresh, without the old one's pause.
+            _captureFails = 0;
+            CaptureStatus.Text = "Not capturing: waiting for the game window (Torchlight: Infinite)…";
+        }
         else if (Win32Windows.IsMinimized(game.Hwnd)) CaptureStatus.Text = "Not capturing: the game window is minimized, restore it";
         else StartCapture(game);
     }
@@ -509,6 +523,7 @@ public partial class ControlWindow : Window
                 StopCapture();
             });
             _capture = capture;
+            (_captureFails, _captureFailure, _captureNextTry) = (0, null, default);
             _target = w;
             CaptureButton.Content = "Stop ■";
             CaptureStatus.Text = $"Capturing: {w}";
@@ -532,7 +547,13 @@ public partial class ControlWindow : Window
         }
         catch (Exception ex)
         {
-            Log($"Could not start capturing \"{w.Title}\": {ex.Message}");
+            _captureFails++;
+            if (ex.Message != _captureFailure || _captureFails % 10 == 0)
+                Log($"Could not start capturing \"{w.Title}\": {ex.Message} (try {_captureFails})");
+            _captureFailure = ex.Message;
+            double wait = Math.Min(CaptureRetryMax.TotalSeconds, Math.Pow(2, Math.Min(_captureFails, 10)));
+            _captureNextTry = DateTime.Now.AddSeconds(wait);
+            CaptureStatus.Text = CaptureFailedStatus;
         }
         finally
         {
