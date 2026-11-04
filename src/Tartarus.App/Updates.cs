@@ -2,8 +2,9 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using Tartarus.Vision;
 
 namespace Tartarus.App;
 
@@ -28,6 +29,19 @@ public static class Updates
         http.DefaultRequestHeaders.UserAgent.ParseAdd("TartarusSolver/" + AppVersion.Number);
         return http;
     }
+
+    /// <summary>
+    /// A connection that sends nothing for this long is given up. Slower than the OCR download's: the zip comes from one
+    /// host, there's no other to go to (HttpClient's own Timeout ends at the headers, a stalled body would wait for ever).
+    /// </summary>
+    private static readonly TimeSpan Stall = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// Tries in a row that bring no bytes before the player is told (2026-11-04: 13 of 152 installs in reports had a
+    /// download fail: SSL, connect timeouts, "response ended prematurely"; 10 of them stayed on their version).
+    /// </summary>
+    private const int IdleTries = 5;
+    private static readonly TimeSpan FirstWait = TimeSpan.FromSeconds(2);
 
     private static string AppDir => AppContext.BaseDirectory.TrimEnd('\\', '/');
     private static string Staging => Path.Combine(AppSettings.Folder, "update");
@@ -63,26 +77,20 @@ public static class Updates
         await _cleaning;
         await Task.Run(CleanUp, ct);
         Directory.CreateDirectory(Staging);
-        string zip = Path.Combine(Staging, release.Asset);
-        using (var response = await Http.GetAsync(release.Url, HttpCompletionOption.ResponseHeadersRead, ct))
-        {
-            response.EnsureSuccessStatusCode();
-            await using var source = await response.Content.ReadAsStreamAsync(ct);
-            await using var file = File.Create(zip);
-            using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-            var buffer = new byte[1 << 16];
-            long done = 0;
-            int n;
-            while ((n = await source.ReadAsync(buffer, ct)) > 0)
+        string zip = Path.Combine(Staging, release.Asset), part = ResumingDownload.PartOf(zip);
+        foreach (var other in Directory.EnumerateFiles(Staging, "*.part"))
+            if (!other.Equals(part, StringComparison.OrdinalIgnoreCase)) Delete(other);
+        if (File.Exists(part)) AppLog.Write($"Update: {release.Asset}: {new FileInfo(part).Length} bytes kept from an earlier try");
+        int shown = -1;
+        await Task.Run(() => ResumingDownload.UntilWholeAsync(Http, release.Url, zip, release.Size, release.Sha256, Stall, IdleTries, FirstWait,
+            done =>
             {
-                await file.WriteAsync(buffer.AsMemory(0, n), ct);
-                hash.AppendData(buffer, 0, n);
-                done += n;
-                progress?.Report(release.Size > 0 ? (double)done / release.Size : 0);
-            }
-            if (!Convert.ToHexString(hash.GetHashAndReset()).Equals(release.Sha256, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException("the download doesn't match its SHA-256 on GitHub");
-        }
+                int percent = release.Size > 0 ? (int)(done * 100 / release.Size) : 0;
+                if (percent == shown) return;
+                shown = percent;
+                progress?.Report(percent / 100.0);
+            },
+            ex => AppLog.Write($"Update: download cut off at {shown}%, trying again: {ex.GetBaseException().Message}"), ct), ct);
         string unpacked = Path.Combine(Staging, release.Version.ToString());
         await Task.Run(() => ZipFile.ExtractToDirectory(zip, unpacked), ct);
         File.Delete(zip);
@@ -158,11 +166,29 @@ public static class Updates
     public static void CleanUpBehind() => _cleaning = Task.Run(CleanUp);
     private static Task _cleaning = Task.CompletedTask;
 
-    /// <summary>What an update left behind (its zip, the unpacked version), unless it's running from there.</summary>
+    /// <summary>
+    /// What an update left behind (its zip, the unpacked version), unless it's running from there. A download cut off
+    /// stays while it's of a version newer than this one: the next try goes on from there.
+    /// </summary>
     public static void CleanUp()
     {
         if (AppDir.StartsWith(Staging, StringComparison.OrdinalIgnoreCase) || !Directory.Exists(Staging)) return;
-        try { Directory.Delete(Staging, recursive: true); }
+        try
+        {
+            foreach (var dir in Directory.EnumerateDirectories(Staging)) Directory.Delete(dir, recursive: true);
+            foreach (var file in Directory.EnumerateFiles(Staging))
+                if (!StillWanted(file)) Delete(file);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+    }
+
+    private static bool StillWanted(string file) =>
+        Regex.Match(Path.GetFileName(file), @"^TartarusSolver-(\d+\.\d+\.\d+)(-full)?\.zip\.part$") is { Success: true } m
+        && Version.Parse(m.Groups[1].Value) > Current;
+
+    private static void Delete(string file)
+    {
+        try { File.Delete(file); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
     }
 

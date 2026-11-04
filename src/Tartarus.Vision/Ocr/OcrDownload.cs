@@ -1,8 +1,5 @@
 using System.IO;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Cryptography;
 
 namespace Tartarus.Vision.Ocr;
 
@@ -94,55 +91,6 @@ public static class OcrDownload
         return hosts;
     }
 
-    private static async Task DownloadAsync(string url, string name, long size, string sha256, Action<long> progress, CancellationToken cancel)
-    {
-        string path = Path.Combine(OcrPacks.DownloadDir, name), part = path + ".part";
-        // Given up when nothing comes for Stall: the connection, the headers, each piece.
-        using var stalled = CancellationTokenSource.CreateLinkedTokenSource(cancel);
-        stalled.CancelAfter(Stall);
-        try
-        {
-            // What an earlier try got goes on from where it stopped, if the host sends just the rest.
-            long have = File.Exists(part) ? new FileInfo(part).Length : 0;
-            if (have >= size) have = 0;
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            if (have > 0) request.Headers.Range = new RangeHeaderValue(have, null);
-            using (var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, stalled.Token))
-            {
-                response.EnsureSuccessStatusCode();
-                if (response.StatusCode != HttpStatusCode.PartialContent) have = 0;
-                await using var source = await response.Content.ReadAsStreamAsync(stalled.Token);
-                using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-                var buffer = new byte[1 << 16];
-                if (have > 0)
-                {
-                    await using var kept = File.OpenRead(part);
-                    for (int n; (n = await kept.ReadAsync(buffer, cancel)) > 0;) hash.AppendData(buffer, 0, n);
-                }
-                await using var file = new FileStream(part, have > 0 ? FileMode.Append : FileMode.Create, FileAccess.Write);
-                long done = have;
-                progress(done);
-                for (int n; (n = await source.ReadAsync(buffer, stalled.Token)) > 0;)
-                {
-                    stalled.CancelAfter(Stall);
-                    await file.WriteAsync(buffer.AsMemory(0, n), cancel);
-                    hash.AppendData(buffer, 0, n);
-                    done += n;
-                    progress(done);
-                }
-                string got = Convert.ToHexStringLower(hash.GetHashAndReset());
-                if (got != sha256) throw new InvalidDataException($"{name}: SHA-256 {got}, expected {sha256}");
-            }
-            File.Move(part, path, overwrite: true);
-        }
-        catch (Exception ex)
-        {
-            // Cut off: kept for the next try. Wrong: not a byte of it trusted.
-            if (ex is InvalidDataException) try { File.Delete(part); } catch (IOException) { }
-            // A stalled host isn't the player's cancel.
-            if (ex is OperationCanceledException && !cancel.IsCancellationRequested)
-                throw new TimeoutException($"{new Uri(url).Host} sent nothing for {Stall.TotalSeconds:0} s", ex);
-            throw;
-        }
-    }
+    private static Task DownloadAsync(string url, string name, long size, string sha256, Action<long> progress, CancellationToken cancel) =>
+        ResumingDownload.GetAsync(Http, url, Path.Combine(OcrPacks.DownloadDir, name), size, sha256, Stall, progress, cancel);
 }

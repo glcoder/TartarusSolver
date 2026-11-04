@@ -75,6 +75,14 @@ public partial class ControlWindow
             if (IsVisible) window.Owner = this;
             if (window.ShowDialog() == true && window.Result != null) Log(window.Result);
         }
+        catch (Exception ex)
+        {
+            // No window to ask with (2026-11-04: its XAML not found, the crash it was opened for lost). Thrown on from here
+            // it would come back through App.OnUnhandled to this method, for ever. Only the stacks go, as with a fatal crash.
+            AppLog.Write($"Report window failed: {ex}");
+            if (crash != null) BugReports.Crash(crash);
+            BugReports.Crash(ex);
+        }
         finally
         {
             _reporting = false;

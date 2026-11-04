@@ -6,6 +6,8 @@ things.
 
 ## Unreleased
 
+- Updates: a download cut off goes on from where it stopped, by itself while tries bring bytes, and at the next press of Update or after a restart; a stalled connection is given up after 30 s.
+- A bug report window that can't open no longer takes the app down: the error it was opened for is still sent.
 - Game language: "Automatic" is now an item of the list, as in Interface language, in place of the separate checkbox.
 
 ## 0.7.43 — 2026-11-04
