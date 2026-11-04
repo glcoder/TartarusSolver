@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using Tartarus.Vision.Ocr;
+using Tartarus.App.Localization;
 
 namespace Tartarus.App;
 
@@ -19,17 +20,19 @@ public partial class GameLanguageWindow : Window
     {
         InitializeComponent();
         Message.Text = first
-            ? "The language found in the game's settings is marked."
-            : $"The game's text can't be read as {OcrPacks.LanguageName(current)}: move hints may be missing or wrong.";
+            ? Strings.Language_FoundMarked
+            : Loc.F(Strings.Language_Unreadable,
+                OcrPacks.LanguageName(current));
         foreach (var code in OcrPacks.GameLanguages)
         {
             string name = OcrPacks.LanguageName(code), native = OcrPacks.NativeName(code);
             // The question in each language beside it: the player who most needs this window may read no English
             // (2026-11-02: a third of those asked said "Not now", and played on hints that couldn't see the cards).
-            var item = new ListBoxItem { Content = $"{(name == native ? name : $"{name} · {native}")} — {OcrPacks.ChooseLanguage(code)}", Tag = code };
+            var item = new ListBoxItem { Content = $"{(name == native ? name : $"{name} · {native}")} — {Loc.In(code, nameof(Strings.Language_Choose))}", Tag = code };
             LanguageList.Items.Add(item);
             if (first && name == OcrPacks.LanguageName(current)) LanguageList.SelectedItem = item;
         }
+        Loc.Apply(this);
     }
 
     private void LanguageList_SelectionChanged(object sender, SelectionChangedEventArgs e) => UseButton.IsEnabled = LanguageList.SelectedItem != null;

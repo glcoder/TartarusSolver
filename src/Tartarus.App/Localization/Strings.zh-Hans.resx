@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Common_Automatic" xml:space="preserve"><value>跟随系统</value></data>
+  <data name="Download_Connecting" xml:space="preserve"><value>正在连接 {0}…</value></data>
+  <data name="Download_Download" xml:space="preserve"><value>下载</value></data>
+  <data name="Download_Failed" xml:space="preserve"><value>下载失败：{0}</value></data>
+  <data name="Download_NotNow" xml:space="preserve"><value>暂不</value></data>
+  <data name="Download_Progress" xml:space="preserve"><value>{0} / {1} MB，来自 {2}</value></data>
+  <data name="Download_Question" xml:space="preserve"><value>游戏语言是 {0}。识别游戏文字需要 {0} 的文字识别模型（{1} MB，PaddleOCR）。现在下载吗？
+
+不下的话游戏文字识别不了；卡牌和选择界面仍可凭图案区分。</value></data>
+  <data name="Download_Retry" xml:space="preserve"><value>重试</value></data>
+  <data name="Download_Title" xml:space="preserve"><value>文字识别</value></data>
+  <data name="Edit_AddDestination" xml:space="preserve"><value>设为目的地 D{0}</value></data>
+  <data name="Edit_RemoveDestination" xml:space="preserve"><value>取消目的地 D{0}</value></data>
+  <data name="Edit_VisibleRarity" xml:space="preserve"><value>可见稀有度（未开启）</value></data>
+  <data name="Hint_AtRiot" xml:space="preserve"><value> — 暴乱结算 ≈{0} 绮彩 · {1} 至臻 · {2} 传奇</value></data>
+  <data name="Hint_CancelThen" xml:space="preserve"><value>取消 → {0}</value></data>
+  <data name="Hint_Cell" xml:space="preserve"><value>{0} 号牢房</value></data>
+  <data name="Hint_CellDetail" xml:space="preserve"><value>{0} 号牢房：{1}</value></data>
+  <data name="Hint_Computing" xml:space="preserve"><value>，计算中…</value></data>
+  <data name="Hint_ConsumeCell" xml:space="preserve"><value>吃：{0} 号牢房</value></data>
+  <data name="Hint_HuntCell" xml:space="preserve"><value>寻猎：{0} 号牢房</value></data>
+  <data name="Hint_Line" xml:space="preserve"><value>提示：{0}</value></data>
+  <data name="Hint_Playouts" xml:space="preserve"><value>  （{0} 次模拟{1}）</value></data>
+  <data name="Hint_SewerRatwayCell" xml:space="preserve"><value>暗渠鼠道：{0} 号牢房</value></data>
+  <data name="Hint_Then" xml:space="preserve"><value> · 之后 {0}</value></data>
+  <data name="Hint_Tied" xml:space="preserve"><value>（并列）</value></data>
+  <data name="Language_Choose" xml:space="preserve"><value>请选择游戏语言</value></data>
+  <data name="Language_Explanation" xml:space="preserve"><value>游戏文字的语言，而不是本窗口的语言。之后可在“识别：游戏语言”中更改。</value></data>
+  <data name="Language_FoundMarked" xml:space="preserve"><value>游戏设置里查到的语言已标出。</value></data>
+  <data name="Language_NotNow" xml:space="preserve"><value>✕ 暂不</value></data>
+  <data name="Language_RestartQuestion" xml:space="preserve"><value>更改语言需要重新启动程序。现在重启？</value></data>
+  <data name="Language_Title" xml:space="preserve"><value>Tartarus Solver：游戏语言</value></data>
+  <data name="Language_Unreadable" xml:space="preserve"><value>游戏文字按 {0} 读不出来：出招提示可能缺失或不准。</value></data>
+  <data name="Main_ApplyFields" xml:space="preserve"><value>应用字段</value></data>
+  <data name="Main_Auto" xml:space="preserve"><value>自动</value></data>
+  <data name="Main_AutoAttach" xml:space="preserve"><value>自动连接游戏</value></data>
+  <data name="Main_AutoCollect" xml:space="preserve"><value>自动采集</value></data>
+  <data name="Main_AutoCollect_Tip" xml:space="preserve"><value>沙盒读取结果一变就存一帧到数据集（需开自动扫描）</value></data>
+  <data name="Main_Capture" xml:space="preserve"><value>捕获 ▶</value></data>
+  <data name="Main_CheckUpdates" xml:space="preserve"><value>检查更新</value></data>
+  <data name="Main_CheckUpdates_Tip" xml:space="preserve"><value>启动时及每 6 小时向 GitHub 查询新版本</value></data>
+  <data name="Main_Choose" xml:space="preserve"><value>选择…</value></data>
+  <data name="Main_ChooseLog_Tip" xml:space="preserve"><value>手动选择 UE_game.log：游戏目录\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_DatasetFolder" xml:space="preserve"><value>数据集文件夹</value></data>
+  <data name="Main_Debug" xml:space="preserve"><value>（调试）</value></data>
+  <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>目的地卡上的牢房号，从左到右，如 9,11,12</value></data>
+  <data name="Main_DetectAutomatically" xml:space="preserve"><value>自动检测</value></data>
+  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>从游戏设置文件里读取语言；在列表里选定语言会关掉此项</value></data>
+  <data name="Main_EditMode" xml:space="preserve"><value>编辑模式</value></data>
+  <data name="Main_EditMode_Tip" xml:space="preserve"><value>编辑模式下点叠加层上的牢房：可选代号、稀有度和各种标记。编辑期间自动扫描暂停。</value></data>
+  <data name="Main_Every" xml:space="preserve"><value>，每隔</value></data>
+  <data name="Main_Faster" xml:space="preserve"><value>更快</value></data>
+  <data name="Main_FilesMissing" xml:space="preserve"><value>程序目录里缺少需要的文件（models/ocr），游戏文字可能读不出来。
+
+请把整个压缩包解压到一个独立的文件夹，再从那里运行程序，不要直接在压缩包里运行。</value></data>
+  <data name="Main_FindLog_Tip" xml:space="preserve"><value>自动查找日志：运行中游戏的同级目录、Steam 库、启动器设置</value></data>
+  <data name="Main_GameLanguage" xml:space="preserve"><value>游戏语言</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>游戏内文字所用的语言，程序据此识别。这不是本窗口的语言，本窗口的语言在下面选。</value></data>
+  <data name="Main_GameLog" xml:space="preserve"><value>游戏日志</value></data>
+  <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log：游戏目录\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_GameWindow" xml:space="preserve"><value>游戏窗口</value></data>
+  <data name="Main_HintQuality_Tip" xml:space="preserve"><value>每步模拟次数：越多提示越准，也算得越久</value></data>
+  <data name="Main_Hints" xml:space="preserve"><value>出招提示</value></data>
+  <data name="Main_HintsOnly" xml:space="preserve"><value>只显示提示</value></data>
+  <data name="Main_HintsOnly_Tip" xml:space="preserve"><value>叠加层只显示走位框和提示行，不显示牢房、刑具和绮彩</value></data>
+  <data name="Main_InstrumentIds_Tip" xml:space="preserve"><value>id，用逗号分隔，如 ironbox,muzzle</value></data>
+  <data name="Main_InteractableRegions" xml:space="preserve"><value>可交互区域</value></data>
+  <data name="Main_InteractableRegions_Tip" xml:space="preserve"><value>给所有能点的地方加框：牢房、卡牌、按钮、刑具与绮彩槽位、选择卡</value></data>
+  <data name="Main_InterfaceLanguage" xml:space="preserve"><value>界面语言</value></data>
+  <data name="Main_InterfaceLanguage_Tip" xml:space="preserve"><value>本窗口和叠加层的语言。自动：Windows 的语言。</value></data>
+  <data name="Main_LabelsAndDataset" xml:space="preserve"><value>标注与数据集</value></data>
+  <data name="Main_LastHint" xml:space="preserve"><value>上次提示：{0} ms，{1} 次模拟</value></data>
+  <data name="Main_Log" xml:space="preserve"><value>日志</value></data>
+  <data name="Main_LogChosenByHand" xml:space="preserve"><value>（手动指定）</value></data>
+  <data name="Main_LogFoundAutomatically" xml:space="preserve"><value>（自动找到）</value></data>
+  <data name="Main_LogNotFound" xml:space="preserve"><value>未找到：只靠画面识别</value></data>
+  <data name="Main_MoveHints" xml:space="preserve"><value>走位提示</value></data>
+  <data name="Main_NoValueNet" xml:space="preserve"><value> · 无价值网络</value></data>
+  <data name="Main_Overlay" xml:space="preserve"><value>叠加层</value></data>
+  <data name="Main_PicksNet" xml:space="preserve"><value> · 选择网络</value></data>
+  <data name="Main_PolicyNet" xml:space="preserve"><value> · 策略网络</value></data>
+  <data name="Main_Recognition" xml:space="preserve"><value>识别</value></data>
+  <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>刷新窗口列表</value></data>
+  <data name="Main_ReportBug" xml:space="preserve"><value>反馈问题</value></data>
+  <data name="Main_ReportBug_Tip" xml:space="preserve"><value>把你的说明连同截图、程序日志和本局游戏日志一起发给开发者</value></data>
+  <data name="Main_ResetEdits" xml:space="preserve"><value>撤销编辑</value></data>
+  <data name="Main_SaveFrame" xml:space="preserve"><value>保存帧</value></data>
+  <data name="Main_Scan" xml:space="preserve"><value>扫描</value></data>
+  <data name="Main_ScanInterval_Tip" xml:space="preserve"><value>两帧之间的间隔（秒）；0 表示上一帧识别和提示一完成就抓下一帧</value></data>
+  <data name="Main_Stop" xml:space="preserve"><value>停止 ■</value></data>
+  <data name="Main_Stronger" xml:space="preserve"><value>更强</value></data>
+  <data name="Main_Text" xml:space="preserve"><value>文字</value></data>
+  <data name="Main_Text_Tip" xml:space="preserve"><value>在叠加层上显示 OCR 区域和读到的文字</value></data>
+  <data name="Main_ValueNet" xml:space="preserve"><value> · 价值网络</value></data>
+  <data name="Main_Version" xml:space="preserve"><value>版本</value></data>
+  <data name="Main_WardenCell_Tip" xml:space="preserve"><value>典狱长所在的牢房，1-16</value></data>
+  <data name="Name_Archenemy" xml:space="preserve"><value>宿敌</value></data>
+  <data name="Name_AvengersCasket" xml:space="preserve"><value>复仇者之匣</value></data>
+  <data name="Name_BarbedWhip" xml:space="preserve"><value>棘刺铁鞭</value></data>
+  <data name="Name_BehindCellDoors" xml:space="preserve"><value>牢门之后</value></data>
+  <data name="Name_BehindClosedDoors" xml:space="preserve"><value>暗箱操作</value></data>
+  <data name="Name_Bestow" xml:space="preserve"><value>赏赐</value></data>
+  <data name="Name_BloodStainedTrapBerserkLion" xml:space="preserve"><value>染红的捕兽夹：狂狮</value></data>
+  <data name="Name_BrandOfOriginalSin" xml:space="preserve"><value>原罪烙印</value></data>
+  <data name="Name_BrassHornOfStrife" xml:space="preserve"><value>升阶奖励</value></data>
+  <data name="Name_BurningStake" xml:space="preserve"><value>火刑柱</value></data>
+  <data name="Name_CageFight" xml:space="preserve"><value>囚徒困斗</value></data>
+  <data name="Name_Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Name_Cell" xml:space="preserve"><value>牢房</value></data>
+  <data name="Name_ChainConsume" xml:space="preserve"><value>连吃</value></data>
+  <data name="Name_ChainReaction" xml:space="preserve"><value>连锁反应</value></data>
+  <data name="Name_Chest" xml:space="preserve"><value>宝箱</value></data>
+  <data name="Name_Chromatic" xml:space="preserve"><value>绮彩</value></data>
+  <data name="Name_Consumable" xml:space="preserve"><value>可吃</value></data>
+  <data name="Name_ConsumableTarget" xml:space="preserve"><value>可吃目标</value></data>
+  <data name="Name_Consume" xml:space="preserve"><value>吃</value></data>
+  <data name="Name_CrimsonVintage" xml:space="preserve"><value>赤色佳酿</value></data>
+  <data name="Name_CrowWhispers" xml:space="preserve"><value>鸦语</value></data>
+  <data name="Name_CrowdedBeastcage" xml:space="preserve"><value>拥挤兽笼</value></data>
+  <data name="Name_Day" xml:space="preserve"><value>日</value></data>
+  <data name="Name_Destination" xml:space="preserve"><value>目的地</value></data>
+  <data name="Name_Destinations" xml:space="preserve"><value>目的地</value></data>
+  <data name="Name_ElephantFootMaulMammoth" xml:space="preserve"><value>象脚重锤：巨象</value></data>
+  <data name="Name_Empty" xml:space="preserve"><value>空牢房</value></data>
+  <data name="Name_End" xml:space="preserve"><value>结束</value></data>
+  <data name="Name_ExecutionEfficiency" xml:space="preserve"><value>处刑效率</value></data>
+  <data name="Name_ExecutionersBlacklist" xml:space="preserve"><value>执刑官的黑名册</value></data>
+  <data name="Name_ExtraPortion" xml:space="preserve"><value>加餐</value></data>
+  <data name="Name_FangedGuillotineAlphaWolf" xml:space="preserve"><value>狼牙铡刀：头狼</value></data>
+  <data name="Name_FelonsDogTag" xml:space="preserve"><value>重刑铭牌</value></data>
+  <data name="Name_FerociousBeastsRavenousChains" xml:space="preserve"><value>凶兽的饥饿绞链</value></data>
+  <data name="Name_FilthyClawsAlphaWolf" xml:space="preserve"><value>脏污铁爪：头狼</value></data>
+  <data name="Name_ForgedKey" xml:space="preserve"><value>伪造钥匙</value></data>
+  <data name="Name_GaolersExecutionAxe" xml:space="preserve"><value>狱卒的行刑巨斧</value></data>
+  <data name="Name_HangmansNoose" xml:space="preserve"><value>绞首绳</value></data>
+  <data name="Name_HighRiskConvict" xml:space="preserve"><value>重刑犯</value></data>
+  <data name="Name_Hunt" xml:space="preserve"><value>寻猎</value></data>
+  <data name="Name_Inmate" xml:space="preserve"><value>囚犯</value></data>
+  <data name="Name_Inmates" xml:space="preserve"><value>囚犯</value></data>
+  <data name="Name_Instigate" xml:space="preserve"><value>煽动</value></data>
+  <data name="Name_InterrogationRoom" xml:space="preserve"><value>审讯室</value></data>
+  <data name="Name_IronCrownOfThePrisonKingBerserkLion" xml:space="preserve"><value>牢中王的铁冠：狂狮</value></data>
+  <data name="Name_IronLaw" xml:space="preserve"><value>铁律</value></data>
+  <data name="Name_IronLawTheme" xml:space="preserve"><value>铁律主题</value></data>
+  <data name="Name_IronPestle" xml:space="preserve"><value>铁杵</value></data>
+  <data name="Name_IronTongsOfLustMammoth" xml:space="preserve"><value>恶欲铁钳：巨象</value></data>
+  <data name="Name_KingOfTheCaged" xml:space="preserve"><value>困兽称王</value></data>
+  <data name="Name_KinsCoinOfFate" xml:space="preserve"><value>手足的命运硬币</value></data>
+  <data name="Name_Legendary" xml:space="preserve"><value>传奇</value></data>
+  <data name="Name_Lion" xml:space="preserve"><value>狂狮</value></data>
+  <data name="Name_LockedCell" xml:space="preserve"><value>未开启牢房</value></data>
+  <data name="Name_LongChainedShackles" xml:space="preserve"><value>长链脚镣</value></data>
+  <data name="Name_LostRingOfKeys" xml:space="preserve"><value>遗落的钥匙串</value></data>
+  <data name="Name_MaddenedBeastsBarbedCollar" xml:space="preserve"><value>疯兽的倒刺项圈</value></data>
+  <data name="Name_Magic" xml:space="preserve"><value>魔法</value></data>
+  <data name="Name_MakeYourDecision" xml:space="preserve"><value>请进行决策</value></data>
+  <data name="Name_Mammoth" xml:space="preserve"><value>巨象</value></data>
+  <data name="Name_NoTartarusSandboxOnScreen" xml:space="preserve"><value>屏幕上没有塔罗斯监狱沙盒。</value></data>
+  <data name="Name_Normal" xml:space="preserve"><value>普通</value></data>
+  <data name="Name_Objective" xml:space="preserve"><value>目标</value></data>
+  <data name="Name_Opened" xml:space="preserve"><value>已开启</value></data>
+  <data name="Name_OpenedEmpty" xml:space="preserve"><value>已开启，空</value></data>
+  <data name="Name_Opulence" xml:space="preserve"><value>奢靡</value></data>
+  <data name="Name_Prey" xml:space="preserve"><value>猎物</value></data>
+  <data name="Name_PrisonIncident" xml:space="preserve"><value>狱中事变</value></data>
+  <data name="Name_PrisonIncidents" xml:space="preserve"><value>狱中事变</value></data>
+  <data name="Name_PrisonWalk" xml:space="preserve"><value>巡狱之路</value></data>
+  <data name="Name_RagingBeastsAgonizingMuzzle" xml:space="preserve"><value>狂兽的剧痛口枷</value></data>
+  <data name="Name_Rare" xml:space="preserve"><value>稀有</value></data>
+  <data name="Name_Rat" xml:space="preserve"><value>硕鼠</value></data>
+  <data name="Name_RatNest" xml:space="preserve"><value>鼠巢</value></data>
+  <data name="Name_RavenousAppetite" xml:space="preserve"><value>食欲大增</value></data>
+  <data name="Name_ReRoll" xml:space="preserve"><value>重新随机</value></data>
+  <data name="Name_RemainingDays" xml:space="preserve"><value>剩余天数</value></data>
+  <data name="Name_Replace" xml:space="preserve"><value>换</value></data>
+  <data name="Name_Riot" xml:space="preserve"><value>暴乱</value></data>
+  <data name="Name_RiotChest" xml:space="preserve"><value>暴乱宝箱</value></data>
+  <data name="Name_RunTheme" xml:space="preserve"><value>局内主题</value></data>
+  <data name="Name_RustySaw" xml:space="preserve"><value>锈锯</value></data>
+  <data name="Name_Sandbox" xml:space="preserve"><value>沙盒</value></data>
+  <data name="Name_ScapegoatsGuillotine" xml:space="preserve"><value>替罪人的断头台</value></data>
+  <data name="Name_ScratchMarks" xml:space="preserve"><value>划痕</value></data>
+  <data name="Name_SearingBrandingIron" xml:space="preserve"><value>灼痛的烙铁</value></data>
+  <data name="Name_SelectADestination" xml:space="preserve"><value>请选择目的地</value></data>
+  <data name="Name_SelectAnInmateToConsume" xml:space="preserve"><value>请选择要吃的囚犯</value></data>
+  <data name="Name_SeveredIronMaiden" xml:space="preserve"><value>切开的人形棺</value></data>
+  <data name="Name_SewerRatway" xml:space="preserve"><value>暗渠鼠道</value></data>
+  <data name="Name_SharedFortune" xml:space="preserve"><value>有福同享</value></data>
+  <data name="Name_ShortChainedShackles" xml:space="preserve"><value>短链脚镣</value></data>
+  <data name="Name_SkeweredRatHeadsColossalRat" xml:space="preserve"><value>鼠头串：硕鼠</value></data>
+  <data name="Name_SortingHook" xml:space="preserve"><value>挑拣钩</value></data>
+  <data name="Name_SquirmingIronBoxColossalRat" xml:space="preserve"><value>蠕动铁盒：硕鼠</value></data>
+  <data name="Name_SurvivalOfTheFittest" xml:space="preserve"><value>弱肉强食</value></data>
+  <data name="Name_Tartarus" xml:space="preserve"><value>塔罗斯</value></data>
+  <data name="Name_TartarusPrison" xml:space="preserve"><value>塔罗斯监狱</value></data>
+  <data name="Name_TasteOfFreedom" xml:space="preserve"><value>自由的滋味</value></data>
+  <data name="Name_ThreeHeadedThumbRing" xml:space="preserve"><value>三首扳指</value></data>
+  <data name="Name_TortureInstrument" xml:space="preserve"><value>刑具</value></data>
+  <data name="Name_TortureInstruments" xml:space="preserve"><value>刑具</value></data>
+  <data name="Name_TransferOfConvicts" xml:space="preserve"><value>同罪移押</value></data>
+  <data name="Name_TreasureHunt" xml:space="preserve"><value>寻“宝”</value></data>
+  <data name="Name_Tusk" xml:space="preserve"><value>象牙</value></data>
+  <data name="Name_Tyranny" xml:space="preserve"><value>滥权</value></data>
+  <data name="Name_Ultimate" xml:space="preserve"><value>至臻</value></data>
+  <data name="Name_Undercurrents" xml:space="preserve"><value>暗流涌动</value></data>
+  <data name="Name_UnknownTortureInstrument" xml:space="preserve"><value>未识别的刑具</value></data>
+  <data name="Name_Unopened" xml:space="preserve"><value>未开启</value></data>
+  <data name="Name_UsurpationI" xml:space="preserve"><value>僭越·其一</value></data>
+  <data name="Name_UsurpationII" xml:space="preserve"><value>僭越·其二</value></data>
+  <data name="Name_UsurpationIII" xml:space="preserve"><value>僭越·其三</value></data>
+  <data name="Name_UsurpationIV" xml:space="preserve"><value>僭越·其四</value></data>
+  <data name="Name_Warden" xml:space="preserve"><value>典狱长</value></data>
+  <data name="Name_WardensCache" xml:space="preserve"><value>典狱秘藏</value></data>
+  <data name="Name_WardensScales" xml:space="preserve"><value>典狱官的天平</value></data>
+  <data name="Name_WardensTreasure" xml:space="preserve"><value>典狱长的珍藏</value></data>
+  <data name="Name_Wolf" xml:space="preserve"><value>头狼</value></data>
+  <data name="Overlay_Cap" xml:space="preserve"><value>（已达上限）</value></data>
+  <data name="Overlay_ChromaticCount" xml:space="preserve"><value>绮彩 {0}/{1}</value></data>
+  <data name="Overlay_Covered" xml:space="preserve"><value>（被遮挡）</value></data>
+  <data name="Overlay_Objective" xml:space="preserve"><value>目标：{0}</value></data>
+  <data name="Overlay_QualityEstimate" xml:space="preserve"><value>每步约 {0} ms · 每局约 {1} 个绮彩（每步 {2} 次模拟）</value></data>
+  <data name="Overlay_RemainingDays" xml:space="preserve"><value>剩余天数 {0}</value></data>
+  <data name="Overlay_Remembered" xml:space="preserve"><value>（沿用记忆）</value></data>
+  <data name="Overlay_Rerolls" xml:space="preserve"><value>重新随机：{0}</value></data>
+  <data name="Overlay_RunTheme" xml:space="preserve"><value>局内主题：{0}（本局已记下）</value></data>
+  <data name="Overlay_SandboxReadBackToPick" xml:space="preserve"><value>沙盒已读取，可以回到选择界面（眼睛按钮）</value></data>
+  <data name="Overlay_Title" xml:space="preserve"><value>塔罗斯叠加层</value></data>
+  <data name="Overlay_WantedForData" xml:space="preserve"><value>缺数据：网络还不认识它的标记</value></data>
+  <data name="Report_AppError" xml:space="preserve"><value>程序捕获到一个错误。出错前你在做什么？</value></data>
+  <data name="Report_OnlyTartarus" xml:space="preserve"><value>请仅反馈“塔罗斯监狱”模式中的问题。</value></data>
+  <data name="Report_Privacy" xml:space="preserve"><value>发送报告会把游戏窗口截图、程序日志和本局塔罗斯在游戏日志中的相关行交给开发者。不会发送任何个人数据。</value></data>
+  <data name="Report_Send" xml:space="preserve"><value>发送</value></data>
+  <data name="Report_Sending" xml:space="preserve"><value>发送中…</value></data>
+  <data name="Report_WhatWentWrong" xml:space="preserve"><value>出什么问题了？</value></data>
+  <data name="Stats_DialogTitle" xml:space="preserve"><value>Tartarus Solver：统计</value></data>
+  <data name="Stats_NoRuns" xml:space="preserve"><value>还没有记录：一局要由游戏日志从开始看到暴乱，才算一局</value></data>
+  <data name="Stats_Reset" xml:space="preserve"><value>重置</value></data>
+  <data name="Stats_ResetConfirm" xml:space="preserve"><value>清空统计（{0} 局、{1} 个绮彩囚犯），从现在起重新计数？</value></data>
+  <data name="Stats_Reset_Tip" xml:space="preserve"><value>清空统计，从现在起重新计数</value></data>
+  <data name="Stats_Since" xml:space="preserve"><value>自 {0} 起；统计的是游戏日志从头看到暴乱的局</value></data>
+  <data name="Stats_Summary" xml:space="preserve"><value>局数：{0} · 绮彩：{1}（每局 {2}）</value></data>
+  <data name="Stats_Title" xml:space="preserve"><value>统计</value></data>
+  <data name="Status_CaptureFailed" xml:space="preserve"><value>未捕获：Windows 抓不到游戏窗口，稍后会自动重试。请把游戏设为「窗口化」或「无边框窗口」</value></data>
+  <data name="Status_CaptureRefused" xml:space="preserve"><value>未能捕获：Windows 拒绝捕获游戏窗口。此 Windows 中的屏幕捕获可能已被关闭或移除，请检查 CaptureService 服务。没有它，本程序无法看到游戏。</value></data>
+  <data name="Status_Capturing" xml:space="preserve"><value>正在捕获：{0}</value></data>
+  <data name="Status_GameMinimized" xml:space="preserve"><value>未捕获：游戏窗口已最小化，请还原它</value></data>
+  <data name="Status_NoFramesYet" xml:space="preserve"><value>还没有画面（窗口是不是最小化了？）</value></data>
+  <data name="Status_NoSandbox" xml:space="preserve"><value>未找到沙盒：{0} · {1} ms</value></data>
+  <data name="Status_NoSandboxFound" xml:space="preserve"><value>塔罗斯：未找到沙盒（{0} ms）</value></data>
+  <data name="Status_NoWindowCaptured" xml:space="preserve"><value>未捕获窗口</value></data>
+  <data name="Status_NotCapturing" xml:space="preserve"><value>未捕获</value></data>
+  <data name="Status_PictureDoesntFill" xml:space="preserve"><value>游戏画面没有填满窗口：在游戏设置里调整窗口尺寸，或连按两次 Alt+Enter</value></data>
+  <data name="Status_Presence" xml:space="preserve"><value> · 存在度 {0}</value></data>
+  <data name="Status_Sandbox" xml:space="preserve"><value>沙盒 · {0} ms</value></data>
+  <data name="Status_ScreenCopyCovered" xml:space="preserve"><value>提示等待中：另一个窗口遮挡了游戏，请将其移开。</value></data>
+  <data name="Status_ScreenCopyOn" xml:space="preserve"><value>屏幕复制：Windows 不允许捕获窗口。请让游戏保持在最前面，不要遮挡。</value></data>
+  <data name="Status_TimingsLower" xml:space="preserve"><value>（OCR {0}，格子 {1}）</value></data>
+  <data name="Status_TimingsUpper" xml:space="preserve"><value>（OCR {0}，格子 {1}）</value></data>
+  <data name="Status_WaitingForGame" xml:space="preserve"><value>未捕获：正在等待游戏窗口（Torchlight: Infinite）…</value></data>
+  <data name="Status_WindowResized" xml:space="preserve"><value>塔罗斯：窗口尺寸变了，需要重新扫描</value></data>
+  <data name="Update_Confirm" xml:space="preserve"><value>下载 {0} 版（{1} MB），替换当前版本并重启程序？</value></data>
+  <data name="Update_DialogTitle" xml:space="preserve"><value>Tartarus Solver：更新</value></data>
+  <data name="Update_Download_Tip" xml:space="preserve"><value>下载 {0}（{1} MB），安装并重启</value></data>
+  <data name="Update_Downloading" xml:space="preserve"><value>下载中… {0}%</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>更新失败：{0}</value></data>
+  <data name="Update_Installing" xml:space="preserve"><value>安装中…</value></data>
+  <data name="Update_OpenPage_Tip" xml:space="preserve"><value>打开发布页</value></data>
+  <data name="Update_To" xml:space="preserve"><value>更新到 {0}</value></data>
+</root>

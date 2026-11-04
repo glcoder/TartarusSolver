@@ -1,5 +1,6 @@
 using System.Windows;
 using Tartarus.Vision.Ocr;
+using Tartarus.App.Localization;
 
 namespace Tartarus.App;
 
@@ -23,16 +24,16 @@ public partial class DownloadWindow : Window
         _pack = pack;
         InitializeComponent();
         string language = OcrPacks.LanguageName(languageCode);
-        Message.Text = $"The game is in {language}. Reading its text needs the {language} text recognition model "
-            + $"({pack.Size / 1048576.0:0.#} MB, PaddleOCR). Download it now?\n\nWithout it the game's text won't be recognized; "
-            + "cards and picks are still told apart by their pictures.";
+        Message.Text = Loc.F(Strings.Download_Question,
+            language, (pack.Size / 1048576.0).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture));
         Result = $"OCR: {language} recognizer not downloaded, the game's text won't be read";
+        Loc.Apply(this);
     }
 
     private async void DownloadButton_Click(object sender, RoutedEventArgs e)
     {
         DownloadButton.IsEnabled = false;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = Strings.Name_Cancel;
         Bar.Visibility = Status.Visibility = Visibility.Visible;
         _cancel = new CancellationTokenSource();
         Failed = false;
@@ -41,12 +42,14 @@ public partial class DownloadWindow : Window
         var progress = new Progress<(long Done, long Total)>(p =>
         {
             Bar.Value = p.Total > 0 ? (double)p.Done / p.Total : 0;
-            Status.Text = $"{p.Done / 1048576.0:0.0} of {p.Total / 1048576.0:0.0} MB from {from}";
+            Status.Text = Loc.F(Strings.Download_Progress,
+                (p.Done / 1048576.0).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture),
+                (p.Total / 1048576.0).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture), from);
         });
         var host = new Progress<string>(h =>
         {
             from = h;
-            Status.Text = $"Connecting to {h}…";
+            Status.Text = Loc.F(Strings.Download_Connecting, h);
         });
         try
         {
@@ -65,10 +68,10 @@ public partial class DownloadWindow : Window
         {
             Result = $"OCR: {_pack.Id} recognizer download failed: {ex.Message}";
             Failed = true;
-            Status.Text = "Download failed: " + ex.Message;
+            Status.Text = Loc.F(Strings.Download_Failed, ex.Message);
             DownloadButton.IsEnabled = true;
-            DownloadButton.Content = "Retry";
-            CancelButton.Content = "Not now";
+            DownloadButton.Content = Strings.Download_Retry;
+            CancelButton.Content = Strings.Download_NotNow;
             _cancel = null;
         }
     }

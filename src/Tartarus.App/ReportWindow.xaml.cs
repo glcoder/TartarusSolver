@@ -1,4 +1,5 @@
 using System.Windows;
+using Tartarus.App.Localization;
 
 namespace Tartarus.App;
 
@@ -14,13 +15,14 @@ public partial class ReportWindow : Window
     {
         _report = report;
         InitializeComponent();
-        OnlyTartarus.Text = string.Join("\n", Tartarus.Vision.Ocr.OcrPacks.GameLanguages.Select(Tartarus.Vision.Ocr.OcrPacks.ReportOnlyTartarus));
+        OnlyTartarus.Text = Strings.Report_OnlyTartarus;
         if (report.Crash != null)
         {
             // The app's own error: wherever it happened, it's worth telling.
             OnlyTartarus.Visibility = Visibility.Collapsed;
-            Prompt.Text = "The app caught an error. What were you doing just before it?";
+            Prompt.Text = Strings.Report_AppError;
         }
+        Loc.Apply(this);
         Loaded += (_, _) =>
         {
             Activate();
@@ -31,7 +33,7 @@ public partial class ReportWindow : Window
     private async void SendButton_Click(object sender, RoutedEventArgs e)
     {
         SendButton.IsEnabled = CancelButton.IsEnabled = CommentBox.IsEnabled = false;
-        StatusText.Text = "Sending…";
+        StatusText.Text = Strings.Report_Sending;
         StatusText.Visibility = Visibility.Visible;
         string comment = CommentBox.Text;
         Result = await Task.Run(() => BugReports.SendAsync(_report, comment));

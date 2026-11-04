@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Common_Automatic" xml:space="preserve"><value>Automatic</value></data>
+  <data name="Download_Connecting" xml:space="preserve"><value>Connecting to {0}…</value></data>
+  <data name="Download_Download" xml:space="preserve"><value>Download</value></data>
+  <data name="Download_Failed" xml:space="preserve"><value>Download failed: {0}</value></data>
+  <data name="Download_NotNow" xml:space="preserve"><value>Not now</value></data>
+  <data name="Download_Progress" xml:space="preserve"><value>{0} of {1} MB from {2}</value></data>
+  <data name="Download_Question" xml:space="preserve"><value>The game is in {0}. Reading its text needs the {0} text recognition model ({1} MB, PaddleOCR). Download it now?
+
+Without it the game's text won't be recognized; cards and picks are still told apart by their pictures.</value></data>
+  <data name="Download_Retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="Download_Title" xml:space="preserve"><value>Text recognition</value></data>
+  <data name="Edit_AddDestination" xml:space="preserve"><value>Add to Destinations (D{0})</value></data>
+  <data name="Edit_RemoveDestination" xml:space="preserve"><value>Remove from Destinations (D{0})</value></data>
+  <data name="Edit_VisibleRarity" xml:space="preserve"><value>Visible rarity (Unopened)</value></data>
+  <data name="Hint_AtRiot" xml:space="preserve"><value> — at the Riot ≈{0} Chromatic · {1} Ultimate · {2} Legendary</value></data>
+  <data name="Hint_CancelThen" xml:space="preserve"><value>Cancel → {0}</value></data>
+  <data name="Hint_Cell" xml:space="preserve"><value>Cell {0}</value></data>
+  <data name="Hint_CellDetail" xml:space="preserve"><value>Cell {0}: {1}</value></data>
+  <data name="Hint_Computing" xml:space="preserve"><value>, computing…</value></data>
+  <data name="Hint_ConsumeCell" xml:space="preserve"><value>Consume: Cell {0}</value></data>
+  <data name="Hint_HuntCell" xml:space="preserve"><value>Hunt: Cell {0}</value></data>
+  <data name="Hint_Line" xml:space="preserve"><value>Hint: {0}</value></data>
+  <data name="Hint_Playouts" xml:space="preserve"><value>  ({0} playouts{1})</value></data>
+  <data name="Hint_SewerRatwayCell" xml:space="preserve"><value>Sewer Ratway: Cell {0}</value></data>
+  <data name="Hint_Then" xml:space="preserve"><value> · then {0}</value></data>
+  <data name="Hint_Tied" xml:space="preserve"><value> (tied)</value></data>
+  <data name="Language_Choose" xml:space="preserve"><value>Choose the game's language</value></data>
+  <data name="Language_Explanation" xml:space="preserve"><value>The language of the game's text, not of this window. You can change it later under Recognition: Game language.</value></data>
+  <data name="Language_FoundMarked" xml:space="preserve"><value>The language found in the game's settings is marked.</value></data>
+  <data name="Language_NotNow" xml:space="preserve"><value>✕ Not now</value></data>
+  <data name="Language_RestartQuestion" xml:space="preserve"><value>The app restarts to change its language. Restart now?</value></data>
+  <data name="Language_Title" xml:space="preserve"><value>Tartarus Solver: Game language</value></data>
+  <data name="Language_Unreadable" xml:space="preserve"><value>The game's text can't be read as {0}: move hints may be missing or wrong.</value></data>
+  <data name="Main_ApplyFields" xml:space="preserve"><value>Apply fields</value></data>
+  <data name="Main_Auto" xml:space="preserve"><value>Auto</value></data>
+  <data name="Main_AutoAttach" xml:space="preserve"><value>Attach to the game automatically</value></data>
+  <data name="Main_AutoCollect" xml:space="preserve"><value>Auto-collect</value></data>
+  <data name="Main_AutoCollect_Tip" xml:space="preserve"><value>Save a frame to the dataset whenever the Sandbox read changes (with auto scan)</value></data>
+  <data name="Main_Capture" xml:space="preserve"><value>Capture ▶</value></data>
+  <data name="Main_CheckUpdates" xml:space="preserve"><value>Check for updates</value></data>
+  <data name="Main_CheckUpdates_Tip" xml:space="preserve"><value>Ask GitHub for a new version at start and every 6 hours</value></data>
+  <data name="Main_Choose" xml:space="preserve"><value>Choose…</value></data>
+  <data name="Main_ChooseLog_Tip" xml:space="preserve"><value>Pick UE_game.log by hand: game folder\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_DatasetFolder" xml:space="preserve"><value>Dataset folder</value></data>
+  <data name="Main_Debug" xml:space="preserve"><value> (debug)</value></data>
+  <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>Cells on the Destination cards, left to right: 9,11,12</value></data>
+  <data name="Main_DetectAutomatically" xml:space="preserve"><value>Detect automatically</value></data>
+  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>Take the language from the game's settings file; choosing one in the list turns this off</value></data>
+  <data name="Main_EditMode" xml:space="preserve"><value>Edit mode</value></data>
+  <data name="Main_EditMode_Tip" xml:space="preserve"><value>In edit mode click a cell on the overlay: a menu of Code, rarity and flags. Auto scan pauses while editing.</value></data>
+  <data name="Main_Every" xml:space="preserve"><value>, every</value></data>
+  <data name="Main_Faster" xml:space="preserve"><value>Faster</value></data>
+  <data name="Main_FilesMissing" xml:space="preserve"><value>The program's files are missing from its folder (models/ocr), so the game's text may not be read.
+
+Unpack the whole archive into a folder of its own and run the program from there, not from inside the archive.</value></data>
+  <data name="Main_FindLog_Tip" xml:space="preserve"><value>Find the log automatically: beside the running game, in Steam libraries, in the launcher's settings</value></data>
+  <data name="Main_GameLanguage" xml:space="preserve"><value>Game language</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>The language the game shows its text in, so the app can read it. Not this window's language: that one is below.</value></data>
+  <data name="Main_GameLog" xml:space="preserve"><value>Game log</value></data>
+  <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: game folder\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_GameWindow" xml:space="preserve"><value>Game window</value></data>
+  <data name="Main_HintQuality_Tip" xml:space="preserve"><value>Playouts per move: longer to compute, stronger hint</value></data>
+  <data name="Main_Hints" xml:space="preserve"><value>Hints</value></data>
+  <data name="Main_HintsOnly" xml:space="preserve"><value>Hints only</value></data>
+  <data name="Main_HintsOnly_Tip" xml:space="preserve"><value>The overlay shows only the move frames and the hint line: no cells, Torture Instruments or Chromatic</value></data>
+  <data name="Main_InstrumentIds_Tip" xml:space="preserve"><value>ids, comma-separated: ironbox,muzzle</value></data>
+  <data name="Main_InteractableRegions" xml:space="preserve"><value>Interactable regions</value></data>
+  <data name="Main_InteractableRegions_Tip" xml:space="preserve"><value>Frame everything clickable: cells, cards, buttons, Torture Instrument and Chromatic slots, pick cards</value></data>
+  <data name="Main_InterfaceLanguage" xml:space="preserve"><value>Interface language</value></data>
+  <data name="Main_InterfaceLanguage_Tip" xml:space="preserve"><value>The language this window and the overlay are written in. Automatic: the language of Windows.</value></data>
+  <data name="Main_LabelsAndDataset" xml:space="preserve"><value>Labels and dataset</value></data>
+  <data name="Main_LastHint" xml:space="preserve"><value>Last hint: {0} ms, {1} playouts</value></data>
+  <data name="Main_Log" xml:space="preserve"><value>Log</value></data>
+  <data name="Main_LogChosenByHand" xml:space="preserve"><value> (chosen by hand)</value></data>
+  <data name="Main_LogFoundAutomatically" xml:space="preserve"><value> (found automatically)</value></data>
+  <data name="Main_LogNotFound" xml:space="preserve"><value>not found: screen recognition only</value></data>
+  <data name="Main_MoveHints" xml:space="preserve"><value>Move hints</value></data>
+  <data name="Main_NoValueNet" xml:space="preserve"><value> · no value net</value></data>
+  <data name="Main_Overlay" xml:space="preserve"><value>Overlay</value></data>
+  <data name="Main_PicksNet" xml:space="preserve"><value> · picks net</value></data>
+  <data name="Main_PolicyNet" xml:space="preserve"><value> · policy net</value></data>
+  <data name="Main_Recognition" xml:space="preserve"><value>Recognition</value></data>
+  <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>Refresh the window list</value></data>
+  <data name="Main_ReportBug" xml:space="preserve"><value>Report a bug</value></data>
+  <data name="Main_ReportBug_Tip" xml:space="preserve"><value>Send the developer a screenshot, the app's log and the current run's log with your comment</value></data>
+  <data name="Main_ResetEdits" xml:space="preserve"><value>Reset edits</value></data>
+  <data name="Main_SaveFrame" xml:space="preserve"><value>Save frame</value></data>
+  <data name="Main_Scan" xml:space="preserve"><value>Scan</value></data>
+  <data name="Main_ScanInterval_Tip" xml:space="preserve"><value>Seconds from one frame to the next; 0: the next frame as soon as the last one's reading and hint are done</value></data>
+  <data name="Main_Stop" xml:space="preserve"><value>Stop ■</value></data>
+  <data name="Main_Stronger" xml:space="preserve"><value>Stronger</value></data>
+  <data name="Main_Text" xml:space="preserve"><value>Text</value></data>
+  <data name="Main_Text_Tip" xml:space="preserve"><value>OCR regions and the lines read, on the overlay</value></data>
+  <data name="Main_ValueNet" xml:space="preserve"><value> · value net</value></data>
+  <data name="Main_Version" xml:space="preserve"><value>Version</value></data>
+  <data name="Main_WardenCell_Tip" xml:space="preserve"><value>The Warden's cell, 1-16</value></data>
+  <data name="Name_Archenemy" xml:space="preserve"><value>Archenemy</value></data>
+  <data name="Name_AvengersCasket" xml:space="preserve"><value>Avenger's Casket</value></data>
+  <data name="Name_BarbedWhip" xml:space="preserve"><value>Barbed Whip</value></data>
+  <data name="Name_BehindCellDoors" xml:space="preserve"><value>Behind Cell Doors</value></data>
+  <data name="Name_BehindClosedDoors" xml:space="preserve"><value>Behind Closed Doors</value></data>
+  <data name="Name_Bestow" xml:space="preserve"><value>Bestow</value></data>
+  <data name="Name_BloodStainedTrapBerserkLion" xml:space="preserve"><value>Blood-Stained Trap: Berserk Lion</value></data>
+  <data name="Name_BrandOfOriginalSin" xml:space="preserve"><value>Brand of Original Sin</value></data>
+  <data name="Name_BrassHornOfStrife" xml:space="preserve"><value>Brass Horn of Strife</value></data>
+  <data name="Name_BurningStake" xml:space="preserve"><value>Burning Stake</value></data>
+  <data name="Name_CageFight" xml:space="preserve"><value>Cage Fight</value></data>
+  <data name="Name_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Name_Cell" xml:space="preserve"><value>Cell</value></data>
+  <data name="Name_ChainConsume" xml:space="preserve"><value>Chain Consume</value></data>
+  <data name="Name_ChainReaction" xml:space="preserve"><value>Chain Reaction</value></data>
+  <data name="Name_Chest" xml:space="preserve"><value>Chest</value></data>
+  <data name="Name_Chromatic" xml:space="preserve"><value>Chromatic</value></data>
+  <data name="Name_Consumable" xml:space="preserve"><value>Consumable</value></data>
+  <data name="Name_ConsumableTarget" xml:space="preserve"><value>Consumable target</value></data>
+  <data name="Name_Consume" xml:space="preserve"><value>Consume</value></data>
+  <data name="Name_CrimsonVintage" xml:space="preserve"><value>Crimson Vintage</value></data>
+  <data name="Name_CrowWhispers" xml:space="preserve"><value>Crow Whispers</value></data>
+  <data name="Name_CrowdedBeastcage" xml:space="preserve"><value>Crowded Beastcage</value></data>
+  <data name="Name_Day" xml:space="preserve"><value>Day</value></data>
+  <data name="Name_Destination" xml:space="preserve"><value>Destination</value></data>
+  <data name="Name_Destinations" xml:space="preserve"><value>Destinations</value></data>
+  <data name="Name_ElephantFootMaulMammoth" xml:space="preserve"><value>Elephant-Foot Maul: Mammoth</value></data>
+  <data name="Name_Empty" xml:space="preserve"><value>Empty</value></data>
+  <data name="Name_End" xml:space="preserve"><value>End</value></data>
+  <data name="Name_ExecutionEfficiency" xml:space="preserve"><value>Execution Efficiency</value></data>
+  <data name="Name_ExecutionersBlacklist" xml:space="preserve"><value>Executioner's Blacklist</value></data>
+  <data name="Name_ExtraPortion" xml:space="preserve"><value>Extra Portion</value></data>
+  <data name="Name_FangedGuillotineAlphaWolf" xml:space="preserve"><value>Fanged Guillotine: Alpha Wolf</value></data>
+  <data name="Name_FelonsDogTag" xml:space="preserve"><value>Felon's Dog Tag</value></data>
+  <data name="Name_FerociousBeastsRavenousChains" xml:space="preserve"><value>Ferocious Beast's Ravenous Chains</value></data>
+  <data name="Name_FilthyClawsAlphaWolf" xml:space="preserve"><value>Filthy Claws: Alpha Wolf</value></data>
+  <data name="Name_ForgedKey" xml:space="preserve"><value>Forged Key</value></data>
+  <data name="Name_GaolersExecutionAxe" xml:space="preserve"><value>Gaoler's Execution Axe</value></data>
+  <data name="Name_HangmansNoose" xml:space="preserve"><value>Hangman's Noose</value></data>
+  <data name="Name_HighRiskConvict" xml:space="preserve"><value>High-Risk Convict</value></data>
+  <data name="Name_Hunt" xml:space="preserve"><value>Hunt</value></data>
+  <data name="Name_Inmate" xml:space="preserve"><value>Inmate</value></data>
+  <data name="Name_Inmates" xml:space="preserve"><value>Inmates</value></data>
+  <data name="Name_Instigate" xml:space="preserve"><value>Instigate</value></data>
+  <data name="Name_InterrogationRoom" xml:space="preserve"><value>Interrogation Room</value></data>
+  <data name="Name_IronCrownOfThePrisonKingBerserkLion" xml:space="preserve"><value>Iron Crown of the Prison King: Berserk Lion</value></data>
+  <data name="Name_IronLaw" xml:space="preserve"><value>Iron Law</value></data>
+  <data name="Name_IronLawTheme" xml:space="preserve"><value>Iron Law theme</value></data>
+  <data name="Name_IronPestle" xml:space="preserve"><value>Iron Pestle</value></data>
+  <data name="Name_IronTongsOfLustMammoth" xml:space="preserve"><value>Iron Tongs of Lust: Mammoth</value></data>
+  <data name="Name_KingOfTheCaged" xml:space="preserve"><value>King of the Caged</value></data>
+  <data name="Name_KinsCoinOfFate" xml:space="preserve"><value>Kin's Coin of Fate</value></data>
+  <data name="Name_Legendary" xml:space="preserve"><value>Legendary</value></data>
+  <data name="Name_Lion" xml:space="preserve"><value>Lion</value></data>
+  <data name="Name_LockedCell" xml:space="preserve"><value>Locked Cell</value></data>
+  <data name="Name_LongChainedShackles" xml:space="preserve"><value>Long-Chained Shackles</value></data>
+  <data name="Name_LostRingOfKeys" xml:space="preserve"><value>Lost Ring of Keys</value></data>
+  <data name="Name_MaddenedBeastsBarbedCollar" xml:space="preserve"><value>Maddened Beast's Barbed Collar</value></data>
+  <data name="Name_Magic" xml:space="preserve"><value>Magic</value></data>
+  <data name="Name_MakeYourDecision" xml:space="preserve"><value>Make Your Decision</value></data>
+  <data name="Name_Mammoth" xml:space="preserve"><value>Mammoth</value></data>
+  <data name="Name_NoTartarusSandboxOnScreen" xml:space="preserve"><value>No Tartarus Sandbox on screen.</value></data>
+  <data name="Name_Normal" xml:space="preserve"><value>Normal</value></data>
+  <data name="Name_Objective" xml:space="preserve"><value>Objective</value></data>
+  <data name="Name_Opened" xml:space="preserve"><value>Opened</value></data>
+  <data name="Name_OpenedEmpty" xml:space="preserve"><value>Opened, empty</value></data>
+  <data name="Name_Opulence" xml:space="preserve"><value>Opulence</value></data>
+  <data name="Name_Prey" xml:space="preserve"><value>Prey</value></data>
+  <data name="Name_PrisonIncident" xml:space="preserve"><value>Prison Incident</value></data>
+  <data name="Name_PrisonIncidents" xml:space="preserve"><value>Prison Incidents</value></data>
+  <data name="Name_PrisonWalk" xml:space="preserve"><value>Prison Walk</value></data>
+  <data name="Name_RagingBeastsAgonizingMuzzle" xml:space="preserve"><value>Raging Beast's Agonizing Muzzle</value></data>
+  <data name="Name_Rare" xml:space="preserve"><value>Rare</value></data>
+  <data name="Name_Rat" xml:space="preserve"><value>Rat</value></data>
+  <data name="Name_RatNest" xml:space="preserve"><value>Rat Nest</value></data>
+  <data name="Name_RavenousAppetite" xml:space="preserve"><value>Ravenous Appetite</value></data>
+  <data name="Name_ReRoll" xml:space="preserve"><value>Re-roll</value></data>
+  <data name="Name_RemainingDays" xml:space="preserve"><value>Remaining Days</value></data>
+  <data name="Name_Replace" xml:space="preserve"><value>Replace</value></data>
+  <data name="Name_Riot" xml:space="preserve"><value>Riot</value></data>
+  <data name="Name_RiotChest" xml:space="preserve"><value>Riot chest</value></data>
+  <data name="Name_RunTheme" xml:space="preserve"><value>Run theme</value></data>
+  <data name="Name_RustySaw" xml:space="preserve"><value>Rusty Saw</value></data>
+  <data name="Name_Sandbox" xml:space="preserve"><value>Sandbox</value></data>
+  <data name="Name_ScapegoatsGuillotine" xml:space="preserve"><value>Scapegoat's Guillotine</value></data>
+  <data name="Name_ScratchMarks" xml:space="preserve"><value>Scratch Marks</value></data>
+  <data name="Name_SearingBrandingIron" xml:space="preserve"><value>Searing Branding Iron</value></data>
+  <data name="Name_SelectADestination" xml:space="preserve"><value>Select a Destination</value></data>
+  <data name="Name_SelectAnInmateToConsume" xml:space="preserve"><value>Select an Inmate to Consume</value></data>
+  <data name="Name_SeveredIronMaiden" xml:space="preserve"><value>Severed Iron Maiden</value></data>
+  <data name="Name_SewerRatway" xml:space="preserve"><value>Sewer Ratway</value></data>
+  <data name="Name_SharedFortune" xml:space="preserve"><value>Shared Fortune</value></data>
+  <data name="Name_ShortChainedShackles" xml:space="preserve"><value>Short-Chained Shackles</value></data>
+  <data name="Name_SkeweredRatHeadsColossalRat" xml:space="preserve"><value>Skewered Rat Heads: Colossal Rat</value></data>
+  <data name="Name_SortingHook" xml:space="preserve"><value>Sorting Hook</value></data>
+  <data name="Name_SquirmingIronBoxColossalRat" xml:space="preserve"><value>Squirming Iron Box: Colossal Rat</value></data>
+  <data name="Name_SurvivalOfTheFittest" xml:space="preserve"><value>Survival of the Fittest</value></data>
+  <data name="Name_Tartarus" xml:space="preserve"><value>Tartarus</value></data>
+  <data name="Name_TartarusPrison" xml:space="preserve"><value>Tartarus Prison</value></data>
+  <data name="Name_TasteOfFreedom" xml:space="preserve"><value>Taste of Freedom</value></data>
+  <data name="Name_ThreeHeadedThumbRing" xml:space="preserve"><value>Three-Headed Thumb Ring</value></data>
+  <data name="Name_TortureInstrument" xml:space="preserve"><value>Torture Instrument</value></data>
+  <data name="Name_TortureInstruments" xml:space="preserve"><value>Torture Instruments</value></data>
+  <data name="Name_TransferOfConvicts" xml:space="preserve"><value>Transfer of Convicts</value></data>
+  <data name="Name_TreasureHunt" xml:space="preserve"><value>"Treasure" Hunt</value></data>
+  <data name="Name_Tusk" xml:space="preserve"><value>Tusk</value></data>
+  <data name="Name_Tyranny" xml:space="preserve"><value>Tyranny</value></data>
+  <data name="Name_Ultimate" xml:space="preserve"><value>Ultimate</value></data>
+  <data name="Name_Undercurrents" xml:space="preserve"><value>Undercurrents</value></data>
+  <data name="Name_UnknownTortureInstrument" xml:space="preserve"><value>Unknown Torture Instrument</value></data>
+  <data name="Name_Unopened" xml:space="preserve"><value>Unopened</value></data>
+  <data name="Name_UsurpationI" xml:space="preserve"><value>Usurpation I</value></data>
+  <data name="Name_UsurpationII" xml:space="preserve"><value>Usurpation II</value></data>
+  <data name="Name_UsurpationIII" xml:space="preserve"><value>Usurpation III</value></data>
+  <data name="Name_UsurpationIV" xml:space="preserve"><value>Usurpation IV</value></data>
+  <data name="Name_Warden" xml:space="preserve"><value>Warden</value></data>
+  <data name="Name_WardensCache" xml:space="preserve"><value>Warden's Cache</value></data>
+  <data name="Name_WardensScales" xml:space="preserve"><value>Warden's Scales</value></data>
+  <data name="Name_WardensTreasure" xml:space="preserve"><value>Warden's Treasure</value></data>
+  <data name="Name_Wolf" xml:space="preserve"><value>Wolf</value></data>
+  <data name="Overlay_Cap" xml:space="preserve"><value> (cap)</value></data>
+  <data name="Overlay_ChromaticCount" xml:space="preserve"><value>Chromatic {0}/{1}</value></data>
+  <data name="Overlay_Covered" xml:space="preserve"><value>(covered)</value></data>
+  <data name="Overlay_Objective" xml:space="preserve"><value>Objective: {0}</value></data>
+  <data name="Overlay_QualityEstimate" xml:space="preserve"><value>~{0} ms per move · ≈{1} Chromatic per run ({2} playouts per move)</value></data>
+  <data name="Overlay_RemainingDays" xml:space="preserve"><value>Remaining Days {0}</value></data>
+  <data name="Overlay_Remembered" xml:space="preserve"><value> (remembered)</value></data>
+  <data name="Overlay_Rerolls" xml:space="preserve"><value>Re-roll: {0}</value></data>
+  <data name="Overlay_RunTheme" xml:space="preserve"><value>Run theme: {0} (kept for this run)</value></data>
+  <data name="Overlay_SandboxReadBackToPick" xml:space="preserve"><value>the Sandbox is read, back to the pick (the eye button)</value></data>
+  <data name="Overlay_Title" xml:space="preserve"><value>Tartarus overlay</value></data>
+  <data name="Overlay_WantedForData" xml:space="preserve"><value>wanted for data: the network doesn't know its marks yet</value></data>
+  <data name="Report_AppError" xml:space="preserve"><value>The app caught an error. What were you doing just before it?</value></data>
+  <data name="Report_OnlyTartarus" xml:space="preserve"><value>Report only problems in the Tartarus Prison mode.</value></data>
+  <data name="Report_Privacy" xml:space="preserve"><value>By sending this report you share a screenshot of the game window, the app's log and the current Tartarus run's lines from the game log with the developer. No personal data is sent.</value></data>
+  <data name="Report_Send" xml:space="preserve"><value>Send</value></data>
+  <data name="Report_Sending" xml:space="preserve"><value>Sending…</value></data>
+  <data name="Report_WhatWentWrong" xml:space="preserve"><value>What went wrong?</value></data>
+  <data name="Stats_DialogTitle" xml:space="preserve"><value>Tartarus Solver: statistics</value></data>
+  <data name="Stats_NoRuns" xml:space="preserve"><value>No runs yet: a run counts once the game's log has seen it from its Start to the Riot</value></data>
+  <data name="Stats_Reset" xml:space="preserve"><value>Reset</value></data>
+  <data name="Stats_ResetConfirm" xml:space="preserve"><value>Clear the statistics ({0} runs, {1} Chromatic) and count from now on?</value></data>
+  <data name="Stats_Reset_Tip" xml:space="preserve"><value>Clear the statistics and count from now on</value></data>
+  <data name="Stats_Since" xml:space="preserve"><value>Since {0}; runs the game's log saw from their Start to the Riot</value></data>
+  <data name="Stats_Summary" xml:space="preserve"><value>Runs: {0} · Chromatic: {1} ({2} per run)</value></data>
+  <data name="Stats_Title" xml:space="preserve"><value>Statistics</value></data>
+  <data name="Status_CaptureFailed" xml:space="preserve"><value>Not capturing: Windows won't capture the game window, trying again. Set the game to windowed or borderless</value></data>
+  <data name="Status_CaptureRefused" xml:space="preserve"><value>Not capturing: Windows refuses to capture the game window. Screen capture may be turned off or removed in this Windows: check the CaptureService service. Without it the app can't see the game.</value></data>
+  <data name="Status_Capturing" xml:space="preserve"><value>Capturing: {0}</value></data>
+  <data name="Status_GameMinimized" xml:space="preserve"><value>Not capturing: the game window is minimized, restore it</value></data>
+  <data name="Status_NoFramesYet" xml:space="preserve"><value>No frames yet (is the window minimized?)</value></data>
+  <data name="Status_NoSandbox" xml:space="preserve"><value>No Sandbox: {0} · {1} ms</value></data>
+  <data name="Status_NoSandboxFound" xml:space="preserve"><value>Tartarus: no Sandbox found ({0} ms)</value></data>
+  <data name="Status_NoWindowCaptured" xml:space="preserve"><value>Not capturing a window</value></data>
+  <data name="Status_NotCapturing" xml:space="preserve"><value>Not capturing</value></data>
+  <data name="Status_PictureDoesntFill" xml:space="preserve"><value>The game's picture doesn't fill its window: set the window size in the game's settings, or press Alt+Enter twice</value></data>
+  <data name="Status_Presence" xml:space="preserve"><value> · presence {0}</value></data>
+  <data name="Status_Sandbox" xml:space="preserve"><value>Sandbox · {0} ms</value></data>
+  <data name="Status_ScreenCopyCovered" xml:space="preserve"><value>Hints wait: another window is over the game. Move it away.</value></data>
+  <data name="Status_ScreenCopyOn" xml:space="preserve"><value>Screen copy: Windows won't capture the window. Keep the game in front, with nothing over it.</value></data>
+  <data name="Status_TimingsLower" xml:space="preserve"><value> (ocr {0}, cells {1})</value></data>
+  <data name="Status_TimingsUpper" xml:space="preserve"><value> (OCR {0}, cells {1})</value></data>
+  <data name="Status_WaitingForGame" xml:space="preserve"><value>Not capturing: waiting for the game window (Torchlight: Infinite)…</value></data>
+  <data name="Status_WindowResized" xml:space="preserve"><value>Tartarus: the window's size changed, a new scan is needed</value></data>
+  <data name="Update_Confirm" xml:space="preserve"><value>Download version {0} ({1} MB), put it in place of this one and restart the app?</value></data>
+  <data name="Update_DialogTitle" xml:space="preserve"><value>Tartarus Solver: update</value></data>
+  <data name="Update_Download_Tip" xml:space="preserve"><value>Download {0} ({1} MB), install it and restart</value></data>
+  <data name="Update_Downloading" xml:space="preserve"><value>Downloading… {0}%</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>The update failed: {0}</value></data>
+  <data name="Update_Installing" xml:space="preserve"><value>Installing…</value></data>
+  <data name="Update_OpenPage_Tip" xml:space="preserve"><value>Open the release's page</value></data>
+  <data name="Update_To" xml:space="preserve"><value>Update to {0}</value></data>
+</root>

@@ -1,7 +1,8 @@
 <Window x:Class="Tartarus.App.GameLanguageWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Game language" Width="560" SizeToContent="Height"
+        xmlns:res="clr-namespace:Tartarus.App.Localization"
+        Title="{x:Static res:Strings.Main_GameLanguage}" Width="560" SizeToContent="Height"
         Topmost="True" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI" FontSize="12" Background="#1E1F24" Foreground="#E8E8EC">
   <StackPanel Margin="12">
@@ -31,10 +32,10 @@
       </ListBox.ItemContainerStyle>
     </ListBox>
     <TextBlock Margin="0,8,0,0" Foreground="#9AA0AC" TextWrapping="Wrap"
-               Text="The language of the game's text; the app itself stays in English. You can change it later under Recognition: Game language." />
+               Text="{x:Static res:Strings.Language_Explanation}" />
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
       <Button x:Name="UseButton" Content="OK" MinWidth="80" Padding="12,3" Margin="0,0,6,0" IsDefault="True" IsEnabled="False" Click="UseButton_Click" />
-      <Button Content="✕ Not now" Padding="12,3" IsCancel="True" />
+      <Button Content="{x:Static res:Strings.Language_NotNow}" Padding="12,3" IsCancel="True" />
     </StackPanel>
   </StackPanel>
 </Window>

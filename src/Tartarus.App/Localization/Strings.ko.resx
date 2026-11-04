@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Common_Automatic" xml:space="preserve"><value>자동</value></data>
+  <data name="Download_Connecting" xml:space="preserve"><value>{0}에 연결 중…</value></data>
+  <data name="Download_Download" xml:space="preserve"><value>다운로드</value></data>
+  <data name="Download_Failed" xml:space="preserve"><value>다운로드 실패: {0}</value></data>
+  <data name="Download_NotNow" xml:space="preserve"><value>나중에</value></data>
+  <data name="Download_Progress" xml:space="preserve"><value>{0} / {1} MB ({2})</value></data>
+  <data name="Download_Question" xml:space="preserve"><value>게임 언어는 {0}입니다. 텍스트를 읽으려면 {0} 텍스트 인식 모델({1} MB, PaddleOCR)이 필요합니다. 지금 다운로드할까요?
+
+없으면 게임 텍스트가 인식되지 않습니다. 카드와 선택은 계속 그림으로 구별합니다.</value></data>
+  <data name="Download_Retry" xml:space="preserve"><value>다시 시도</value></data>
+  <data name="Download_Title" xml:space="preserve"><value>텍스트 인식</value></data>
+  <data name="Edit_AddDestination" xml:space="preserve"><value>목적지에 추가 (D{0})</value></data>
+  <data name="Edit_RemoveDestination" xml:space="preserve"><value>목적지에서 제거 (D{0})</value></data>
+  <data name="Edit_VisibleRarity" xml:space="preserve"><value>보이는 희귀도 (오픈되지 않음)</value></data>
+  <data name="Hint_AtRiot" xml:space="preserve"><value> — 폭동 시 ≈{0} 레인보우 · {1} 절대자 · {2} 레전드</value></data>
+  <data name="Hint_CancelThen" xml:space="preserve"><value>취소 → {0}</value></data>
+  <data name="Hint_Cell" xml:space="preserve"><value>감방 {0}</value></data>
+  <data name="Hint_CellDetail" xml:space="preserve"><value>감방 {0}: {1}</value></data>
+  <data name="Hint_Computing" xml:space="preserve"><value>, 계산 중…</value></data>
+  <data name="Hint_ConsumeCell" xml:space="preserve"><value>먹기: 감방 {0}</value></data>
+  <data name="Hint_HuntCell" xml:space="preserve"><value>추적 사냥: 감방 {0}</value></data>
+  <data name="Hint_Line" xml:space="preserve"><value>힌트: {0}</value></data>
+  <data name="Hint_Playouts" xml:space="preserve"><value>  (시뮬레이션 {0}회{1})</value></data>
+  <data name="Hint_SewerRatwayCell" xml:space="preserve"><value>하수구 쥐구멍: 감방 {0}</value></data>
+  <data name="Hint_Then" xml:space="preserve"><value> · 다음 {0}</value></data>
+  <data name="Hint_Tied" xml:space="preserve"><value> (동률)</value></data>
+  <data name="Language_Choose" xml:space="preserve"><value>게임 언어를 선택하세요</value></data>
+  <data name="Language_Explanation" xml:space="preserve"><value>게임 텍스트의 언어이며 이 창의 언어가 아닙니다. 나중에 인식: 게임 언어에서 바꿀 수 있습니다.</value></data>
+  <data name="Language_FoundMarked" xml:space="preserve"><value>게임 설정에서 찾은 언어가 표시되어 있습니다.</value></data>
+  <data name="Language_NotNow" xml:space="preserve"><value>✕ 나중에</value></data>
+  <data name="Language_RestartQuestion" xml:space="preserve"><value>언어를 바꾸려면 앱을 다시 시작합니다. 지금 다시 시작할까요?</value></data>
+  <data name="Language_Title" xml:space="preserve"><value>Tartarus Solver: 게임 언어</value></data>
+  <data name="Language_Unreadable" xml:space="preserve"><value>게임 텍스트를 {0}(으)로 읽을 수 없습니다. 수 힌트가 없거나 틀릴 수 있습니다.</value></data>
+  <data name="Main_ApplyFields" xml:space="preserve"><value>필드 적용</value></data>
+  <data name="Main_Auto" xml:space="preserve"><value>자동</value></data>
+  <data name="Main_AutoAttach" xml:space="preserve"><value>게임에 자동으로 연결</value></data>
+  <data name="Main_AutoCollect" xml:space="preserve"><value>자동 수집</value></data>
+  <data name="Main_AutoCollect_Tip" xml:space="preserve"><value>Sandbox 읽기가 바뀔 때마다 프레임을 데이터 세트에 저장 (자동 스캔 시)</value></data>
+  <data name="Main_Capture" xml:space="preserve"><value>캡처 ▶</value></data>
+  <data name="Main_CheckUpdates" xml:space="preserve"><value>업데이트 확인</value></data>
+  <data name="Main_CheckUpdates_Tip" xml:space="preserve"><value>시작할 때와 6시간마다 GitHub에 새 버전을 확인합니다</value></data>
+  <data name="Main_Choose" xml:space="preserve"><value>선택…</value></data>
+  <data name="Main_ChooseLog_Tip" xml:space="preserve"><value>UE_game.log 직접 선택: 게임 폴더\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_DatasetFolder" xml:space="preserve"><value>데이터 세트 폴더</value></data>
+  <data name="Main_Debug" xml:space="preserve"><value> (디버그)</value></data>
+  <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>목적지 카드의 감방, 왼쪽부터: 9,11,12</value></data>
+  <data name="Main_DetectAutomatically" xml:space="preserve"><value>자동 감지</value></data>
+  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>게임 설정 파일에서 언어를 가져옵니다. 목록에서 언어를 고르면 꺼집니다</value></data>
+  <data name="Main_EditMode" xml:space="preserve"><value>편집 모드</value></data>
+  <data name="Main_EditMode_Tip" xml:space="preserve"><value>편집 모드에서 오버레이의 감방을 클릭하면 코드, 희귀도, 플래그 메뉴가 열립니다. 편집 중에는 자동 스캔이 멈춥니다.</value></data>
+  <data name="Main_Every" xml:space="preserve"><value>, 간격</value></data>
+  <data name="Main_Faster" xml:space="preserve"><value>빠르게</value></data>
+  <data name="Main_FilesMissing" xml:space="preserve"><value>프로그램 폴더에 파일이 없어(models/ocr) 게임 텍스트를 읽지 못할 수 있습니다.
+
+압축 파일 전체를 별도 폴더에 풀고 압축 파일 안이 아니라 그 폴더에서 프로그램을 실행하세요.</value></data>
+  <data name="Main_FindLog_Tip" xml:space="preserve"><value>로그 자동 찾기: 실행 중인 게임 옆, Steam 라이브러리, launcher 설정</value></data>
+  <data name="Main_GameLanguage" xml:space="preserve"><value>게임 언어</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>게임이 텍스트를 표시하는 언어로, 앱이 읽는 데 필요합니다. 이 창의 언어가 아닙니다. 창의 언어는 아래에 있습니다.</value></data>
+  <data name="Main_GameLog" xml:space="preserve"><value>게임 로그</value></data>
+  <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: 게임 폴더\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_GameWindow" xml:space="preserve"><value>게임 창</value></data>
+  <data name="Main_HintQuality_Tip" xml:space="preserve"><value>수당 시뮬레이션: 계산이 길어지고 힌트가 강해집니다</value></data>
+  <data name="Main_Hints" xml:space="preserve"><value>힌트</value></data>
+  <data name="Main_HintsOnly" xml:space="preserve"><value>힌트만</value></data>
+  <data name="Main_HintsOnly_Tip" xml:space="preserve"><value>오버레이에 수 테두리와 힌트 줄만 표시합니다. 감방, 고문 도구, 레인보우는 표시하지 않습니다</value></data>
+  <data name="Main_InstrumentIds_Tip" xml:space="preserve"><value>id, 쉼표로 구분: ironbox,muzzle</value></data>
+  <data name="Main_InteractableRegions" xml:space="preserve"><value>상호 작용 영역</value></data>
+  <data name="Main_InteractableRegions_Tip" xml:space="preserve"><value>클릭할 수 있는 모든 것에 테두리 표시: 감방, 카드, 버튼, 고문 도구와 레인보우 칸, 선택 카드</value></data>
+  <data name="Main_InterfaceLanguage" xml:space="preserve"><value>인터페이스 언어</value></data>
+  <data name="Main_InterfaceLanguage_Tip" xml:space="preserve"><value>이 창과 오버레이의 언어입니다. 자동: Windows 언어.</value></data>
+  <data name="Main_LabelsAndDataset" xml:space="preserve"><value>라벨과 데이터 세트</value></data>
+  <data name="Main_LastHint" xml:space="preserve"><value>마지막 힌트: {0} ms, 시뮬레이션 {1}회</value></data>
+  <data name="Main_Log" xml:space="preserve"><value>로그</value></data>
+  <data name="Main_LogChosenByHand" xml:space="preserve"><value> (직접 선택)</value></data>
+  <data name="Main_LogFoundAutomatically" xml:space="preserve"><value> (자동으로 찾음)</value></data>
+  <data name="Main_LogNotFound" xml:space="preserve"><value>찾을 수 없음: 화면 인식만 사용</value></data>
+  <data name="Main_MoveHints" xml:space="preserve"><value>수 힌트</value></data>
+  <data name="Main_NoValueNet" xml:space="preserve"><value> · 가치망 없음</value></data>
+  <data name="Main_Overlay" xml:space="preserve"><value>오버레이</value></data>
+  <data name="Main_PicksNet" xml:space="preserve"><value> · 선택망</value></data>
+  <data name="Main_PolicyNet" xml:space="preserve"><value> · 정책망</value></data>
+  <data name="Main_Recognition" xml:space="preserve"><value>인식</value></data>
+  <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>창 목록 새로 고침</value></data>
+  <data name="Main_ReportBug" xml:space="preserve"><value>버그 신고</value></data>
+  <data name="Main_ReportBug_Tip" xml:space="preserve"><value>스크린샷, 앱 로그, 현재 판의 로그를 의견과 함께 개발자에게 보냅니다</value></data>
+  <data name="Main_ResetEdits" xml:space="preserve"><value>편집 초기화</value></data>
+  <data name="Main_SaveFrame" xml:space="preserve"><value>프레임 저장</value></data>
+  <data name="Main_Scan" xml:space="preserve"><value>스캔</value></data>
+  <data name="Main_ScanInterval_Tip" xml:space="preserve"><value>프레임 사이의 초. 0: 직전 프레임의 읽기와 힌트가 끝나는 즉시 다음 프레임</value></data>
+  <data name="Main_Stop" xml:space="preserve"><value>중지 ■</value></data>
+  <data name="Main_Stronger" xml:space="preserve"><value>강하게</value></data>
+  <data name="Main_Text" xml:space="preserve"><value>텍스트</value></data>
+  <data name="Main_Text_Tip" xml:space="preserve"><value>OCR 영역과 읽은 줄을 오버레이에 표시</value></data>
+  <data name="Main_ValueNet" xml:space="preserve"><value> · 가치망</value></data>
+  <data name="Main_Version" xml:space="preserve"><value>버전</value></data>
+  <data name="Main_WardenCell_Tip" xml:space="preserve"><value>교도소장의 감방, 1-16</value></data>
+  <data name="Name_Archenemy" xml:space="preserve"><value>숙적</value></data>
+  <data name="Name_AvengersCasket" xml:space="preserve"><value>복수자의 관</value></data>
+  <data name="Name_BarbedWhip" xml:space="preserve"><value>가시 달린 철 채찍</value></data>
+  <data name="Name_BehindCellDoors" xml:space="preserve"><value>옥문 너머</value></data>
+  <data name="Name_BehindClosedDoors" xml:space="preserve"><value>배후 조작</value></data>
+  <data name="Name_Bestow" xml:space="preserve"><value>포상</value></data>
+  <data name="Name_BloodStainedTrapBerserkLion" xml:space="preserve"><value>피로 물든 덫: 광기 사자</value></data>
+  <data name="Name_BrandOfOriginalSin" xml:space="preserve"><value>원죄의 낙인</value></data>
+  <data name="Name_BrassHornOfStrife" xml:space="preserve"><value>투쟁의 구리 나팔</value></data>
+  <data name="Name_BurningStake" xml:space="preserve"><value>화형용 기둥</value></data>
+  <data name="Name_CageFight" xml:space="preserve"><value>죄수의 혈투</value></data>
+  <data name="Name_Cancel" xml:space="preserve"><value>취소</value></data>
+  <data name="Name_Cell" xml:space="preserve"><value>감방</value></data>
+  <data name="Name_ChainConsume" xml:space="preserve"><value>연속 먹기</value></data>
+  <data name="Name_ChainReaction" xml:space="preserve"><value>연쇄 반응</value></data>
+  <data name="Name_Chest" xml:space="preserve"><value>상자</value></data>
+  <data name="Name_Chromatic" xml:space="preserve"><value>레인보우</value></data>
+  <data name="Name_Consumable" xml:space="preserve"><value>먹기 가능</value></data>
+  <data name="Name_ConsumableTarget" xml:space="preserve"><value>먹기 대상</value></data>
+  <data name="Name_Consume" xml:space="preserve"><value>먹기</value></data>
+  <data name="Name_CrimsonVintage" xml:space="preserve"><value>진홍의 숙성주</value></data>
+  <data name="Name_CrowWhispers" xml:space="preserve"><value>까마귀의 속삭임</value></data>
+  <data name="Name_CrowdedBeastcage" xml:space="preserve"><value>비좁은 짐승 우리</value></data>
+  <data name="Name_Day" xml:space="preserve"><value>일</value></data>
+  <data name="Name_Destination" xml:space="preserve"><value>목적지</value></data>
+  <data name="Name_Destinations" xml:space="preserve"><value>목적지</value></data>
+  <data name="Name_ElephantFootMaulMammoth" xml:space="preserve"><value>코끼리 드롭해머: 거대 코끼리</value></data>
+  <data name="Name_Empty" xml:space="preserve"><value>비어 있음</value></data>
+  <data name="Name_End" xml:space="preserve"><value>종료</value></data>
+  <data name="Name_ExecutionEfficiency" xml:space="preserve"><value>처형 효율</value></data>
+  <data name="Name_ExecutionersBlacklist" xml:space="preserve"><value>집행관의 블랙리스트</value></data>
+  <data name="Name_ExtraPortion" xml:space="preserve"><value>추가 배식</value></data>
+  <data name="Name_FangedGuillotineAlphaWolf" xml:space="preserve"><value>늑대 송곳니 작두: 우두머리 늑대</value></data>
+  <data name="Name_FelonsDogTag" xml:space="preserve"><value>중범죄자 명패</value></data>
+  <data name="Name_FerociousBeastsRavenousChains" xml:space="preserve"><value>흉수의 굶주린 사슬</value></data>
+  <data name="Name_FilthyClawsAlphaWolf" xml:space="preserve"><value>더러운 철발톱: 우두머리 늑대</value></data>
+  <data name="Name_ForgedKey" xml:space="preserve"><value>위조 열쇠</value></data>
+  <data name="Name_GaolersExecutionAxe" xml:space="preserve"><value>간수의 처형 도끼</value></data>
+  <data name="Name_HangmansNoose" xml:space="preserve"><value>교수형 밧줄</value></data>
+  <data name="Name_HighRiskConvict" xml:space="preserve"><value>중범죄자</value></data>
+  <data name="Name_Hunt" xml:space="preserve"><value>추적 사냥</value></data>
+  <data name="Name_Inmate" xml:space="preserve"><value>죄수</value></data>
+  <data name="Name_Inmates" xml:space="preserve"><value>죄수</value></data>
+  <data name="Name_Instigate" xml:space="preserve"><value>선동</value></data>
+  <data name="Name_InterrogationRoom" xml:space="preserve"><value>취조실</value></data>
+  <data name="Name_IronCrownOfThePrisonKingBerserkLion" xml:space="preserve"><value>감옥왕의 철관: 광기 사자</value></data>
+  <data name="Name_IronLaw" xml:space="preserve"><value>철칙</value></data>
+  <data name="Name_IronLawTheme" xml:space="preserve"><value>철의 법칙 테마</value></data>
+  <data name="Name_IronPestle" xml:space="preserve"><value>쇠몽둥이</value></data>
+  <data name="Name_IronTongsOfLustMammoth" xml:space="preserve"><value>야욕의 쇠집게: 거대 코끼리</value></data>
+  <data name="Name_KingOfTheCaged" xml:space="preserve"><value>감옥수의 왕</value></data>
+  <data name="Name_KinsCoinOfFate" xml:space="preserve"><value>형제의 운명 동전</value></data>
+  <data name="Name_Legendary" xml:space="preserve"><value>레전드</value></data>
+  <data name="Name_Lion" xml:space="preserve"><value>광기 사자</value></data>
+  <data name="Name_LockedCell" xml:space="preserve"><value>감방이 오픈되지 않았습니다.</value></data>
+  <data name="Name_LongChainedShackles" xml:space="preserve"><value>긴 사슬 족쇄</value></data>
+  <data name="Name_LostRingOfKeys" xml:space="preserve"><value>버려진 열쇠꾸러미</value></data>
+  <data name="Name_MaddenedBeastsBarbedCollar" xml:space="preserve"><value>맹수의 가시 목걸이</value></data>
+  <data name="Name_Magic" xml:space="preserve"><value>매직</value></data>
+  <data name="Name_MakeYourDecision" xml:space="preserve"><value>결정을 내리세요.</value></data>
+  <data name="Name_Mammoth" xml:space="preserve"><value>거대 코끼리</value></data>
+  <data name="Name_NoTartarusSandboxOnScreen" xml:space="preserve"><value>화면에 타르타로스 감옥 Sandbox가 없습니다.</value></data>
+  <data name="Name_Normal" xml:space="preserve"><value>노멀</value></data>
+  <data name="Name_Objective" xml:space="preserve"><value>목표</value></data>
+  <data name="Name_Opened" xml:space="preserve"><value>오픈됨</value></data>
+  <data name="Name_OpenedEmpty" xml:space="preserve"><value>오픈됨, 비어 있음</value></data>
+  <data name="Name_Opulence" xml:space="preserve"><value>사치</value></data>
+  <data name="Name_Prey" xml:space="preserve"><value>사냥감</value></data>
+  <data name="Name_PrisonIncident" xml:space="preserve"><value>옥중 사건</value></data>
+  <data name="Name_PrisonIncidents" xml:space="preserve"><value>옥중 사건</value></data>
+  <data name="Name_PrisonWalk" xml:space="preserve"><value>순찰의 길</value></data>
+  <data name="Name_RagingBeastsAgonizingMuzzle" xml:space="preserve"><value>야수의 고통스러운 재갈</value></data>
+  <data name="Name_Rare" xml:space="preserve"><value>레어</value></data>
+  <data name="Name_Rat" xml:space="preserve"><value>거대 쥐</value></data>
+  <data name="Name_RatNest" xml:space="preserve"><value>쥐 둥지</value></data>
+  <data name="Name_RavenousAppetite" xml:space="preserve"><value>식욕 폭발</value></data>
+  <data name="Name_ReRoll" xml:space="preserve"><value>랜덤 초기화</value></data>
+  <data name="Name_RemainingDays" xml:space="preserve"><value>남은 일수</value></data>
+  <data name="Name_Replace" xml:space="preserve"><value>교체</value></data>
+  <data name="Name_Riot" xml:space="preserve"><value>폭동</value></data>
+  <data name="Name_RiotChest" xml:space="preserve"><value>폭동 상자</value></data>
+  <data name="Name_RunTheme" xml:space="preserve"><value>이번 판 테마</value></data>
+  <data name="Name_RustySaw" xml:space="preserve"><value>녹슨 톱</value></data>
+  <data name="Name_Sandbox" xml:space="preserve"><value>Sandbox</value></data>
+  <data name="Name_ScapegoatsGuillotine" xml:space="preserve"><value>희생양의 단두대</value></data>
+  <data name="Name_ScratchMarks" xml:space="preserve"><value>긁힌 자국</value></data>
+  <data name="Name_SearingBrandingIron" xml:space="preserve"><value>달아오른 인두</value></data>
+  <data name="Name_SelectADestination" xml:space="preserve"><value>목적지를 선택하세요.</value></data>
+  <data name="Name_SelectAnInmateToConsume" xml:space="preserve"><value>먹을 죄수를 선택하세요.</value></data>
+  <data name="Name_SeveredIronMaiden" xml:space="preserve"><value>쪼개진 인간형 관</value></data>
+  <data name="Name_SewerRatway" xml:space="preserve"><value>하수구 쥐구멍</value></data>
+  <data name="Name_SharedFortune" xml:space="preserve"><value>동고동락</value></data>
+  <data name="Name_ShortChainedShackles" xml:space="preserve"><value>짧은 사슬 족쇄</value></data>
+  <data name="Name_SkeweredRatHeadsColossalRat" xml:space="preserve"><value>쥐머리 꼬치: 거대 쥐</value></data>
+  <data name="Name_SortingHook" xml:space="preserve"><value>선택의 갈고리</value></data>
+  <data name="Name_SquirmingIronBoxColossalRat" xml:space="preserve"><value>꿈틀거리는 철상자: 거대 쥐</value></data>
+  <data name="Name_SurvivalOfTheFittest" xml:space="preserve"><value>약육강식</value></data>
+  <data name="Name_Tartarus" xml:space="preserve"><value>타르타로스</value></data>
+  <data name="Name_TartarusPrison" xml:space="preserve"><value>타르타로스 감옥</value></data>
+  <data name="Name_TasteOfFreedom" xml:space="preserve"><value>자유의 맛</value></data>
+  <data name="Name_ThreeHeadedThumbRing" xml:space="preserve"><value>삼두 반지</value></data>
+  <data name="Name_TortureInstrument" xml:space="preserve"><value>고문 도구</value></data>
+  <data name="Name_TortureInstruments" xml:space="preserve"><value>고문 도구</value></data>
+  <data name="Name_TransferOfConvicts" xml:space="preserve"><value>동죄 이감</value></data>
+  <data name="Name_TreasureHunt" xml:space="preserve"><value>'보물'찾기</value></data>
+  <data name="Name_Tusk" xml:space="preserve"><value>상아</value></data>
+  <data name="Name_Tyranny" xml:space="preserve"><value>직권 남용</value></data>
+  <data name="Name_Ultimate" xml:space="preserve"><value>절대자</value></data>
+  <data name="Name_Undercurrents" xml:space="preserve"><value>암투 소용돌이</value></data>
+  <data name="Name_UnknownTortureInstrument" xml:space="preserve"><value>알 수 없는 고문 도구</value></data>
+  <data name="Name_Unopened" xml:space="preserve"><value>오픈되지 않음</value></data>
+  <data name="Name_UsurpationI" xml:space="preserve"><value>참람·1</value></data>
+  <data name="Name_UsurpationII" xml:space="preserve"><value>참람·2</value></data>
+  <data name="Name_UsurpationIII" xml:space="preserve"><value>참람·3</value></data>
+  <data name="Name_UsurpationIV" xml:space="preserve"><value>참람·4</value></data>
+  <data name="Name_Warden" xml:space="preserve"><value>교도소장</value></data>
+  <data name="Name_WardensCache" xml:space="preserve"><value>교도소장의 비장품</value></data>
+  <data name="Name_WardensScales" xml:space="preserve"><value>교도관의 저울</value></data>
+  <data name="Name_WardensTreasure" xml:space="preserve"><value>교도소장의 소장품</value></data>
+  <data name="Name_Wolf" xml:space="preserve"><value>우두머리 늑대</value></data>
+  <data name="Overlay_Cap" xml:space="preserve"><value> (상한)</value></data>
+  <data name="Overlay_ChromaticCount" xml:space="preserve"><value>레인보우 {0}/{1}</value></data>
+  <data name="Overlay_Covered" xml:space="preserve"><value>(가려짐)</value></data>
+  <data name="Overlay_Objective" xml:space="preserve"><value>목표: {0}</value></data>
+  <data name="Overlay_QualityEstimate" xml:space="preserve"><value>수당 ~{0} ms · 판당 ≈{1} 레인보우 (수당 시뮬레이션 {2}회)</value></data>
+  <data name="Overlay_RemainingDays" xml:space="preserve"><value>남은 일수 {0}</value></data>
+  <data name="Overlay_Remembered" xml:space="preserve"><value> (기억됨)</value></data>
+  <data name="Overlay_Rerolls" xml:space="preserve"><value>랜덤 초기화: {0}</value></data>
+  <data name="Overlay_RunTheme" xml:space="preserve"><value>이번 판 테마: {0} (이번 판 동안 유지)</value></data>
+  <data name="Overlay_SandboxReadBackToPick" xml:space="preserve"><value>Sandbox를 읽었습니다. 선택으로 돌아가세요 (눈 버튼)</value></data>
+  <data name="Overlay_Title" xml:space="preserve"><value>Tartarus 오버레이</value></data>
+  <data name="Overlay_WantedForData" xml:space="preserve"><value>데이터 수집 필요: 네트워크가 아직 이 표시를 모릅니다</value></data>
+  <data name="Report_AppError" xml:space="preserve"><value>앱에서 오류가 발생했습니다. 바로 전에 무엇을 하고 있었나요?</value></data>
+  <data name="Report_OnlyTartarus" xml:space="preserve"><value>"타르타로스 감옥" 모드의 문제만 신고해 주세요.</value></data>
+  <data name="Report_Privacy" xml:space="preserve"><value>이 보고서를 보내면 게임 창의 스크린샷, 앱 로그, 게임 로그 중 현재 타르타로스 감옥 판의 줄이 개발자에게 공유됩니다. 개인 정보는 보내지 않습니다.</value></data>
+  <data name="Report_Send" xml:space="preserve"><value>보내기</value></data>
+  <data name="Report_Sending" xml:space="preserve"><value>보내는 중…</value></data>
+  <data name="Report_WhatWentWrong" xml:space="preserve"><value>무엇이 잘못되었나요?</value></data>
+  <data name="Stats_DialogTitle" xml:space="preserve"><value>Tartarus Solver: 통계</value></data>
+  <data name="Stats_NoRuns" xml:space="preserve"><value>아직 기록이 없습니다: 게임 로그가 시작부터 폭동까지 확인한 판만 셉니다</value></data>
+  <data name="Stats_Reset" xml:space="preserve"><value>초기화</value></data>
+  <data name="Stats_ResetConfirm" xml:space="preserve"><value>통계({0}판, 레인보우 {1})를 지우고 지금부터 다시 셀까요?</value></data>
+  <data name="Stats_Reset_Tip" xml:space="preserve"><value>통계를 지우고 지금부터 다시 셉니다</value></data>
+  <data name="Stats_Since" xml:space="preserve"><value>{0}부터, 게임 로그가 시작부터 폭동까지 확인한 판</value></data>
+  <data name="Stats_Summary" xml:space="preserve"><value>판: {0} · 레인보우: {1} (판당 {2})</value></data>
+  <data name="Stats_Title" xml:space="preserve"><value>통계</value></data>
+  <data name="Status_CaptureFailed" xml:space="preserve"><value>캡처 중이 아님: Windows가 게임 창을 캡처하지 않아 다시 시도합니다. 게임을 창 모드나 테두리 없는 창으로 설정하세요</value></data>
+  <data name="Status_CaptureRefused" xml:space="preserve"><value>캡처 불가: Windows가 게임 창 캡처를 거부합니다. 이 Windows에서 화면 캡처가 꺼졌거나 제거되었을 수 있습니다. CaptureService 서비스를 확인해 주세요. 이 기능 없이는 앱이 게임을 볼 수 없습니다.</value></data>
+  <data name="Status_Capturing" xml:space="preserve"><value>캡처 중: {0}</value></data>
+  <data name="Status_GameMinimized" xml:space="preserve"><value>캡처 중이 아님: 게임 창이 최소화되어 있습니다. 복원해 주세요</value></data>
+  <data name="Status_NoFramesYet" xml:space="preserve"><value>아직 프레임이 없습니다 (창이 최소화되어 있나요?)</value></data>
+  <data name="Status_NoSandbox" xml:space="preserve"><value>Sandbox 없음: {0} · {1} ms</value></data>
+  <data name="Status_NoSandboxFound" xml:space="preserve"><value>Tartarus: Sandbox를 찾을 수 없음 ({0} ms)</value></data>
+  <data name="Status_NoWindowCaptured" xml:space="preserve"><value>캡처 중인 창 없음</value></data>
+  <data name="Status_NotCapturing" xml:space="preserve"><value>캡처 중이 아님</value></data>
+  <data name="Status_PictureDoesntFill" xml:space="preserve"><value>게임 화면이 창을 채우지 못합니다: 게임 설정에서 창 크기를 지정하거나 Alt+Enter를 두 번 누르세요</value></data>
+  <data name="Status_Presence" xml:space="preserve"><value> · 존재도 {0}</value></data>
+  <data name="Status_Sandbox" xml:space="preserve"><value>Sandbox · {0} ms</value></data>
+  <data name="Status_ScreenCopyCovered" xml:space="preserve"><value>힌트 대기 중: 다른 창이 게임을 가리고 있습니다. 옮겨 주세요.</value></data>
+  <data name="Status_ScreenCopyOn" xml:space="preserve"><value>화면 복사: Windows가 창 캡처를 허용하지 않습니다. 게임을 맨 앞에 두고 가리지 마세요.</value></data>
+  <data name="Status_TimingsLower" xml:space="preserve"><value> (ocr {0}, 감방 {1})</value></data>
+  <data name="Status_TimingsUpper" xml:space="preserve"><value> (OCR {0}, 감방 {1})</value></data>
+  <data name="Status_WaitingForGame" xml:space="preserve"><value>캡처 중이 아님: 게임 창을 기다리는 중 (Torchlight: Infinite)…</value></data>
+  <data name="Status_WindowResized" xml:space="preserve"><value>Tartarus: 창 크기가 바뀌어 다시 스캔해야 합니다</value></data>
+  <data name="Update_Confirm" xml:space="preserve"><value>버전 {0} ({1} MB)을 다운로드해 이 버전을 교체하고 앱을 다시 시작할까요?</value></data>
+  <data name="Update_DialogTitle" xml:space="preserve"><value>Tartarus Solver: 업데이트</value></data>
+  <data name="Update_Download_Tip" xml:space="preserve"><value>{0} ({1} MB) 다운로드 후 설치하고 다시 시작</value></data>
+  <data name="Update_Downloading" xml:space="preserve"><value>다운로드 중… {0}%</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>업데이트 실패: {0}</value></data>
+  <data name="Update_Installing" xml:space="preserve"><value>설치 중…</value></data>
+  <data name="Update_OpenPage_Tip" xml:space="preserve"><value>릴리스 페이지 열기</value></data>
+  <data name="Update_To" xml:space="preserve"><value>{0}(으)로 업데이트</value></data>
+</root>

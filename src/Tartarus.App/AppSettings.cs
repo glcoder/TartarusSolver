@@ -73,6 +73,11 @@ public sealed class AppSettings
     public string? ReportDsn { get; set; }
     /// <summary>A copy of the screen instead of window capture from the start; only in this file, the app turns to it by itself where it must.</summary>
     public bool ScreenCopy { get; set; }
+    /// <summary>
+    /// The language the app's own window and overlay are drawn in: "auto" (this Windows' language), or one of the
+    /// game's languages. Not the game's language (<see cref="GameLanguage"/>): that one is what the game's text is read in.
+    /// </summary>
+    public string UiLanguage { get; set; } = "auto";
     /// <summary>A random id of this install: tells one tester's reports from another's, and nothing else about them.</summary>
     public string InstallId { get; set; } = Guid.NewGuid().ToString("N")[..12];
     /// <summary>Ask GitHub for a new version (the player's window; never with --debug).</summary>

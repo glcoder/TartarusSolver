@@ -77,3 +77,25 @@ public static partial class GameText
     [GeneratedRegex(@"\s+")]
     private static partial Regex Spaces();
 }
+
+/// <summary>The resource key of a name the interface knows only at run time: "Rusty Saw" is Name_RustySaw, "Warden's Cache" Name_WardensCache.</summary>
+public static class UiNames
+{
+    public static string Key(string english)
+    {
+        var key = new System.Text.StringBuilder("Name_", english.Length + 5);
+        bool start = true;
+        foreach (char c in english)
+        {
+            if (c == '\'') continue;
+            if (!char.IsAsciiLetterOrDigit(c))
+            {
+                start = true;
+                continue;
+            }
+            key.Append(start ? char.ToUpperInvariant(c) : c);
+            start = false;
+        }
+        return key.ToString();
+    }
+}

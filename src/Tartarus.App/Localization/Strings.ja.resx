@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Common_Automatic" xml:space="preserve"><value>自動</value></data>
+  <data name="Download_Connecting" xml:space="preserve"><value>{0} に接続中…</value></data>
+  <data name="Download_Download" xml:space="preserve"><value>ダウンロード</value></data>
+  <data name="Download_Failed" xml:space="preserve"><value>ダウンロードに失敗しました: {0}</value></data>
+  <data name="Download_NotNow" xml:space="preserve"><value>今はしない</value></data>
+  <data name="Download_Progress" xml:space="preserve"><value>{0} / {1} MB ({2} から)</value></data>
+  <data name="Download_Question" xml:space="preserve"><value>ゲームの言語は {0} です。テキストの読み取りには {0} のテキスト認識モデル ({1} MB、PaddleOCR) が必要です。今すぐダウンロードしますか?
+
+これがないとゲームのテキストは認識されません。カードと選択肢は引き続き画像で見分けます。</value></data>
+  <data name="Download_Retry" xml:space="preserve"><value>再試行</value></data>
+  <data name="Download_Title" xml:space="preserve"><value>テキスト認識</value></data>
+  <data name="Edit_AddDestination" xml:space="preserve"><value>目的地に追加 (D{0})</value></data>
+  <data name="Edit_RemoveDestination" xml:space="preserve"><value>目的地から削除 (D{0})</value></data>
+  <data name="Edit_VisibleRarity" xml:space="preserve"><value>見えるレアリティ (未開放)</value></data>
+  <data name="Hint_AtRiot" xml:space="preserve"><value> — 暴動時 ≈{0} 綺彩 · {1} 至高 · {2} 伝説</value></data>
+  <data name="Hint_CancelThen" xml:space="preserve"><value>キャンセル → {0}</value></data>
+  <data name="Hint_Cell" xml:space="preserve"><value>監房 {0}</value></data>
+  <data name="Hint_CellDetail" xml:space="preserve"><value>監房 {0}: {1}</value></data>
+  <data name="Hint_Computing" xml:space="preserve"><value>、計算中…</value></data>
+  <data name="Hint_ConsumeCell" xml:space="preserve"><value>捕食: 監房 {0}</value></data>
+  <data name="Hint_HuntCell" xml:space="preserve"><value>獲物探し: 監房 {0}</value></data>
+  <data name="Hint_Line" xml:space="preserve"><value>ヒント: {0}</value></data>
+  <data name="Hint_Playouts" xml:space="preserve"><value>  ({0} シミュレーション{1})</value></data>
+  <data name="Hint_SewerRatwayCell" xml:space="preserve"><value>暗渠の鼠道: 監房 {0}</value></data>
+  <data name="Hint_Then" xml:space="preserve"><value> · 次に {0}</value></data>
+  <data name="Hint_Tied" xml:space="preserve"><value> (同率)</value></data>
+  <data name="Language_Choose" xml:space="preserve"><value>ゲームの言語を選択</value></data>
+  <data name="Language_Explanation" xml:space="preserve"><value>ゲームのテキストの言語です。このウィンドウの言語ではありません。あとで「認識: ゲームの言語」で変更できます。</value></data>
+  <data name="Language_FoundMarked" xml:space="preserve"><value>ゲームの設定で見つかった言語に印を付けています。</value></data>
+  <data name="Language_NotNow" xml:space="preserve"><value>✕ 今はしない</value></data>
+  <data name="Language_RestartQuestion" xml:space="preserve"><value>言語を変更するためにアプリを再起動します。今すぐ再起動しますか?</value></data>
+  <data name="Language_Title" xml:space="preserve"><value>Tartarus Solver: ゲームの言語</value></data>
+  <data name="Language_Unreadable" xml:space="preserve"><value>ゲームのテキストを {0} として読み取れません: 手のヒントが出ない、または誤っている可能性があります。</value></data>
+  <data name="Main_ApplyFields" xml:space="preserve"><value>項目を適用</value></data>
+  <data name="Main_Auto" xml:space="preserve"><value>自動</value></data>
+  <data name="Main_AutoAttach" xml:space="preserve"><value>ゲームに自動で接続</value></data>
+  <data name="Main_AutoCollect" xml:space="preserve"><value>自動収集</value></data>
+  <data name="Main_AutoCollect_Tip" xml:space="preserve"><value>Sandbox の読み取りが変わるたびにフレームをデータセットに保存します (自動スキャン時)</value></data>
+  <data name="Main_Capture" xml:space="preserve"><value>キャプチャ ▶</value></data>
+  <data name="Main_CheckUpdates" xml:space="preserve"><value>更新を確認</value></data>
+  <data name="Main_CheckUpdates_Tip" xml:space="preserve"><value>起動時と 6 時間ごとに GitHub で新しいバージョンを確認します</value></data>
+  <data name="Main_Choose" xml:space="preserve"><value>選択…</value></data>
+  <data name="Main_ChooseLog_Tip" xml:space="preserve"><value>UE_game.log を手動で選択: ゲームフォルダー\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_DatasetFolder" xml:space="preserve"><value>データセットのフォルダー</value></data>
+  <data name="Main_Debug" xml:space="preserve"><value> (デバッグ)</value></data>
+  <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>目的地カードの監房 (左から右へ): 9,11,12</value></data>
+  <data name="Main_DetectAutomatically" xml:space="preserve"><value>自動検出</value></data>
+  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>ゲームの設定ファイルから言語を取得します。一覧から選ぶとオフになります</value></data>
+  <data name="Main_EditMode" xml:space="preserve"><value>編集モード</value></data>
+  <data name="Main_EditMode_Tip" xml:space="preserve"><value>編集モードではオーバーレイの監房をクリックすると、コード、レアリティ、フラグのメニューが開きます。編集中は自動スキャンが止まります。</value></data>
+  <data name="Main_Every" xml:space="preserve"><value>、間隔</value></data>
+  <data name="Main_Faster" xml:space="preserve"><value>速い</value></data>
+  <data name="Main_FilesMissing" xml:space="preserve"><value>プログラムのフォルダーにファイルがありません (models/ocr)。ゲームのテキストを読み取れない場合があります。
+
+アーカイブ全体を専用のフォルダーに展開し、アーカイブ内からではなくそこからプログラムを実行してください。</value></data>
+  <data name="Main_FindLog_Tip" xml:space="preserve"><value>ログを自動で探します: 実行中のゲームの隣、Steam ライブラリ、ランチャーの設定</value></data>
+  <data name="Main_GameLanguage" xml:space="preserve"><value>ゲームの言語</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>ゲームがテキストを表示する言語です。アプリが読み取るために使います。このウィンドウの言語ではありません(そちらは下にあります)。</value></data>
+  <data name="Main_GameLog" xml:space="preserve"><value>ゲームログ</value></data>
+  <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: ゲームフォルダー\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_GameWindow" xml:space="preserve"><value>ゲームウィンドウ</value></data>
+  <data name="Main_HintQuality_Tip" xml:space="preserve"><value>1手あたりのシミュレーション数: 計算は長くなり、ヒントは強くなります</value></data>
+  <data name="Main_Hints" xml:space="preserve"><value>ヒント</value></data>
+  <data name="Main_HintsOnly" xml:space="preserve"><value>ヒントのみ</value></data>
+  <data name="Main_HintsOnly_Tip" xml:space="preserve"><value>オーバーレイに手の枠とヒント行だけを表示します(監房、刑具、綺彩は表示しません)</value></data>
+  <data name="Main_InstrumentIds_Tip" xml:space="preserve"><value>id (カンマ区切り): ironbox,muzzle</value></data>
+  <data name="Main_InteractableRegions" xml:space="preserve"><value>操作可能な領域</value></data>
+  <data name="Main_InteractableRegions_Tip" xml:space="preserve"><value>クリックできるものをすべて枠で囲みます: 監房、カード、ボタン、刑具と綺彩の枠、選択カード</value></data>
+  <data name="Main_InterfaceLanguage" xml:space="preserve"><value>表示言語</value></data>
+  <data name="Main_InterfaceLanguage_Tip" xml:space="preserve"><value>このウィンドウとオーバーレイの言語です。自動: Windows の言語。</value></data>
+  <data name="Main_LabelsAndDataset" xml:space="preserve"><value>ラベルとデータセット</value></data>
+  <data name="Main_LastHint" xml:space="preserve"><value>最後のヒント: {0} ms、{1} シミュレーション</value></data>
+  <data name="Main_Log" xml:space="preserve"><value>ログ</value></data>
+  <data name="Main_LogChosenByHand" xml:space="preserve"><value> (手動で選択)</value></data>
+  <data name="Main_LogFoundAutomatically" xml:space="preserve"><value> (自動で検出)</value></data>
+  <data name="Main_LogNotFound" xml:space="preserve"><value>見つかりません: 画面認識のみ</value></data>
+  <data name="Main_MoveHints" xml:space="preserve"><value>手のヒント</value></data>
+  <data name="Main_NoValueNet" xml:space="preserve"><value> · 価値ネットなし</value></data>
+  <data name="Main_Overlay" xml:space="preserve"><value>オーバーレイ</value></data>
+  <data name="Main_PicksNet" xml:space="preserve"><value> · 選択ネット</value></data>
+  <data name="Main_PolicyNet" xml:space="preserve"><value> · 方策ネット</value></data>
+  <data name="Main_Recognition" xml:space="preserve"><value>認識</value></data>
+  <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>ウィンドウ一覧を更新</value></data>
+  <data name="Main_ReportBug" xml:space="preserve"><value>バグを報告</value></data>
+  <data name="Main_ReportBug_Tip" xml:space="preserve"><value>スクリーンショット、アプリのログ、今回のログをコメントとともに開発者へ送ります</value></data>
+  <data name="Main_ResetEdits" xml:space="preserve"><value>編集をリセット</value></data>
+  <data name="Main_SaveFrame" xml:space="preserve"><value>フレームを保存</value></data>
+  <data name="Main_Scan" xml:space="preserve"><value>スキャン</value></data>
+  <data name="Main_ScanInterval_Tip" xml:space="preserve"><value>フレーム間の秒数。0: 前のフレームの読み取りとヒントが終わり次第、次のフレーム</value></data>
+  <data name="Main_Stop" xml:space="preserve"><value>停止 ■</value></data>
+  <data name="Main_Stronger" xml:space="preserve"><value>強い</value></data>
+  <data name="Main_Text" xml:space="preserve"><value>テキスト</value></data>
+  <data name="Main_Text_Tip" xml:space="preserve"><value>OCR 領域と読み取った行をオーバーレイに表示</value></data>
+  <data name="Main_ValueNet" xml:space="preserve"><value> · 価値ネット</value></data>
+  <data name="Main_Version" xml:space="preserve"><value>バージョン</value></data>
+  <data name="Main_WardenCell_Tip" xml:space="preserve"><value>監獄長の監房、1-16</value></data>
+  <data name="Name_Archenemy" xml:space="preserve"><value>宿敵</value></data>
+  <data name="Name_AvengersCasket" xml:space="preserve"><value>復讐者の匣</value></data>
+  <data name="Name_BarbedWhip" xml:space="preserve"><value>棘の鉄鞭</value></data>
+  <data name="Name_BehindCellDoors" xml:space="preserve"><value>牢門の先</value></data>
+  <data name="Name_BehindClosedDoors" xml:space="preserve"><value>裏工作</value></data>
+  <data name="Name_Bestow" xml:space="preserve"><value>恩賞</value></data>
+  <data name="Name_BloodStainedTrapBerserkLion" xml:space="preserve"><value>血染めのトラバサミ：狂獅子</value></data>
+  <data name="Name_BrandOfOriginalSin" xml:space="preserve"><value>原罪の烙印</value></data>
+  <data name="Name_BrassHornOfStrife" xml:space="preserve"><value>闘争の角笛</value></data>
+  <data name="Name_BurningStake" xml:space="preserve"><value>火刑の柱</value></data>
+  <data name="Name_CageFight" xml:space="preserve"><value>囚人の共食い</value></data>
+  <data name="Name_Cancel" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="Name_Cell" xml:space="preserve"><value>監房</value></data>
+  <data name="Name_ChainConsume" xml:space="preserve"><value>連続捕食</value></data>
+  <data name="Name_ChainReaction" xml:space="preserve"><value>連鎖反応</value></data>
+  <data name="Name_Chest" xml:space="preserve"><value>宝箱</value></data>
+  <data name="Name_Chromatic" xml:space="preserve"><value>綺彩</value></data>
+  <data name="Name_Consumable" xml:space="preserve"><value>捕食可能</value></data>
+  <data name="Name_ConsumableTarget" xml:space="preserve"><value>捕食の対象</value></data>
+  <data name="Name_Consume" xml:space="preserve"><value>捕食</value></data>
+  <data name="Name_CrimsonVintage" xml:space="preserve"><value>深紅の美酒</value></data>
+  <data name="Name_CrowWhispers" xml:space="preserve"><value>鴉の囁き</value></data>
+  <data name="Name_CrowdedBeastcage" xml:space="preserve"><value>獣ひしめく檻</value></data>
+  <data name="Name_Day" xml:space="preserve"><value>日</value></data>
+  <data name="Name_Destination" xml:space="preserve"><value>目的地</value></data>
+  <data name="Name_Destinations" xml:space="preserve"><value>目的地</value></data>
+  <data name="Name_ElephantFootMaulMammoth" xml:space="preserve"><value>象足の大鎚：巨象</value></data>
+  <data name="Name_Empty" xml:space="preserve"><value>空</value></data>
+  <data name="Name_End" xml:space="preserve"><value>終了</value></data>
+  <data name="Name_ExecutionEfficiency" xml:space="preserve"><value>処刑効率</value></data>
+  <data name="Name_ExecutionersBlacklist" xml:space="preserve"><value>処刑官の黒き名簿</value></data>
+  <data name="Name_ExtraPortion" xml:space="preserve"><value>おかわり</value></data>
+  <data name="Name_FangedGuillotineAlphaWolf" xml:space="preserve"><value>狼牙の処刑刃：狼王</value></data>
+  <data name="Name_FelonsDogTag" xml:space="preserve"><value>重刑囚の認識票</value></data>
+  <data name="Name_FerociousBeastsRavenousChains" xml:space="preserve"><value>狂獣の逆棘輪</value></data>
+  <data name="Name_FilthyClawsAlphaWolf" xml:space="preserve"><value>血錆びの鉄爪：狼王</value></data>
+  <data name="Name_ForgedKey" xml:space="preserve"><value>偽の鍵</value></data>
+  <data name="Name_GaolersExecutionAxe" xml:space="preserve"><value>獄卒の処刑大斧</value></data>
+  <data name="Name_HangmansNoose" xml:space="preserve"><value>絞首の縄</value></data>
+  <data name="Name_HighRiskConvict" xml:space="preserve"><value>重刑囚</value></data>
+  <data name="Name_Hunt" xml:space="preserve"><value>獲物探し</value></data>
+  <data name="Name_Inmate" xml:space="preserve"><value>囚人</value></data>
+  <data name="Name_Inmates" xml:space="preserve"><value>囚人</value></data>
+  <data name="Name_Instigate" xml:space="preserve"><value>扇動</value></data>
+  <data name="Name_InterrogationRoom" xml:space="preserve"><value>取調室</value></data>
+  <data name="Name_IronCrownOfThePrisonKingBerserkLion" xml:space="preserve"><value>牢獄王の鉄冠：狂獅子</value></data>
+  <data name="Name_IronLaw" xml:space="preserve"><value>鉄の掟</value></data>
+  <data name="Name_IronLawTheme" xml:space="preserve"><value>鉄の掟テーマ</value></data>
+  <data name="Name_IronPestle" xml:space="preserve"><value>鉄の棍棒</value></data>
+  <data name="Name_IronTongsOfLustMammoth" xml:space="preserve"><value>強欲の鉄ばさみ：巨象</value></data>
+  <data name="Name_KingOfTheCaged" xml:space="preserve"><value>囚われし獣、王となる</value></data>
+  <data name="Name_KinsCoinOfFate" xml:space="preserve"><value>同胞を分かつ運命の硬貨</value></data>
+  <data name="Name_Legendary" xml:space="preserve"><value>伝説</value></data>
+  <data name="Name_Lion" xml:space="preserve"><value>狂獅子</value></data>
+  <data name="Name_LockedCell" xml:space="preserve"><value>未開放の監房</value></data>
+  <data name="Name_LongChainedShackles" xml:space="preserve"><value>長い鎖の足枷</value></data>
+  <data name="Name_LostRingOfKeys" xml:space="preserve"><value>遺された鍵束</value></data>
+  <data name="Name_MaddenedBeastsBarbedCollar" xml:space="preserve"><value>棘立ちし猛獣の首輪</value></data>
+  <data name="Name_Magic" xml:space="preserve"><value>魔法</value></data>
+  <data name="Name_MakeYourDecision" xml:space="preserve"><value>裁定を行ってください</value></data>
+  <data name="Name_Mammoth" xml:space="preserve"><value>巨象</value></data>
+  <data name="Name_NoTartarusSandboxOnScreen" xml:space="preserve"><value>画面にタロス監獄の Sandbox がありません。</value></data>
+  <data name="Name_Normal" xml:space="preserve"><value>ノーマル</value></data>
+  <data name="Name_Objective" xml:space="preserve"><value>目標</value></data>
+  <data name="Name_Opened" xml:space="preserve"><value>開放済み</value></data>
+  <data name="Name_OpenedEmpty" xml:space="preserve"><value>開放済み、空</value></data>
+  <data name="Name_Opulence" xml:space="preserve"><value>豪奢</value></data>
+  <data name="Name_Prey" xml:space="preserve"><value>獲物</value></data>
+  <data name="Name_PrisonIncident" xml:space="preserve"><value>獄中事件</value></data>
+  <data name="Name_PrisonIncidents" xml:space="preserve"><value>獄中事件</value></data>
+  <data name="Name_PrisonWalk" xml:space="preserve"><value>牢獄巡り</value></data>
+  <data name="Name_RagingBeastsAgonizingMuzzle" xml:space="preserve"><value>狂獣の激痛枷</value></data>
+  <data name="Name_Rare" xml:space="preserve"><value>レア</value></data>
+  <data name="Name_Rat" xml:space="preserve"><value>大鼠</value></data>
+  <data name="Name_RatNest" xml:space="preserve"><value>ネズミの巣</value></data>
+  <data name="Name_RavenousAppetite" xml:space="preserve"><value>食欲増進</value></data>
+  <data name="Name_ReRoll" xml:space="preserve"><value>ランダムに再設定</value></data>
+  <data name="Name_RemainingDays" xml:space="preserve"><value>残り日数</value></data>
+  <data name="Name_Replace" xml:space="preserve"><value>入れ替え</value></data>
+  <data name="Name_Riot" xml:space="preserve"><value>暴動</value></data>
+  <data name="Name_RiotChest" xml:space="preserve"><value>暴動の宝箱</value></data>
+  <data name="Name_RunTheme" xml:space="preserve"><value>今回のテーマ</value></data>
+  <data name="Name_RustySaw" xml:space="preserve"><value>錆びた鋸</value></data>
+  <data name="Name_Sandbox" xml:space="preserve"><value>Sandbox</value></data>
+  <data name="Name_ScapegoatsGuillotine" xml:space="preserve"><value>身代わりの断頭台</value></data>
+  <data name="Name_ScratchMarks" xml:space="preserve"><value>爪痕</value></data>
+  <data name="Name_SearingBrandingIron" xml:space="preserve"><value>灼熱の焼きごて</value></data>
+  <data name="Name_SelectADestination" xml:space="preserve"><value>目的地を選択してください</value></data>
+  <data name="Name_SelectAnInmateToConsume" xml:space="preserve"><value>捕食する囚人を選択してください</value></data>
+  <data name="Name_SeveredIronMaiden" xml:space="preserve"><value>断たれた人型棺</value></data>
+  <data name="Name_SewerRatway" xml:space="preserve"><value>暗渠の鼠道</value></data>
+  <data name="Name_SharedFortune" xml:space="preserve"><value>幸運のおすそ分け</value></data>
+  <data name="Name_ShortChainedShackles" xml:space="preserve"><value>短い鎖の足枷</value></data>
+  <data name="Name_SkeweredRatHeadsColossalRat" xml:space="preserve"><value>鼠頭の串刺し：大鼠</value></data>
+  <data name="Name_SortingHook" xml:space="preserve"><value>選別の鉤</value></data>
+  <data name="Name_SquirmingIronBoxColossalRat" xml:space="preserve"><value>蠢く鉄箱：大鼠</value></data>
+  <data name="Name_SurvivalOfTheFittest" xml:space="preserve"><value>弱肉強食</value></data>
+  <data name="Name_Tartarus" xml:space="preserve"><value>タロス</value></data>
+  <data name="Name_TartarusPrison" xml:space="preserve"><value>タロス監獄</value></data>
+  <data name="Name_TasteOfFreedom" xml:space="preserve"><value>自由の味</value></data>
+  <data name="Name_ThreeHeadedThumbRing" xml:space="preserve"><value>三獣の指輪</value></data>
+  <data name="Name_TortureInstrument" xml:space="preserve"><value>刑具</value></data>
+  <data name="Name_TortureInstruments" xml:space="preserve"><value>刑具</value></data>
+  <data name="Name_TransferOfConvicts" xml:space="preserve"><value>同罪者の移送</value></data>
+  <data name="Name_TreasureHunt" xml:space="preserve"><value>「お宝」探し</value></data>
+  <data name="Name_Tusk" xml:space="preserve"><value>象牙</value></data>
+  <data name="Name_Tyranny" xml:space="preserve"><value>職権濫用</value></data>
+  <data name="Name_Ultimate" xml:space="preserve"><value>至高</value></data>
+  <data name="Name_Undercurrents" xml:space="preserve"><value>暗流のうねり</value></data>
+  <data name="Name_UnknownTortureInstrument" xml:space="preserve"><value>不明な刑具</value></data>
+  <data name="Name_Unopened" xml:space="preserve"><value>未開放</value></data>
+  <data name="Name_UsurpationI" xml:space="preserve"><value>僭越・其の一</value></data>
+  <data name="Name_UsurpationII" xml:space="preserve"><value>僭越・其の二</value></data>
+  <data name="Name_UsurpationIII" xml:space="preserve"><value>僭越・其の三</value></data>
+  <data name="Name_UsurpationIV" xml:space="preserve"><value>僭越・其の四</value></data>
+  <data name="Name_Warden" xml:space="preserve"><value>監獄長</value></data>
+  <data name="Name_WardensCache" xml:space="preserve"><value>監獄の秘蔵品</value></data>
+  <data name="Name_WardensScales" xml:space="preserve"><value>看守の天秤</value></data>
+  <data name="Name_WardensTreasure" xml:space="preserve"><value>監獄長の秘蔵品</value></data>
+  <data name="Name_Wolf" xml:space="preserve"><value>狼王</value></data>
+  <data name="Overlay_Cap" xml:space="preserve"><value> (上限)</value></data>
+  <data name="Overlay_ChromaticCount" xml:space="preserve"><value>綺彩 {0}/{1}</value></data>
+  <data name="Overlay_Covered" xml:space="preserve"><value>(隠れています)</value></data>
+  <data name="Overlay_Objective" xml:space="preserve"><value>目標: {0}</value></data>
+  <data name="Overlay_QualityEstimate" xml:space="preserve"><value>1手あたり ~{0} ms · 1 回あたり ≈{1} 綺彩 (1手あたり {2} シミュレーション)</value></data>
+  <data name="Overlay_RemainingDays" xml:space="preserve"><value>残り日数 {0}</value></data>
+  <data name="Overlay_Remembered" xml:space="preserve"><value> (記憶済み)</value></data>
+  <data name="Overlay_Rerolls" xml:space="preserve"><value>ランダムに再設定: {0}</value></data>
+  <data name="Overlay_RunTheme" xml:space="preserve"><value>今回のテーマ: {0} (今回は保持)</value></data>
+  <data name="Overlay_SandboxReadBackToPick" xml:space="preserve"><value>Sandbox を読み取りました。選択に戻ってください (目のボタン)</value></data>
+  <data name="Overlay_Title" xml:space="preserve"><value>Tartarus オーバーレイ</value></data>
+  <data name="Overlay_WantedForData" xml:space="preserve"><value>データ収集対象: ネットワークはまだこの印を知りません</value></data>
+  <data name="Report_AppError" xml:space="preserve"><value>アプリでエラーが発生しました。直前に何をしていましたか?</value></data>
+  <data name="Report_OnlyTartarus" xml:space="preserve"><value>「タロス監獄」モードの問題のみ報告してください。</value></data>
+  <data name="Report_Privacy" xml:space="preserve"><value>このレポートを送信すると、ゲームウィンドウのスクリーンショット、アプリのログ、ゲームログのうち今回のタロス監獄の行が開発者に共有されます。個人データは送信されません。</value></data>
+  <data name="Report_Send" xml:space="preserve"><value>送信</value></data>
+  <data name="Report_Sending" xml:space="preserve"><value>送信中…</value></data>
+  <data name="Report_WhatWentWrong" xml:space="preserve"><value>何が問題でしたか?</value></data>
+  <data name="Stats_DialogTitle" xml:space="preserve"><value>Tartarus Solver: 統計</value></data>
+  <data name="Stats_NoRuns" xml:space="preserve"><value>まだ記録がありません: ゲームログが開始から暴動まで確認すると 1 回と数えます</value></data>
+  <data name="Stats_Reset" xml:space="preserve"><value>リセット</value></data>
+  <data name="Stats_ResetConfirm" xml:space="preserve"><value>統計 ({0} 回、綺彩 {1}) を消去して今から数え直しますか?</value></data>
+  <data name="Stats_Reset_Tip" xml:space="preserve"><value>統計を消去して今から数え直します</value></data>
+  <data name="Stats_Since" xml:space="preserve"><value>{0} 以降。ゲームログが開始から暴動まで確認した回</value></data>
+  <data name="Stats_Summary" xml:space="preserve"><value>回数: {0} · 綺彩: {1} (1 回あたり {2})</value></data>
+  <data name="Stats_Title" xml:space="preserve"><value>統計</value></data>
+  <data name="Status_CaptureFailed" xml:space="preserve"><value>キャプチャしていません: Windows がゲームウィンドウをキャプチャしません。再試行中です。ゲームをウィンドウまたはボーダーレスにしてください</value></data>
+  <data name="Status_CaptureRefused" xml:space="preserve"><value>キャプチャできません: Windows がゲームウィンドウのキャプチャを拒否しています。この Windows では画面キャプチャが無効化または削除されている可能性があります。CaptureService サービスを確認してください。これがないとアプリはゲームを認識できません。</value></data>
+  <data name="Status_Capturing" xml:space="preserve"><value>キャプチャ中: {0}</value></data>
+  <data name="Status_GameMinimized" xml:space="preserve"><value>キャプチャしていません: ゲームウィンドウが最小化されています。元に戻してください</value></data>
+  <data name="Status_NoFramesYet" xml:space="preserve"><value>まだフレームがありません (ウィンドウが最小化されていませんか?)</value></data>
+  <data name="Status_NoSandbox" xml:space="preserve"><value>Sandbox なし: {0} · {1} ms</value></data>
+  <data name="Status_NoSandboxFound" xml:space="preserve"><value>Tartarus: Sandbox が見つかりません ({0} ms)</value></data>
+  <data name="Status_NoWindowCaptured" xml:space="preserve"><value>ウィンドウをキャプチャしていません</value></data>
+  <data name="Status_NotCapturing" xml:space="preserve"><value>キャプチャしていません</value></data>
+  <data name="Status_PictureDoesntFill" xml:space="preserve"><value>ゲームの画面がウィンドウいっぱいに表示されていません: ゲームの設定でウィンドウサイズを設定するか、Alt+Enter を 2 回押してください</value></data>
+  <data name="Status_Presence" xml:space="preserve"><value> · 存在度 {0}</value></data>
+  <data name="Status_Sandbox" xml:space="preserve"><value>Sandbox · {0} ms</value></data>
+  <data name="Status_ScreenCopyCovered" xml:space="preserve"><value>ヒントは待機中です: 別のウィンドウがゲームを隠しています。移動してください。</value></data>
+  <data name="Status_ScreenCopyOn" xml:space="preserve"><value>画面コピー: Windows がウィンドウのキャプチャを許可していません。ゲームを前面に出し、隠さないでください。</value></data>
+  <data name="Status_TimingsLower" xml:space="preserve"><value> (ocr {0}、監房 {1})</value></data>
+  <data name="Status_TimingsUpper" xml:space="preserve"><value> (OCR {0}、監房 {1})</value></data>
+  <data name="Status_WaitingForGame" xml:space="preserve"><value>キャプチャしていません: ゲームウィンドウを待っています (Torchlight: Infinite)…</value></data>
+  <data name="Status_WindowResized" xml:space="preserve"><value>Tartarus: ウィンドウサイズが変わりました。再スキャンが必要です</value></data>
+  <data name="Update_Confirm" xml:space="preserve"><value>バージョン {0} ({1} MB) をダウンロードして置き換え、アプリを再起動しますか?</value></data>
+  <data name="Update_DialogTitle" xml:space="preserve"><value>Tartarus Solver: 更新</value></data>
+  <data name="Update_Download_Tip" xml:space="preserve"><value>{0} ({1} MB) をダウンロードしてインストールし、再起動します</value></data>
+  <data name="Update_Downloading" xml:space="preserve"><value>ダウンロード中… {0}%</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>更新に失敗しました: {0}</value></data>
+  <data name="Update_Installing" xml:space="preserve"><value>インストール中…</value></data>
+  <data name="Update_OpenPage_Tip" xml:space="preserve"><value>リリースのページを開く</value></data>
+  <data name="Update_To" xml:space="preserve"><value>{0} に更新</value></data>
+</root>

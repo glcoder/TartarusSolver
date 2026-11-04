@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Common_Automatic" xml:space="preserve"><value>อัตโนมัติ</value></data>
+  <data name="Download_Connecting" xml:space="preserve"><value>กำลังเชื่อมต่อกับ {0}…</value></data>
+  <data name="Download_Download" xml:space="preserve"><value>ดาวน์โหลด</value></data>
+  <data name="Download_Failed" xml:space="preserve"><value>ดาวน์โหลดไม่สำเร็จ: {0}</value></data>
+  <data name="Download_NotNow" xml:space="preserve"><value>ไม่ใช่ตอนนี้</value></data>
+  <data name="Download_Progress" xml:space="preserve"><value>{0} จาก {1} MB จาก {2}</value></data>
+  <data name="Download_Question" xml:space="preserve"><value>เกมใช้ภาษา {0} การอ่านข้อความต้องใช้โมเดลจดจำข้อความภาษา {0} ({1} MB, PaddleOCR) ดาวน์โหลดตอนนี้หรือไม่?
+
+หากไม่มี ระบบจะไม่จดจำข้อความของเกม แต่ยังแยกการ์ดและตัวเลือกจากรูปภาพได้</value></data>
+  <data name="Download_Retry" xml:space="preserve"><value>ลองอีกครั้ง</value></data>
+  <data name="Download_Title" xml:space="preserve"><value>การจดจำข้อความ</value></data>
+  <data name="Edit_AddDestination" xml:space="preserve"><value>เพิ่มในจุดหมายปลายทาง (D{0})</value></data>
+  <data name="Edit_RemoveDestination" xml:space="preserve"><value>เอาออกจากจุดหมายปลายทาง (D{0})</value></data>
+  <data name="Edit_VisibleRarity" xml:space="preserve"><value>ความหายากที่มองเห็น (ยังไม่เปิด)</value></data>
+  <data name="Hint_AtRiot" xml:space="preserve"><value> — เมื่อจลาจล ≈{0} สีรุ้ง · {1} เพอร์เฟค · {2} ตำนาน</value></data>
+  <data name="Hint_CancelThen" xml:space="preserve"><value>ยกเลิก → {0}</value></data>
+  <data name="Hint_Cell" xml:space="preserve"><value>ห้องขัง {0}</value></data>
+  <data name="Hint_CellDetail" xml:space="preserve"><value>ห้องขัง {0}: {1}</value></data>
+  <data name="Hint_Computing" xml:space="preserve"><value>, กำลังคำนวณ…</value></data>
+  <data name="Hint_ConsumeCell" xml:space="preserve"><value>เขมือบ: ห้องขัง {0}</value></data>
+  <data name="Hint_HuntCell" xml:space="preserve"><value>ออกล่า: ห้องขัง {0}</value></data>
+  <data name="Hint_Line" xml:space="preserve"><value>คำแนะนำ: {0}</value></data>
+  <data name="Hint_Playouts" xml:space="preserve"><value>  (จำลอง {0} ครั้ง{1})</value></data>
+  <data name="Hint_SewerRatwayCell" xml:space="preserve"><value>ทางระบายน้ำหนูมุด: ห้องขัง {0}</value></data>
+  <data name="Hint_Then" xml:space="preserve"><value> · จากนั้น {0}</value></data>
+  <data name="Hint_Tied" xml:space="preserve"><value> (เสมอ)</value></data>
+  <data name="Language_Choose" xml:space="preserve"><value>เลือกภาษาของเกม</value></data>
+  <data name="Language_Explanation" xml:space="preserve"><value>ภาษาของข้อความในเกม ไม่ใช่ของหน้าต่างนี้ คุณเปลี่ยนได้ภายหลังที่ การจดจำ: ภาษาของเกม</value></data>
+  <data name="Language_FoundMarked" xml:space="preserve"><value>ทำเครื่องหมายภาษาที่พบในการตั้งค่าของเกมแล้ว</value></data>
+  <data name="Language_NotNow" xml:space="preserve"><value>✕ ไม่ใช่ตอนนี้</value></data>
+  <data name="Language_RestartQuestion" xml:space="preserve"><value>แอปจะเริ่มใหม่เพื่อเปลี่ยนภาษา เริ่มใหม่ตอนนี้หรือไม่?</value></data>
+  <data name="Language_Title" xml:space="preserve"><value>Tartarus Solver: ภาษาของเกม</value></data>
+  <data name="Language_Unreadable" xml:space="preserve"><value>อ่านข้อความของเกมเป็น {0} ไม่ได้: คำแนะนำการเดินอาจหายไปหรือผิดพลาด</value></data>
+  <data name="Main_ApplyFields" xml:space="preserve"><value>ใช้ช่องข้อมูล</value></data>
+  <data name="Main_Auto" xml:space="preserve"><value>อัตโนมัติ</value></data>
+  <data name="Main_AutoAttach" xml:space="preserve"><value>เชื่อมต่อกับเกมโดยอัตโนมัติ</value></data>
+  <data name="Main_AutoCollect" xml:space="preserve"><value>เก็บอัตโนมัติ</value></data>
+  <data name="Main_AutoCollect_Tip" xml:space="preserve"><value>บันทึกเฟรมลงชุดข้อมูลทุกครั้งที่การอ่าน Sandbox เปลี่ยน (เมื่อสแกนอัตโนมัติ)</value></data>
+  <data name="Main_Capture" xml:space="preserve"><value>จับภาพ ▶</value></data>
+  <data name="Main_CheckUpdates" xml:space="preserve"><value>ตรวจหาการอัปเดต</value></data>
+  <data name="Main_CheckUpdates_Tip" xml:space="preserve"><value>ถาม GitHub หาเวอร์ชันใหม่ตอนเริ่มและทุก 6 ชั่วโมง</value></data>
+  <data name="Main_Choose" xml:space="preserve"><value>เลือก…</value></data>
+  <data name="Main_ChooseLog_Tip" xml:space="preserve"><value>เลือก UE_game.log ด้วยตนเอง: โฟลเดอร์เกม\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_DatasetFolder" xml:space="preserve"><value>โฟลเดอร์ชุดข้อมูล</value></data>
+  <data name="Main_Debug" xml:space="preserve"><value> (ดีบัก)</value></data>
+  <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>ห้องขังบนการ์ดจุดหมายปลายทาง จากซ้ายไปขวา: 9,11,12</value></data>
+  <data name="Main_DetectAutomatically" xml:space="preserve"><value>ตรวจหาอัตโนมัติ</value></data>
+  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>ใช้ภาษาจากไฟล์การตั้งค่าของเกม การเลือกภาษาจากรายการจะปิดตัวเลือกนี้</value></data>
+  <data name="Main_EditMode" xml:space="preserve"><value>โหมดแก้ไข</value></data>
+  <data name="Main_EditMode_Tip" xml:space="preserve"><value>ในโหมดแก้ไข ให้คลิกห้องขังบนโอเวอร์เลย์: เมนูรหัส ความหายาก และแฟล็ก การสแกนอัตโนมัติจะหยุดระหว่างแก้ไข</value></data>
+  <data name="Main_Every" xml:space="preserve"><value>, ทุก</value></data>
+  <data name="Main_Faster" xml:space="preserve"><value>เร็วขึ้น</value></data>
+  <data name="Main_FilesMissing" xml:space="preserve"><value>ไม่มีไฟล์ของโปรแกรมในโฟลเดอร์ (models/ocr) จึงอาจอ่านข้อความของเกมไม่ได้
+
+แตกไฟล์ทั้งหมดไปยังโฟลเดอร์ของตัวเอง แล้วเรียกใช้โปรแกรมจากที่นั่น ไม่ใช่จากในไฟล์บีบอัด</value></data>
+  <data name="Main_FindLog_Tip" xml:space="preserve"><value>ค้นหาบันทึกโดยอัตโนมัติ: ข้างเกมที่กำลังทำงาน ในคลัง Steam ในการตั้งค่าของตัวเปิดเกม</value></data>
+  <data name="Main_GameLanguage" xml:space="preserve"><value>ภาษาของเกม</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>ภาษาที่เกมใช้แสดงข้อความ เพื่อให้แอปอ่านได้ ไม่ใช่ภาษาของหน้าต่างนี้ ซึ่งอยู่ด้านล่าง</value></data>
+  <data name="Main_GameLog" xml:space="preserve"><value>บันทึกของเกม</value></data>
+  <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: โฟลเดอร์เกม\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_GameWindow" xml:space="preserve"><value>หน้าต่างเกม</value></data>
+  <data name="Main_HintQuality_Tip" xml:space="preserve"><value>จำนวนการจำลองต่อการเดิน: คำนวณนานขึ้น คำแนะนำดีขึ้น</value></data>
+  <data name="Main_Hints" xml:space="preserve"><value>คำแนะนำ</value></data>
+  <data name="Main_HintsOnly" xml:space="preserve"><value>คำแนะนำเท่านั้น</value></data>
+  <data name="Main_HintsOnly_Tip" xml:space="preserve"><value>โอเวอร์เลย์แสดงเฉพาะกรอบการเดินและบรรทัดคำแนะนำ: ไม่มีห้องขัง อุปกรณ์ลงทัณฑ์ หรือสีรุ้ง</value></data>
+  <data name="Main_InstrumentIds_Tip" xml:space="preserve"><value>id คั่นด้วยจุลภาค: ironbox,muzzle</value></data>
+  <data name="Main_InteractableRegions" xml:space="preserve"><value>พื้นที่โต้ตอบ</value></data>
+  <data name="Main_InteractableRegions_Tip" xml:space="preserve"><value>ตีกรอบทุกอย่างที่คลิกได้: ห้องขัง การ์ด ปุ่ม ช่องอุปกรณ์ลงทัณฑ์และสีรุ้ง การ์ดตัวเลือก</value></data>
+  <data name="Main_InterfaceLanguage" xml:space="preserve"><value>ภาษาของหน้าจอ</value></data>
+  <data name="Main_InterfaceLanguage_Tip" xml:space="preserve"><value>ภาษาของหน้าต่างนี้และโอเวอร์เลย์ อัตโนมัติ: ภาษาของ Windows</value></data>
+  <data name="Main_LabelsAndDataset" xml:space="preserve"><value>ป้ายกำกับและชุดข้อมูล</value></data>
+  <data name="Main_LastHint" xml:space="preserve"><value>คำแนะนำล่าสุด: {0} ms, จำลอง {1} ครั้ง</value></data>
+  <data name="Main_Log" xml:space="preserve"><value>บันทึก</value></data>
+  <data name="Main_LogChosenByHand" xml:space="preserve"><value> (เลือกด้วยตนเอง)</value></data>
+  <data name="Main_LogFoundAutomatically" xml:space="preserve"><value> (พบโดยอัตโนมัติ)</value></data>
+  <data name="Main_LogNotFound" xml:space="preserve"><value>ไม่พบ: ใช้การจดจำหน้าจอเท่านั้น</value></data>
+  <data name="Main_MoveHints" xml:space="preserve"><value>คำแนะนำการเดิน</value></data>
+  <data name="Main_NoValueNet" xml:space="preserve"><value> · ไม่มีเครือข่ายค่า</value></data>
+  <data name="Main_Overlay" xml:space="preserve"><value>โอเวอร์เลย์</value></data>
+  <data name="Main_PicksNet" xml:space="preserve"><value> · เครือข่ายตัวเลือก</value></data>
+  <data name="Main_PolicyNet" xml:space="preserve"><value> · เครือข่ายนโยบาย</value></data>
+  <data name="Main_Recognition" xml:space="preserve"><value>การจดจำ</value></data>
+  <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>รีเฟรชรายการหน้าต่าง</value></data>
+  <data name="Main_ReportBug" xml:space="preserve"><value>รายงานข้อผิดพลาด</value></data>
+  <data name="Main_ReportBug_Tip" xml:space="preserve"><value>ส่งภาพหน้าจอ บันทึกของแอป และบันทึกของรอบปัจจุบันพร้อมความคิดเห็นของคุณให้ผู้พัฒนา</value></data>
+  <data name="Main_ResetEdits" xml:space="preserve"><value>รีเซ็ตการแก้ไข</value></data>
+  <data name="Main_SaveFrame" xml:space="preserve"><value>บันทึกเฟรม</value></data>
+  <data name="Main_Scan" xml:space="preserve"><value>สแกน</value></data>
+  <data name="Main_ScanInterval_Tip" xml:space="preserve"><value>วินาทีระหว่างเฟรม 0: เฟรมถัดไปทันทีที่การอ่านและคำแนะนำของเฟรมก่อนเสร็จ</value></data>
+  <data name="Main_Stop" xml:space="preserve"><value>หยุด ■</value></data>
+  <data name="Main_Stronger" xml:space="preserve"><value>แรงขึ้น</value></data>
+  <data name="Main_Text" xml:space="preserve"><value>ข้อความ</value></data>
+  <data name="Main_Text_Tip" xml:space="preserve"><value>พื้นที่ OCR และบรรทัดที่อ่านได้ บนโอเวอร์เลย์</value></data>
+  <data name="Main_ValueNet" xml:space="preserve"><value> · เครือข่ายค่า</value></data>
+  <data name="Main_Version" xml:space="preserve"><value>เวอร์ชัน</value></data>
+  <data name="Main_WardenCell_Tip" xml:space="preserve"><value>ห้องขังของพัศดี, 1-16</value></data>
+  <data name="Name_Archenemy" xml:space="preserve"><value>คู่อาฆาต</value></data>
+  <data name="Name_AvengersCasket" xml:space="preserve"><value>กล่องผู้ล้างแค้น</value></data>
+  <data name="Name_BarbedWhip" xml:space="preserve"><value>แส้หนามเหล็ก</value></data>
+  <data name="Name_BehindCellDoors" xml:space="preserve"><value>หลังประตูคุก</value></data>
+  <data name="Name_BehindClosedDoors" xml:space="preserve"><value>กลโกงลับหลัง</value></data>
+  <data name="Name_Bestow" xml:space="preserve"><value>ประทานรางวัล</value></data>
+  <data name="Name_BloodStainedTrapBerserkLion" xml:space="preserve"><value>กับดักสัตว์เปื้อนเลือด: ราชสีห์</value></data>
+  <data name="Name_BrandOfOriginalSin" xml:space="preserve"><value>ตราประทับบาป</value></data>
+  <data name="Name_BrassHornOfStrife" xml:space="preserve"><value>แตรห้ำหั่น</value></data>
+  <data name="Name_BurningStake" xml:space="preserve"><value>เสาเพลิงมรณะ</value></data>
+  <data name="Name_CageFight" xml:space="preserve"><value>สังเวียนนักโทษ</value></data>
+  <data name="Name_Cancel" xml:space="preserve"><value>ยกเลิก</value></data>
+  <data name="Name_Cell" xml:space="preserve"><value>ห้องขัง</value></data>
+  <data name="Name_ChainConsume" xml:space="preserve"><value>เขมือบต่อเนื่อง</value></data>
+  <data name="Name_ChainReaction" xml:space="preserve"><value>ผลกระทบลูกโซ่</value></data>
+  <data name="Name_Chest" xml:space="preserve"><value>หีบ</value></data>
+  <data name="Name_Chromatic" xml:space="preserve"><value>สีรุ้ง</value></data>
+  <data name="Name_Consumable" xml:space="preserve"><value>เขมือบได้</value></data>
+  <data name="Name_ConsumableTarget" xml:space="preserve"><value>เป้าหมายที่จะเขมือบ</value></data>
+  <data name="Name_Consume" xml:space="preserve"><value>เขมือบ</value></data>
+  <data name="Name_CrimsonVintage" xml:space="preserve"><value>ไวน์โลหิตทมิฬ</value></data>
+  <data name="Name_CrowWhispers" xml:space="preserve"><value>อีกากระซิบ</value></data>
+  <data name="Name_CrowdedBeastcage" xml:space="preserve"><value>กรงเหล็กอสุรกาย</value></data>
+  <data name="Name_Day" xml:space="preserve"><value>วัน</value></data>
+  <data name="Name_Destination" xml:space="preserve"><value>จุดหมายปลายทาง</value></data>
+  <data name="Name_Destinations" xml:space="preserve"><value>จุดหมายปลายทาง</value></data>
+  <data name="Name_ElephantFootMaulMammoth" xml:space="preserve"><value>ค้อนเหล็กบาทาช้าง: ช้างยักษ์</value></data>
+  <data name="Name_Empty" xml:space="preserve"><value>ว่าง</value></data>
+  <data name="Name_End" xml:space="preserve"><value>จบ</value></data>
+  <data name="Name_ExecutionEfficiency" xml:space="preserve"><value>ประสิทธิภาพการลงทัณฑ์</value></data>
+  <data name="Name_ExecutionersBlacklist" xml:space="preserve"><value>บันทึกมรณะผู้ลงทัณฑ์</value></data>
+  <data name="Name_ExtraPortion" xml:space="preserve"><value>มื้อพิเศษ</value></data>
+  <data name="Name_FangedGuillotineAlphaWolf" xml:space="preserve"><value>กิโยตินเขี้ยวหมาป่า: หมาป่าทมิฬ</value></data>
+  <data name="Name_FelonsDogTag" xml:space="preserve"><value>ป้ายเหล็กนักโทษทัณฑ์</value></data>
+  <data name="Name_FerociousBeastsRavenousChains" xml:space="preserve"><value>โซ่ตรวนกระหายเลือดสัตว์ร้าย</value></data>
+  <data name="Name_FilthyClawsAlphaWolf" xml:space="preserve"><value>กรงเล็บเหล็กโสมม: หมาป่าทมิฬ</value></data>
+  <data name="Name_ForgedKey" xml:space="preserve"><value>กุญแจปลอม</value></data>
+  <data name="Name_GaolersExecutionAxe" xml:space="preserve"><value>ขวานประหารยักษ์ของผู้คุม</value></data>
+  <data name="Name_HangmansNoose" xml:space="preserve"><value>บ่วงเชือกประหาร</value></data>
+  <data name="Name_HighRiskConvict" xml:space="preserve"><value>นักโทษอุกฉกรรจ์</value></data>
+  <data name="Name_Hunt" xml:space="preserve"><value>ออกล่า</value></data>
+  <data name="Name_Inmate" xml:space="preserve"><value>นักโทษ</value></data>
+  <data name="Name_Inmates" xml:space="preserve"><value>นักโทษ</value></data>
+  <data name="Name_Instigate" xml:space="preserve"><value>ปลุกปั่น</value></data>
+  <data name="Name_InterrogationRoom" xml:space="preserve"><value>ห้องสอบสวน</value></data>
+  <data name="Name_IronCrownOfThePrisonKingBerserkLion" xml:space="preserve"><value>มงกุฎเหล็กราชันย์กรงขัง: ราชสีห์</value></data>
+  <data name="Name_IronLaw" xml:space="preserve"><value>กฎเหล็ก</value></data>
+  <data name="Name_IronLawTheme" xml:space="preserve"><value>ธีมกฎเหล็ก</value></data>
+  <data name="Name_IronPestle" xml:space="preserve"><value>ท่อนเหล็ก</value></data>
+  <data name="Name_IronTongsOfLustMammoth" xml:space="preserve"><value>คีมเหล็กตัณหา: ช้างยักษ์</value></data>
+  <data name="Name_KingOfTheCaged" xml:space="preserve"><value>ราชันสัตว์ร้ายต้องขัง</value></data>
+  <data name="Name_KinsCoinOfFate" xml:space="preserve"><value>เหรียญชะตากรรมคู่แฝด</value></data>
+  <data name="Name_Legendary" xml:space="preserve"><value>ตำนาน</value></data>
+  <data name="Name_Lion" xml:space="preserve"><value>สีห์คลั่ง</value></data>
+  <data name="Name_LockedCell" xml:space="preserve"><value>ห้องขังที่ยังไม่เปิด</value></data>
+  <data name="Name_LongChainedShackles" xml:space="preserve"><value>ตรวนโซ่อยาว</value></data>
+  <data name="Name_LostRingOfKeys" xml:space="preserve"><value>พวงกุญแจหลงเหลือ</value></data>
+  <data name="Name_MaddenedBeastsBarbedCollar" xml:space="preserve"><value>ปลอกคอหนามสัตว์คลั่ง</value></data>
+  <data name="Name_Magic" xml:space="preserve"><value>เวทมนตร์</value></data>
+  <data name="Name_MakeYourDecision" xml:space="preserve"><value>กรุณาทำการตัดสินใจ</value></data>
+  <data name="Name_Mammoth" xml:space="preserve"><value>ช้างยักษ์</value></data>
+  <data name="Name_NoTartarusSandboxOnScreen" xml:space="preserve"><value>ไม่มี Sandbox ของคุกทาลอสบนหน้าจอ</value></data>
+  <data name="Name_Normal" xml:space="preserve"><value>ทั่วไป</value></data>
+  <data name="Name_Objective" xml:space="preserve"><value>เป้าหมาย</value></data>
+  <data name="Name_Opened" xml:space="preserve"><value>เปิดแล้ว</value></data>
+  <data name="Name_OpenedEmpty" xml:space="preserve"><value>เปิดแล้ว ว่าง</value></data>
+  <data name="Name_Opulence" xml:space="preserve"><value>ความฟุ่มเฟือย</value></data>
+  <data name="Name_Prey" xml:space="preserve"><value>เหยื่อ</value></data>
+  <data name="Name_PrisonIncident" xml:space="preserve"><value>เหตุการณ์ในคุก</value></data>
+  <data name="Name_PrisonIncidents" xml:space="preserve"><value>เหตุการณ์ในคุก</value></data>
+  <data name="Name_PrisonWalk" xml:space="preserve"><value>เส้นทางลาดตระเวนคุก</value></data>
+  <data name="Name_RagingBeastsAgonizingMuzzle" xml:space="preserve"><value>หน้ากากเหล็กทรมานอสุรกาย</value></data>
+  <data name="Name_Rare" xml:space="preserve"><value>หายาก</value></data>
+  <data name="Name_Rat" xml:space="preserve"><value>หนูยักษ์</value></data>
+  <data name="Name_RatNest" xml:space="preserve"><value>รังหนู</value></data>
+  <data name="Name_RavenousAppetite" xml:space="preserve"><value>ความอยากอาหารพุ่งพล่าน</value></data>
+  <data name="Name_ReRoll" xml:space="preserve"><value>สุ่มใหม่</value></data>
+  <data name="Name_RemainingDays" xml:space="preserve"><value>จำนวนวันที่เหลือ</value></data>
+  <data name="Name_Replace" xml:space="preserve"><value>เปลี่ยน</value></data>
+  <data name="Name_Riot" xml:space="preserve"><value>จลาจล</value></data>
+  <data name="Name_RiotChest" xml:space="preserve"><value>หีบจลาจล</value></data>
+  <data name="Name_RunTheme" xml:space="preserve"><value>ธีมของรอบ</value></data>
+  <data name="Name_RustySaw" xml:space="preserve"><value>เลื่อยขึ้นสนิม</value></data>
+  <data name="Name_Sandbox" xml:space="preserve"><value>Sandbox</value></data>
+  <data name="Name_ScapegoatsGuillotine" xml:space="preserve"><value>กิโยตีนแพะรับบาป</value></data>
+  <data name="Name_ScratchMarks" xml:space="preserve"><value>รอยแผลข่วน</value></data>
+  <data name="Name_SearingBrandingIron" xml:space="preserve"><value>เหล็กแดงเดือด</value></data>
+  <data name="Name_SelectADestination" xml:space="preserve"><value>กรุณาเลือกจุดหมายปลายทาง</value></data>
+  <data name="Name_SelectAnInmateToConsume" xml:space="preserve"><value>กรุณาเลือกนักโทษที่จะเขมือบ</value></data>
+  <data name="Name_SeveredIronMaiden" xml:space="preserve"><value>โลงศพรูปคนผ่าซีก</value></data>
+  <data name="Name_SewerRatway" xml:space="preserve"><value>ทางระบายน้ำหนูมุด</value></data>
+  <data name="Name_SharedFortune" xml:space="preserve"><value>มีสุขร่วมเสพ</value></data>
+  <data name="Name_ShortChainedShackles" xml:space="preserve"><value>ตรวนโซ่สั้น</value></data>
+  <data name="Name_SkeweredRatHeadsColossalRat" xml:space="preserve"><value>เหล็กเสียบหัวหนู: อสูรหนู</value></data>
+  <data name="Name_SortingHook" xml:space="preserve"><value>ตะขอคัดแยก</value></data>
+  <data name="Name_SquirmingIronBoxColossalRat" xml:space="preserve"><value>กล่องเหล็กดิ้นพล่าน: อสูรหนู</value></data>
+  <data name="Name_SurvivalOfTheFittest" xml:space="preserve"><value>ผู้แข็งแกร่งกลืนกินผู้อ่อนแอ</value></data>
+  <data name="Name_Tartarus" xml:space="preserve"><value>ทาลอส</value></data>
+  <data name="Name_TartarusPrison" xml:space="preserve"><value>คุกทาลอส</value></data>
+  <data name="Name_TasteOfFreedom" xml:space="preserve"><value>รสชาติแห่งเสรีภาพ</value></data>
+  <data name="Name_ThreeHeadedThumbRing" xml:space="preserve"><value>แหวนอสูรสามเศียร</value></data>
+  <data name="Name_TortureInstrument" xml:space="preserve"><value>อุปกรณ์ลงทัณฑ์</value></data>
+  <data name="Name_TortureInstruments" xml:space="preserve"><value>อุปกรณ์ลงทัณฑ์</value></data>
+  <data name="Name_TransferOfConvicts" xml:space="preserve"><value>ย้ายตัวร่วมข้อหา</value></data>
+  <data name="Name_TreasureHunt" xml:space="preserve"><value>ล่า "สมบัติ"</value></data>
+  <data name="Name_Tusk" xml:space="preserve"><value>งาช้าง</value></data>
+  <data name="Name_Tyranny" xml:space="preserve"><value>อำนาจเบ็ดเสร็จ</value></data>
+  <data name="Name_Ultimate" xml:space="preserve"><value>เพอร์เฟค</value></data>
+  <data name="Name_Undercurrents" xml:space="preserve"><value>กระแสใต้น้ำพลุ่งพล่าน</value></data>
+  <data name="Name_UnknownTortureInstrument" xml:space="preserve"><value>อุปกรณ์ลงทัณฑ์ที่ไม่รู้จัก</value></data>
+  <data name="Name_Unopened" xml:space="preserve"><value>ยังไม่เปิด</value></data>
+  <data name="Name_UsurpationI" xml:space="preserve"><value>การก้าวล่วง · หนึ่ง</value></data>
+  <data name="Name_UsurpationII" xml:space="preserve"><value>การก้าวล่วง · สอง</value></data>
+  <data name="Name_UsurpationIII" xml:space="preserve"><value>การก้าวล่วง · สาม</value></data>
+  <data name="Name_UsurpationIV" xml:space="preserve"><value>การก้าวล่วง · สี่</value></data>
+  <data name="Name_Warden" xml:space="preserve"><value>พัศดี</value></data>
+  <data name="Name_WardensCache" xml:space="preserve"><value>สมบัติลับผู้คุม</value></data>
+  <data name="Name_WardensScales" xml:space="preserve"><value>ตาชั่งท่านพัศดี</value></data>
+  <data name="Name_WardensTreasure" xml:space="preserve"><value>ของสะสมของท่านพัศดี</value></data>
+  <data name="Name_Wolf" xml:space="preserve"><value>หมาป่าจ่าฝูง</value></data>
+  <data name="Overlay_Cap" xml:space="preserve"><value> (สูงสุด)</value></data>
+  <data name="Overlay_ChromaticCount" xml:space="preserve"><value>สีรุ้ง {0}/{1}</value></data>
+  <data name="Overlay_Covered" xml:space="preserve"><value>(ถูกบัง)</value></data>
+  <data name="Overlay_Objective" xml:space="preserve"><value>เป้าหมาย: {0}</value></data>
+  <data name="Overlay_QualityEstimate" xml:space="preserve"><value>~{0} ms ต่อการเดิน · ≈{1} สีรุ้งต่อรอบ (จำลอง {2} ครั้งต่อการเดิน)</value></data>
+  <data name="Overlay_RemainingDays" xml:space="preserve"><value>จำนวนวันที่เหลือ {0}</value></data>
+  <data name="Overlay_Remembered" xml:space="preserve"><value> (จำไว้แล้ว)</value></data>
+  <data name="Overlay_Rerolls" xml:space="preserve"><value>สุ่มใหม่: {0}</value></data>
+  <data name="Overlay_RunTheme" xml:space="preserve"><value>ธีมของรอบ: {0} (เก็บไว้สำหรับรอบนี้)</value></data>
+  <data name="Overlay_SandboxReadBackToPick" xml:space="preserve"><value>อ่าน Sandbox แล้ว กลับไปที่ตัวเลือก (ปุ่มรูปตา)</value></data>
+  <data name="Overlay_Title" xml:space="preserve"><value>โอเวอร์เลย์ Tartarus</value></data>
+  <data name="Overlay_WantedForData" xml:space="preserve"><value>ต้องการสำหรับข้อมูล: เครือข่ายยังไม่รู้จักเครื่องหมายเหล่านี้</value></data>
+  <data name="Report_AppError" xml:space="preserve"><value>แอปพบข้อผิดพลาด ก่อนหน้านั้นคุณกำลังทำอะไรอยู่?</value></data>
+  <data name="Report_OnlyTartarus" xml:space="preserve"><value>โปรดแจ้งเฉพาะปัญหาในโหมด "คุกทาลอส"</value></data>
+  <data name="Report_Privacy" xml:space="preserve"><value>การส่งรายงานนี้จะแชร์ภาพหน้าต่างเกม บันทึกของแอป และบรรทัดของรอบคุกทาลอสปัจจุบันจากบันทึกของเกมให้ผู้พัฒนา ไม่มีการส่งข้อมูลส่วนบุคคล</value></data>
+  <data name="Report_Send" xml:space="preserve"><value>ส่ง</value></data>
+  <data name="Report_Sending" xml:space="preserve"><value>กำลังส่ง…</value></data>
+  <data name="Report_WhatWentWrong" xml:space="preserve"><value>เกิดอะไรผิดพลาด?</value></data>
+  <data name="Stats_DialogTitle" xml:space="preserve"><value>Tartarus Solver: สถิติ</value></data>
+  <data name="Stats_NoRuns" xml:space="preserve"><value>ยังไม่มีรอบ: จะนับรอบเมื่อบันทึกของเกมเห็นตั้งแต่เริ่มจนถึงจลาจล</value></data>
+  <data name="Stats_Reset" xml:space="preserve"><value>รีเซ็ต</value></data>
+  <data name="Stats_ResetConfirm" xml:space="preserve"><value>ล้างสถิติ ({0} รอบ, สีรุ้ง {1}) และนับใหม่ตั้งแต่ตอนนี้หรือไม่?</value></data>
+  <data name="Stats_Reset_Tip" xml:space="preserve"><value>ล้างสถิติและนับใหม่ตั้งแต่ตอนนี้</value></data>
+  <data name="Stats_Since" xml:space="preserve"><value>ตั้งแต่ {0}; รอบที่บันทึกของเกมเห็นตั้งแต่เริ่มจนถึงจลาจล</value></data>
+  <data name="Stats_Summary" xml:space="preserve"><value>รอบ: {0} · สีรุ้ง: {1} ({2} ต่อรอบ)</value></data>
+  <data name="Stats_Title" xml:space="preserve"><value>สถิติ</value></data>
+  <data name="Status_CaptureFailed" xml:space="preserve"><value>ไม่ได้จับภาพ: Windows ไม่จับภาพหน้าต่างเกม กำลังลองใหม่ โปรดตั้งเกมเป็นโหมดหน้าต่างหรือไร้ขอบ</value></data>
+  <data name="Status_CaptureRefused" xml:space="preserve"><value>จับภาพไม่ได้: Windows ปฏิเสธการจับภาพหน้าต่างเกม การจับภาพหน้าจออาจถูกปิดหรือลบออกจาก Windows นี้ โปรดตรวจสอบบริการ CaptureService หากไม่มีบริการนี้ แอปจะมองไม่เห็นเกม</value></data>
+  <data name="Status_Capturing" xml:space="preserve"><value>กำลังจับภาพ: {0}</value></data>
+  <data name="Status_GameMinimized" xml:space="preserve"><value>ไม่ได้จับภาพ: หน้าต่างเกมถูกย่อ โปรดเปิดกลับมา</value></data>
+  <data name="Status_NoFramesYet" xml:space="preserve"><value>ยังไม่มีเฟรม (หน้าต่างถูกย่ออยู่หรือไม่?)</value></data>
+  <data name="Status_NoSandbox" xml:space="preserve"><value>ไม่มี Sandbox: {0} · {1} ms</value></data>
+  <data name="Status_NoSandboxFound" xml:space="preserve"><value>Tartarus: ไม่พบ Sandbox ({0} ms)</value></data>
+  <data name="Status_NoWindowCaptured" xml:space="preserve"><value>ไม่ได้จับภาพหน้าต่างใด</value></data>
+  <data name="Status_NotCapturing" xml:space="preserve"><value>ไม่ได้จับภาพ</value></data>
+  <data name="Status_PictureDoesntFill" xml:space="preserve"><value>ภาพของเกมไม่เต็มหน้าต่าง: ตั้งขนาดหน้าต่างในการตั้งค่าของเกม หรือกด Alt+Enter สองครั้ง</value></data>
+  <data name="Status_Presence" xml:space="preserve"><value> · การมีอยู่ {0}</value></data>
+  <data name="Status_Sandbox" xml:space="preserve"><value>Sandbox · {0} ms</value></data>
+  <data name="Status_ScreenCopyCovered" xml:space="preserve"><value>คำแนะนำกำลังรอ: มีหน้าต่างอื่นบังเกมอยู่ โปรดย้ายออก</value></data>
+  <data name="Status_ScreenCopyOn" xml:space="preserve"><value>คัดลอกหน้าจอ: Windows ไม่อนุญาตให้จับภาพหน้าต่าง โปรดให้เกมอยู่ด้านหน้าและไม่ถูกบัง</value></data>
+  <data name="Status_TimingsLower" xml:space="preserve"><value> (ocr {0}, ห้องขัง {1})</value></data>
+  <data name="Status_TimingsUpper" xml:space="preserve"><value> (OCR {0}, ห้องขัง {1})</value></data>
+  <data name="Status_WaitingForGame" xml:space="preserve"><value>ไม่ได้จับภาพ: กำลังรอหน้าต่างเกม (Torchlight: Infinite)…</value></data>
+  <data name="Status_WindowResized" xml:space="preserve"><value>Tartarus: ขนาดหน้าต่างเปลี่ยน ต้องสแกนใหม่</value></data>
+  <data name="Update_Confirm" xml:space="preserve"><value>ดาวน์โหลดเวอร์ชัน {0} ({1} MB) แทนที่เวอร์ชันนี้ และเริ่มแอปใหม่หรือไม่?</value></data>
+  <data name="Update_DialogTitle" xml:space="preserve"><value>Tartarus Solver: อัปเดต</value></data>
+  <data name="Update_Download_Tip" xml:space="preserve"><value>ดาวน์โหลด {0} ({1} MB) ติดตั้งและเริ่มใหม่</value></data>
+  <data name="Update_Downloading" xml:space="preserve"><value>กำลังดาวน์โหลด… {0}%</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>อัปเดตไม่สำเร็จ: {0}</value></data>
+  <data name="Update_Installing" xml:space="preserve"><value>กำลังติดตั้ง…</value></data>
+  <data name="Update_OpenPage_Tip" xml:space="preserve"><value>เปิดหน้ารุ่น</value></data>
+  <data name="Update_To" xml:space="preserve"><value>อัปเดตเป็น {0}</value></data>
+</root>

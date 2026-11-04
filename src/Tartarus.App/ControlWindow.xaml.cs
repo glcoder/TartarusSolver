@@ -10,6 +10,7 @@ using System.Windows.Threading;
 using Tartarus.Capture;
 using Tartarus.Vision;
 using Frame = Tartarus.Vision.Frame;
+using Tartarus.App.Localization;
 
 namespace Tartarus.App;
 
@@ -72,8 +73,10 @@ public partial class ControlWindow : Window
                     + $" ({hint.Result.Elapsed.TotalMilliseconds:0} ms)");
             _hint = hint;
             _hintShownAt = DateTime.Now;
-            HintStatus.Text = $"Last hint: {hint.Result.Elapsed.TotalMilliseconds:0} ms, {hint.Result.Playouts:N0} playouts"
-                + (_hints.Net != null ? " · value net" : " · no value net") + (_hints.Policy != null ? " · policy net" : "") + (_hints.Picks != null ? " · picks net" : "");
+            HintStatus.Text = Loc.F(Strings.Main_LastHint,
+                    hint.Result.Elapsed.TotalMilliseconds.ToString("0", CultureInfo.InvariantCulture),
+                    hint.Result.Playouts.ToString("N0", CultureInfo.InvariantCulture))
+                + (_hints.Net != null ? Strings.Main_ValueNet : Strings.Main_NoValueNet) + (_hints.Policy != null ? Strings.Main_PolicyNet : "") + (_hints.Picks != null ? Strings.Main_PicksNet : "");
             RefreshOverlay();
         });
         _dataset = new Dataset(settings.DatasetDir);
@@ -89,18 +92,18 @@ public partial class ControlWindow : Window
         else WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
         string Hk(string action) => settings.Hotkeys.TryGetValue(action, out var g) && !string.IsNullOrWhiteSpace(g) ? $" ({g})" : "";
-        ScanButton.Content = "Scan" + Hk("scan");
-        OverlayCheck.Content = "Overlay" + Hk("overlay");
-        EditCheck.Content = "Edit mode" + Hk("edit");
-        SaveButton.Content = "Save frame" + Hk("save");
-        AutoScanCheck.Content = "Auto" + Hk("auto") + ", every";
-        ReportButton.Content = "Report a bug" + Hk("report");
-        Title = $"Tartarus Solver {AppVersion.Number}" + (settings.Debug ? " (debug)" : "");
+        ScanButton.Content = Strings.Main_Scan + Hk("scan");
+        OverlayCheck.Content = Strings.Main_Overlay + Hk("overlay");
+        EditCheck.Content = Strings.Main_EditMode + Hk("edit");
+        SaveButton.Content = Strings.Main_SaveFrame + Hk("save");
+        AutoScanCheck.Content = Strings.Main_Auto + Hk("auto") + Strings.Main_Every;
+        ReportButton.Content = Strings.Main_ReportBug + Hk("report");
+        Title = $"Tartarus Solver {AppVersion.Number}" + (settings.Debug ? Strings.Main_Debug : "");
         // The player's window: the game window, scanning, the hints' quality, the game's log, the version
         // and bug reports.
         if (!settings.Debug)
             foreach (var panel in new FrameworkElement[] { ViewPanel, HintsCheck, HintsOnlyCheck, DebugPanel }) panel.Visibility = Visibility.Collapsed;
-        VersionText.Text = "Version " + AppVersion.Short;
+        VersionText.Text = Strings.Main_Version + " " + AppVersion.Short;
         VersionText.ToolTip = AppVersion.Full;
         Log("Version " + AppVersion.Short + (BugReports.Enabled ? "" : " · bug reports not set up"));
 
@@ -122,6 +125,15 @@ public partial class ControlWindow : Window
         GameLanguageAutoCheck.Checked += GameLanguageAuto_Changed;
         GameLanguageAutoCheck.Unchecked += GameLanguageAuto_Changed;
         GameLanguageCombo.SelectionChanged += GameLanguageCombo_SelectionChanged;
+        // The interface's own language, each by its own name; automatic is Windows's. The XAML's words are swapped when a
+        // window is built, so a change takes a restart.
+        UiLanguageCombo.Items.Add(new ComboBoxItem { Content = Strings.Common_Automatic, Tag = "auto" });
+        foreach (var code in Tartarus.Vision.Ocr.OcrPacks.GameLanguages)
+            UiLanguageCombo.Items.Add(new ComboBoxItem { Content = Tartarus.Vision.Ocr.OcrPacks.NativeName(code), Tag = code });
+        bool automatic = string.IsNullOrWhiteSpace(settings.UiLanguage) || settings.UiLanguage.Equals("auto", StringComparison.OrdinalIgnoreCase);
+        UiLanguageCombo.SelectedItem = UiLanguageCombo.Items.Cast<ComboBoxItem>().FirstOrDefault(i =>
+            automatic ? (string)i.Tag == "auto" : (string)i.Tag != "auto" && Loc.Resolve((string)i.Tag) == Loc.Resolve(settings.UiLanguage)) ?? UiLanguageCombo.Items[0];
+        UiLanguageCombo.SelectionChanged += UiLanguageCombo_SelectionChanged;
         _placeTimer.Tick += (_, _) => PlaceOverlay();
         _attachTimer.Tick += (_, _) => TryAutoAttach();
 
@@ -132,6 +144,8 @@ public partial class ControlWindow : Window
         UpdateDatasetStatus();
         SetupUpdates();
         ShowStats();
+        // Last: every line the XAML wrote, in the interface's language where the table has a word for it.
+        Loc.Apply(this);
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -312,8 +326,7 @@ public partial class ControlWindow : Window
         if (_warnedModelsGone) return;
         _warnedModelsGone = true;
         Log($"OCR models not found in {AppContext.BaseDirectory}");
-        Dispatcher.BeginInvoke(() => MessageBox.Show(this, "The program's files are missing from its folder (models/ocr), so the game's text may not be read.\n\n"
-            + "Unpack the whole archive into a folder of its own and run the program from there, not from inside the archive.",
+        Dispatcher.BeginInvoke(() => MessageBox.Show(this, Strings.Main_FilesMissing,
             "Tartarus Solver", MessageBoxButton.OK, MessageBoxImage.Warning), DispatcherPriority.ApplicationIdle);
     }
 
@@ -339,6 +352,21 @@ public partial class ControlWindow : Window
         CheckGameLanguage();
     }
 
+    /// <summary>The interface's language chosen: every window is built in it, so the app starts again, asked in that language.</summary>
+    private void UiLanguageCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (UiLanguageCombo.SelectedItem is not ComboBoxItem { Tag: string code } || code == _settings.UiLanguage) return;
+        _settings.UiLanguage = code;
+        _settings.Save();
+        if (Loc.Resolve(code) == Loc.Language) return;
+        if (MessageBox.Show(this, Loc.In(code, nameof(Strings.Language_RestartQuestion)), "Tartarus Solver",
+                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        // Once this one is down: the new one takes the hotkeys.
+        if (Environment.ProcessPath is { } exe)
+            Application.Current.Exit += (_, _) => System.Diagnostics.Process.Start(exe, Environment.GetCommandLineArgs().Skip(1));
+        Application.Current.Shutdown();
+    }
+
     private void GameLanguageCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_showingLanguage || (GameLanguageCombo.SelectedItem as ComboBoxItem)?.Tag is not string code) return;
@@ -358,8 +386,8 @@ public partial class ControlWindow : Window
     // The game's text doesn't read in the language taken, until a frame's does: the overlay says so.
     private bool _textUnread;
     // In every language of the game: which one the player reads is what isn't known.
-    private static readonly string LanguageAsk = "Tartarus Solver: Game language\n"
-        + string.Join("\n", Tartarus.Vision.Ocr.OcrPacks.GameLanguages.Select(Tartarus.Vision.Ocr.OcrPacks.ChooseLanguage));
+    private static readonly string LanguageAsk = Strings.Language_Title + "\n"
+        + string.Join("\n", Tartarus.Vision.Ocr.OcrPacks.GameLanguages.Select(code => Loc.In(code, nameof(Strings.Language_Choose))));
     // Languages the player was asked about this session: not asked again until the next start.
     private readonly HashSet<string> _askedLanguage = [];
     // No language chosen and asked this session: "Not now" asks again at the next start.
@@ -461,7 +489,6 @@ public partial class ControlWindow : Window
     private int _captureRefusals;
     private const int RefusalsForScreenCopy = 3;
     private bool _copyCovered;
-    private static string WindowsLanguage => Tartarus.Vision.Ocr.OcrPacks.FromCulture(System.Globalization.CultureInfo.CurrentUICulture.Name);
 
     // A capture that fails is tried again later and later, the failure said when it changes and at each tenth try (2026-11-03:
     // tried every 2 s for hours, 859 lines of the same failure in a log, and a Direct3D device left behind by each).
@@ -469,7 +496,6 @@ public partial class ControlWindow : Window
     private string? _captureFailure;
     private DateTime _captureNextTry;
     private static readonly TimeSpan CaptureRetryMax = TimeSpan.FromMinutes(1);
-    private const string CaptureFailedStatus = "Not capturing: Windows won't capture the game window, trying again. Set the game to windowed or borderless";
 
     private async void TryAutoAttach()
     {
@@ -479,7 +505,7 @@ public partial class ControlWindow : Window
         if (_capture != null || _startingCapture || _findingGame) return;
         if (AutoAttachCheck.IsChecked != true)
         {
-            CaptureStatus.Text = "Not capturing";
+            CaptureStatus.Text = Strings.Status_NotCapturing;
             return;
         }
         if (DateTime.Now < _captureNextTry) return;
@@ -496,9 +522,9 @@ public partial class ControlWindow : Window
         {
             // A new game window starts afresh, without the old one's pause.
             _captureFails = 0;
-            CaptureStatus.Text = "Not capturing: waiting for the game window (Torchlight: Infinite)…";
+            CaptureStatus.Text = Strings.Status_WaitingForGame;
         }
-        else if (Win32Windows.IsMinimized(game.Hwnd)) CaptureStatus.Text = "Not capturing: the game window is minimized, restore it";
+        else if (Win32Windows.IsMinimized(game.Hwnd)) CaptureStatus.Text = Strings.Status_GameMinimized;
         else StartCapture(game);
     }
 
@@ -525,9 +551,9 @@ public partial class ControlWindow : Window
             _capture = capture;
             (_captureFails, _captureFailure, _captureNextTry) = (0, null, default);
             _target = w;
-            CaptureButton.Content = "Stop ■";
+            CaptureButton.Content = Strings.Main_Stop;
             _copyCovered = false;
-            CaptureStatus.Text = byScreenCopy ? Tartarus.Vision.Ocr.OcrPacks.ScreenCopyOn(WindowsLanguage) : $"Capturing: {w}";
+            CaptureStatus.Text = byScreenCopy ? Strings.Status_ScreenCopyOn : Loc.F(Strings.Status_Capturing, w);
             Log($"Capturing window \"{w.Title}\" ({w.Process}){(byScreenCopy ? " by screen copy" : "")}, {Win32Windows.VisibleBounds(w.Hwnd)}");
             if (capture is ScreenCopyCapture copy) LeaveOutOfCopies(copy);
             // The log of the very install that's running, from its executable's path.
@@ -549,9 +575,10 @@ public partial class ControlWindow : Window
             _captureFailure = ex.Message;
             double wait = Math.Min(CaptureRetryMax.TotalSeconds, Math.Pow(2, Math.Min(_captureFails, 10)));
             _captureNextTry = DateTime.Now.AddSeconds(wait);
+            // 被 Windows 拒绝时用它自带的多语言提示（作者已备好简体中文），其余情况走我们的译文表。
             CaptureStatus.Text = WindowCapture.IsRefused(ex)
-                ? $"{Tartarus.Vision.Ocr.OcrPacks.CaptureRefused(Tartarus.Vision.Ocr.OcrPacks.FromCulture(System.Globalization.CultureInfo.CurrentUICulture.Name))} (0x{ex.HResult:X8})"
-                : CaptureFailedStatus;
+                ? $"{Strings.Status_CaptureRefused} (0x{ex.HResult:X8})"
+                : Strings.Status_CaptureFailed;
         }
         finally
         {
@@ -568,8 +595,8 @@ public partial class ControlWindow : Window
         if (_capture is { } old) Task.Run(old.Dispose);
         _capture = null;
         _target = null;
-        CaptureButton.Content = "Capture ▶";
-        CaptureStatus.Text = "Not capturing";
+        CaptureButton.Content = Strings.Main_Capture;
+        CaptureStatus.Text = Strings.Status_NotCapturing;
         if (hideOverlay && _overlay.IsVisible) _overlay.Hide();
     }
 
@@ -728,11 +755,11 @@ public partial class ControlWindow : Window
             ShowText = TextCheck.IsChecked == true,
             KeptInstruments = stale ? new HashSet<int>() : new HashSet<int>(_run.Kept),
             Hint = stale || !_settings.Hints ? null : _hint,
-            Status = stale ? "Tartarus: the window's size changed, a new scan is needed" : _status,
+            Status = stale ? Strings.Status_WindowResized : _status,
             // The game keeps the picture it drew before its window was resized by the edges: its layout is only
             // guessed (2026-10-30, a player's report: nothing read).
             Warning = _scan?.Notes?.Any(n => n.StartsWith(Vision.GamePicture.Note, StringComparison.Ordinal)) == true
-                ? "The game's picture doesn't fill its window: set the window size in the game's settings, or press Alt+Enter twice"
+                ? Strings.Status_PictureDoesntFill
                 : null,
             LanguageAsk = _textUnread && _scan is { Ok: true } ? LanguageAsk : null,
             EyeHint = !stale && _settings.Hints && _eyeHint,
@@ -747,7 +774,7 @@ public partial class ControlWindow : Window
     {
         if (_capture == null)
         {
-            if (manual) ScanStatus.Text = "Not capturing a window";
+            if (manual) ScanStatus.Text = Strings.Status_NoWindowCaptured;
             return false;
         }
         if (_scans.Busy || (_editMode && !manual)) return false;
@@ -779,11 +806,11 @@ public partial class ControlWindow : Window
         if (capture is ScreenCopyCapture { Covered: var covered } && covered != _copyCovered)
         {
             _copyCovered = covered;
-            CaptureStatus.Text = covered ? Tartarus.Vision.Ocr.OcrPacks.ScreenCopyCovered(WindowsLanguage) : Tartarus.Vision.Ocr.OcrPacks.ScreenCopyOn(WindowsLanguage);
+            CaptureStatus.Text = covered ? Strings.Status_ScreenCopyCovered : Strings.Status_ScreenCopyOn;
         }
         if (frame == null)
         {
-            if (manual) ScanStatus.Text = "No frames yet (is the window minimized?)";
+            if (manual) ScanStatus.Text = Strings.Status_NoFramesYet;
             return false;
         }
         ScanResult r;
@@ -861,13 +888,19 @@ public partial class ControlWindow : Window
         _sandbox = _scannedSandbox.Clone();
         _selected = -1;
         _savedSinceScan = false;
-        _status = r.Ok ? null : manual || _editMode ? $"Tartarus: no Sandbox found ({r.TotalMs:0} ms)" : null;
+        _status = r.Ok ? null : manual || _editMode
+            ? Loc.F(Strings.Status_NoSandboxFound, r.TotalMs.ToString("0", CultureInfo.InvariantCulture)) : null;
         RefreshOverlay();
         RefreshLabelsUi();
-        ScanStatus.Text = (r.Ok ? $"Sandbox · {r.TotalMs:0} ms" : $"No Sandbox: {r.Reason} · {r.TotalMs:0} ms")
-            + (r.Timings.TryGetValue("ocr", out var ocrMs) ? $" (OCR {ocrMs:0}, cells {r.Timings.GetValueOrDefault("cells"):0})" : "")
-            + (r.Timings.ContainsKey("presence") ? $" · presence {r.Loc?.Score:0.00}" : "")
-            + $" · {frame.Width}×{frame.Height} · {r.Source}";
+        ScanStatus.Text = (r.Ok
+                ? Loc.F(Strings.Status_Sandbox, r.TotalMs.ToString("0", CultureInfo.InvariantCulture))
+                : Loc.F(Strings.Status_NoSandbox, Loc.Name(r.Reason ?? ""), r.TotalMs.ToString("0", CultureInfo.InvariantCulture)))
+            + (r.Timings.TryGetValue("ocr", out var ocrMs)
+                ? Loc.F(Strings.Status_TimingsUpper, ocrMs.ToString("0", CultureInfo.InvariantCulture),
+                    r.Timings.GetValueOrDefault("cells").ToString("0", CultureInfo.InvariantCulture))
+                : "")
+            + (r.Timings.ContainsKey("presence") ? Loc.F(Strings.Status_Presence, (r.Loc?.Score ?? 0).ToString("0.00", CultureInfo.InvariantCulture)) : "")
+            + Loc.F(" · {0}×{1} · {2}", frame.Width, frame.Height, r.Source);
         string description = SandboxText.Describe(r);
         // What was read, without the scan's timing and presence score (they differ every scan).
         string reading = r.Ok ? SandboxText.Describe(_scannedSandbox) : description;
@@ -917,7 +950,10 @@ public partial class ControlWindow : Window
     private void ShowHintLevel()
     {
         var level = _hintLevels[Math.Clamp((int)HintSlider.Value, 0, _hintLevels.Count - 1)];
-        HintLevelText.Text = $"~{level.Milliseconds:0.#} ms per move · ≈{level.Chromatic:0.0} Chromatic per run ({level.Playouts:N0} playouts per move)";
+        HintLevelText.Text = Loc.F(Strings.Overlay_QualityEstimate,
+            level.Milliseconds.ToString("0.#", CultureInfo.InvariantCulture),
+            level.Chromatic.ToString("0.0", CultureInfo.InvariantCulture),
+            level.Playouts.ToString("N0", CultureInfo.InvariantCulture));
     }
 
     private void HintSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -1030,13 +1066,14 @@ public partial class ControlWindow : Window
     }
 
     private void ShowLogStatus() => LogStatus.Text =
-        (_gameLogPath ?? "not found: screen recognition only") + (_settings.GameLogPath != null ? " (chosen by hand)" : " (found automatically)");
+        (_gameLogPath ?? Strings.Main_LogNotFound)
+        + (_settings.GameLogPath != null ? Strings.Main_LogChosenByHand : Strings.Main_LogFoundAutomatically);
 
     private void PickLogButton_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "UE_game.log: game folder\\UE_game\\TorchLight\\Saved\\Logs",
+            Title = Strings.Main_GameLog_Tip,
             Filter = "Game log (UE_game.log)|UE_game.log|Logs (*.log)|*.log",
             InitialDirectory = _gameLogPath != null ? Path.GetDirectoryName(_gameLogPath) : null,
         };
@@ -1180,7 +1217,7 @@ public partial class ControlWindow : Window
                 // A run the log saw from its start: its Chromatic count, or the panel's when higher (a sound can go missing).
                 if (live is { FromStart: true }) _hintSandbox.Chromatic = Math.Max(_hintSandbox.Chromatic, live.ChromaticAtLeast);
                 // The Sandbox viewed from a pick is read now: back to the pick is the hint.
-                ShowEye(viewing, "the Sandbox is read, back to the pick (the eye button)");
+                ShowEye(viewing, Strings.Overlay_SandboxReadBackToPick);
                 if (viewing)
                 {
                     _hints.Clear();
@@ -1676,7 +1713,7 @@ public partial class ControlWindow : Window
         var cell = sandbox.Cells[idx];
         int n = idx + 1;
         var menu = new ContextMenu();
-        menu.Items.Add(new MenuItem { Header = $"Cell {n}: {SandboxText.CellShort(cell)}", IsEnabled = false });
+        menu.Items.Add(new MenuItem { Header = Loc.F(Strings.Hint_CellDetail, n, SandboxText.CellShort(cell)), IsEnabled = false });
         menu.Items.Add(new Separator());
 
         if (idx > 0)
@@ -1687,7 +1724,7 @@ public partial class ControlWindow : Window
             // An Inmate: its Code, then its rarity (Normal .. Ultimate: Chromatic leaves the Sandbox).
             foreach (var code in Codes.All)
             {
-                var sub = new MenuItem { Header = Codes.Name(code), IsChecked = cell.Kind == CellKind.Inmate && cell.Code == code };
+                var sub = new MenuItem { Header = Loc.Name(Codes.Name(code)), IsChecked = cell.Kind == CellKind.Inmate && cell.Code == code };
                 for (var rarity = Rarity.Normal; rarity <= Rarity.Ultimate; rarity++)
                 {
                     var r = rarity;
@@ -1708,7 +1745,7 @@ public partial class ControlWindow : Window
             menu.Items.Add(Item("Tusk (Iron Tongs of Lust: Mammoth)", cell.Tusk, () => cell.Tusk = !cell.Tusk));
             menu.Items.Add(Item("Prey (Hunt, Blood-Stained Trap)", cell.Prey, () => cell.Prey = !cell.Prey));
             menu.Items.Add(Item("Rat Nest (Squirming Iron Box)", cell.Nest, () => cell.Nest = !cell.Nest));
-            var visibleMenu = new MenuItem { Header = "Visible rarity (Unopened)", IsChecked = cell.VisibleRarity != null };
+            var visibleMenu = new MenuItem { Header = Strings.Edit_VisibleRarity, IsChecked = cell.VisibleRarity != null };
             visibleMenu.Items.Add(Item("none", cell.VisibleRarity == null, () => cell.VisibleRarity = null));
             for (var rarity = Rarity.Normal; rarity <= Rarity.Ultimate; rarity++)
             {
@@ -1736,7 +1773,7 @@ public partial class ControlWindow : Window
             sandbox.Warden = n;
             sandbox.SandboxEdited = true;
         }, cellEdit: false));
-        menu.Items.Add(Item(sandbox.Destinations.Contains(n) ? $"Remove from Destinations (D{sandbox.Destinations.IndexOf(n) + 1})" : $"Add to Destinations (D{sandbox.Destinations.Count + 1})", sandbox.Destinations.Contains(n), () =>
+        menu.Items.Add(Item(sandbox.Destinations.Contains(n) ? Loc.F(Strings.Edit_RemoveDestination, sandbox.Destinations.IndexOf(n) + 1) : Loc.F(Strings.Edit_AddDestination, sandbox.Destinations.Count + 1), sandbox.Destinations.Contains(n), () =>
         {
             if (!sandbox.Destinations.Remove(n)) sandbox.Destinations.Add(n);
             sandbox.Phase = sandbox.Destinations.Count > 0 ? Phases.Destination : Phases.Decision;
@@ -1751,7 +1788,7 @@ public partial class ControlWindow : Window
 
         MenuItem Item(string header, bool isChecked, Action apply, bool cellEdit = true)
         {
-            var mi = new MenuItem { Header = header, IsChecked = isChecked };
+            var mi = new MenuItem { Header = Loc.Name(header), IsChecked = isChecked };
             mi.Click += (_, _) =>
             {
                 apply();

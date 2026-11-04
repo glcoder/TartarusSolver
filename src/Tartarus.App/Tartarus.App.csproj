@@ -11,9 +11,21 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>TartarusSolver</AssemblyName>
     <RootNamespace>Tartarus.App</RootNamespace>
+    <NeutralLanguage>en</NeutralLanguage>
     <!-- Where bug reports go (BugReports.DefaultDsn): kept out of the source, passed at build time. -->
     <SentryDsn Condition="'$(SentryDsn)' == ''">$(TARTARUS_SENTRY_DSN)</SentryDsn>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- The interface's lines: Strings.resx in English, one Strings.<culture>.resx per language (a satellite assembly each). -->
+    <EmbeddedResource Update="Localization\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <Compile Update="Localization\Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
   <ItemGroup>
     <AssemblyMetadata Include="SentryDsn" Value="$(SentryDsn)" />
   </ItemGroup>

@@ -22,6 +22,8 @@ chests).
   Treasure.
 - **The game's rules:** all 31 Torture Instruments, the 17 Prison Incidents, the Objectives, the run themes (Tyranny,
   Opulence, Iron Law, Cage Fight), Rat Nests, Tusk and Prey marks, Scratch Marks.
+- **In your language:** the app's window and overlay in all the game's languages (the language of Windows by default, a list
+  to choose another). The game's own names come from the game, the rest is machine translated.
 - **The solver:** a determinized Monte Carlo search (what's hidden behind doors is drawn again for every playout:
   no peeking): the playouts' moves by a small policy network trained on the search's own choices, a small value
   network at their horizon.
@@ -158,6 +160,9 @@ are included only so the app can recognize the game's screens.
   opinion to check ours against (one of them, the mornings with one Destination card fewer, is ours too).
 
 No code from these projects is used here.
+
+- **[TartarusSolver-zh](https://github.com/xingkinglb/TartarusSolver-zh)** by xingkinglb: the Simplified Chinese localization,
+  whose way of it and Chinese lines started the interface's translations here (used by its author's leave).
 
 ## License
 

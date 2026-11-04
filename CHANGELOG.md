@@ -4,6 +4,13 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.7.43 — 2026-11-04
+
+- The app's window and overlay in all the game's languages, the language of Windows by default, with a list to choose another
+  (Interface language, above the update check). The game's own names are the game's; the rest is machine translated: corrections welcome.
+  The way of it and the Simplified Chinese come from the localization by xingkinglb
+  (https://github.com/xingkinglb/TartarusSolver-zh), thank you.
+
 ## 0.7.42 — 2026-11-04
 
 - Where Windows won't capture a window (older than Windows 10 1903, or its capture service off or removed), the game is read by a

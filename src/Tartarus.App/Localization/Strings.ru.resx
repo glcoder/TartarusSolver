@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Common_Automatic" xml:space="preserve"><value>Автоматически</value></data>
+  <data name="Download_Connecting" xml:space="preserve"><value>Подключение к {0}…</value></data>
+  <data name="Download_Download" xml:space="preserve"><value>Скачать</value></data>
+  <data name="Download_Failed" xml:space="preserve"><value>Загрузка не удалась: {0}</value></data>
+  <data name="Download_NotNow" xml:space="preserve"><value>Не сейчас</value></data>
+  <data name="Download_Progress" xml:space="preserve"><value>{0} из {1} МБ с {2}</value></data>
+  <data name="Download_Question" xml:space="preserve"><value>Игра на языке: {0}. Для чтения её текста нужна модель распознавания этого языка ({1} МБ, PaddleOCR). Скачать сейчас?
+
+Без неё текст игры не распознаётся; карточки и выборы всё равно различаются по картинкам.</value></data>
+  <data name="Download_Retry" xml:space="preserve"><value>Повторить</value></data>
+  <data name="Download_Title" xml:space="preserve"><value>Распознавание текста</value></data>
+  <data name="Edit_AddDestination" xml:space="preserve"><value>Добавить в пункты назначения (D{0})</value></data>
+  <data name="Edit_RemoveDestination" xml:space="preserve"><value>Убрать из пунктов назначения (D{0})</value></data>
+  <data name="Edit_VisibleRarity" xml:space="preserve"><value>Видимая редкость (неоткрытая)</value></data>
+  <data name="Hint_AtRiot" xml:space="preserve"><value> — к бунту ≈{0} призматических · {1} ULT · {2} легендарных</value></data>
+  <data name="Hint_CancelThen" xml:space="preserve"><value>Отмена → {0}</value></data>
+  <data name="Hint_Cell" xml:space="preserve"><value>Камера {0}</value></data>
+  <data name="Hint_CellDetail" xml:space="preserve"><value>Камера {0}: {1}</value></data>
+  <data name="Hint_Computing" xml:space="preserve"><value>, считаю…</value></data>
+  <data name="Hint_ConsumeCell" xml:space="preserve"><value>Пожирание: камера {0}</value></data>
+  <data name="Hint_HuntCell" xml:space="preserve"><value>Выслеживание: камера {0}</value></data>
+  <data name="Hint_Line" xml:space="preserve"><value>Подсказка: {0}</value></data>
+  <data name="Hint_Playouts" xml:space="preserve"><value>  (симуляций: {0}{1})</value></data>
+  <data name="Hint_SewerRatwayCell" xml:space="preserve"><value>Крысиный ход в стоках: камера {0}</value></data>
+  <data name="Hint_Then" xml:space="preserve"><value> · затем {0}</value></data>
+  <data name="Hint_Tied" xml:space="preserve"><value> (вровень)</value></data>
+  <data name="Language_Choose" xml:space="preserve"><value>Выберите язык игры</value></data>
+  <data name="Language_Explanation" xml:space="preserve"><value>Язык текста игры, а не этого окна. Позже его можно изменить в разделе «Распознавание»: «Язык игры».</value></data>
+  <data name="Language_FoundMarked" xml:space="preserve"><value>Отмечен язык, найденный в настройках игры.</value></data>
+  <data name="Language_NotNow" xml:space="preserve"><value>✕ Не сейчас</value></data>
+  <data name="Language_RestartQuestion" xml:space="preserve"><value>Для смены языка приложение перезапустится. Перезапустить сейчас?</value></data>
+  <data name="Language_Title" xml:space="preserve"><value>Tartarus Solver: язык игры</value></data>
+  <data name="Language_Unreadable" xml:space="preserve"><value>Текст игры не читается как {0}: подсказки ходов могут отсутствовать или быть неверными.</value></data>
+  <data name="Main_ApplyFields" xml:space="preserve"><value>Применить поля</value></data>
+  <data name="Main_Auto" xml:space="preserve"><value>Авто</value></data>
+  <data name="Main_AutoAttach" xml:space="preserve"><value>Подключаться к игре автоматически</value></data>
+  <data name="Main_AutoCollect" xml:space="preserve"><value>Автосбор</value></data>
+  <data name="Main_AutoCollect_Tip" xml:space="preserve"><value>Сохранять кадр в датасет при каждом изменении прочитанной Песочницы (при автоскане)</value></data>
+  <data name="Main_Capture" xml:space="preserve"><value>Захват ▶</value></data>
+  <data name="Main_CheckUpdates" xml:space="preserve"><value>Проверять обновления</value></data>
+  <data name="Main_CheckUpdates_Tip" xml:space="preserve"><value>Спрашивать у GitHub о новой версии при запуске и каждые 6 часов</value></data>
+  <data name="Main_Choose" xml:space="preserve"><value>Выбрать…</value></data>
+  <data name="Main_ChooseLog_Tip" xml:space="preserve"><value>Указать UE_game.log вручную: папка игры\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_DatasetFolder" xml:space="preserve"><value>Папка датасета</value></data>
+  <data name="Main_Debug" xml:space="preserve"><value> (отладка)</value></data>
+  <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>Камеры на карточках пунктов назначения, слева направо: 9,11,12</value></data>
+  <data name="Main_DetectAutomatically" xml:space="preserve"><value>Определять автоматически</value></data>
+  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>Брать язык из файла настроек игры; выбор языка в списке отключает это</value></data>
+  <data name="Main_EditMode" xml:space="preserve"><value>Режим правки</value></data>
+  <data name="Main_EditMode_Tip" xml:space="preserve"><value>В режиме правки нажмите на камеру на оверлее: меню кода, редкости и флагов. Автоскан на это время останавливается.</value></data>
+  <data name="Main_Every" xml:space="preserve"><value>, каждые</value></data>
+  <data name="Main_Faster" xml:space="preserve"><value>Быстрее</value></data>
+  <data name="Main_FilesMissing" xml:space="preserve"><value>В папке программы нет её файлов (models/ocr), поэтому текст игры может не читаться.
+
+Распакуйте весь архив в отдельную папку и запускайте программу оттуда, а не из архива.</value></data>
+  <data name="Main_FindLog_Tip" xml:space="preserve"><value>Найти лог автоматически: рядом с запущенной игрой, в библиотеках Steam, в настройках лаунчера</value></data>
+  <data name="Main_GameLanguage" xml:space="preserve"><value>Язык игры</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>Язык, на котором игра показывает текст: он нужен приложению, чтобы читать его. Это не язык этого окна: он выбирается ниже.</value></data>
+  <data name="Main_GameLog" xml:space="preserve"><value>Лог игры</value></data>
+  <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: папка игры\UE_game\TorchLight\Saved\Logs</value></data>
+  <data name="Main_GameWindow" xml:space="preserve"><value>Окно игры</value></data>
+  <data name="Main_HintQuality_Tip" xml:space="preserve"><value>Симуляций на ход: дольше считает, сильнее подсказка</value></data>
+  <data name="Main_Hints" xml:space="preserve"><value>Подсказки</value></data>
+  <data name="Main_HintsOnly" xml:space="preserve"><value>Только подсказки</value></data>
+  <data name="Main_HintsOnly_Tip" xml:space="preserve"><value>На оверлее только рамки ходов и строка подсказки: без камер, орудий пыток и призматических</value></data>
+  <data name="Main_InstrumentIds_Tip" xml:space="preserve"><value>id через запятую: ironbox,muzzle</value></data>
+  <data name="Main_InteractableRegions" xml:space="preserve"><value>Активные области</value></data>
+  <data name="Main_InteractableRegions_Tip" xml:space="preserve"><value>Обводить всё, что можно нажать: камеры, карточки, кнопки, ячейки орудий пыток и призматических, карточки выбора</value></data>
+  <data name="Main_InterfaceLanguage" xml:space="preserve"><value>Язык интерфейса</value></data>
+  <data name="Main_InterfaceLanguage_Tip" xml:space="preserve"><value>Язык этого окна и оверлея. Автоматически: язык Windows.</value></data>
+  <data name="Main_LabelsAndDataset" xml:space="preserve"><value>Разметка и датасет</value></data>
+  <data name="Main_LastHint" xml:space="preserve"><value>Последняя подсказка: {0} мс, симуляций: {1}</value></data>
+  <data name="Main_Log" xml:space="preserve"><value>Лог</value></data>
+  <data name="Main_LogChosenByHand" xml:space="preserve"><value> (выбран вручную)</value></data>
+  <data name="Main_LogFoundAutomatically" xml:space="preserve"><value> (найден автоматически)</value></data>
+  <data name="Main_LogNotFound" xml:space="preserve"><value>не найден: только распознавание экрана</value></data>
+  <data name="Main_MoveHints" xml:space="preserve"><value>Подсказки ходов</value></data>
+  <data name="Main_NoValueNet" xml:space="preserve"><value> · без сети оценки</value></data>
+  <data name="Main_Overlay" xml:space="preserve"><value>Оверлей</value></data>
+  <data name="Main_PicksNet" xml:space="preserve"><value> · сеть выбора</value></data>
+  <data name="Main_PolicyNet" xml:space="preserve"><value> · сеть политики</value></data>
+  <data name="Main_Recognition" xml:space="preserve"><value>Распознавание</value></data>
+  <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>Обновить список окон</value></data>
+  <data name="Main_ReportBug" xml:space="preserve"><value>Сообщить об ошибке</value></data>
+  <data name="Main_ReportBug_Tip" xml:space="preserve"><value>Отправить разработчику снимок экрана, лог приложения и лог текущего забега с вашим комментарием</value></data>
+  <data name="Main_ResetEdits" xml:space="preserve"><value>Сбросить правки</value></data>
+  <data name="Main_SaveFrame" xml:space="preserve"><value>Сохранить кадр</value></data>
+  <data name="Main_Scan" xml:space="preserve"><value>Сканировать</value></data>
+  <data name="Main_ScanInterval_Tip" xml:space="preserve"><value>Секунд от кадра до кадра; 0: следующий кадр сразу, как готовы чтение и подсказка</value></data>
+  <data name="Main_Stop" xml:space="preserve"><value>Стоп ■</value></data>
+  <data name="Main_Stronger" xml:space="preserve"><value>Сильнее</value></data>
+  <data name="Main_Text" xml:space="preserve"><value>Текст</value></data>
+  <data name="Main_Text_Tip" xml:space="preserve"><value>Области OCR и прочитанные строки на оверлее</value></data>
+  <data name="Main_ValueNet" xml:space="preserve"><value> · сеть оценки</value></data>
+  <data name="Main_Version" xml:space="preserve"><value>Версия</value></data>
+  <data name="Main_WardenCell_Tip" xml:space="preserve"><value>Камера начальника тюрьмы, 1-16</value></data>
+  <data name="Name_Archenemy" xml:space="preserve"><value>Заклятый враг</value></data>
+  <data name="Name_AvengersCasket" xml:space="preserve"><value>Железная дева мстителя</value></data>
+  <data name="Name_BarbedWhip" xml:space="preserve"><value>Шипастая железная плеть</value></data>
+  <data name="Name_BehindCellDoors" xml:space="preserve"><value>За дверью камеры</value></data>
+  <data name="Name_BehindClosedDoors" xml:space="preserve"><value>Закулисные махинации</value></data>
+  <data name="Name_Bestow" xml:space="preserve"><value>Наградить</value></data>
+  <data name="Name_BloodStainedTrapBerserkLion" xml:space="preserve"><value>Окровавленный капкан: Яростный лев</value></data>
+  <data name="Name_BrandOfOriginalSin" xml:space="preserve"><value>Клеймо первородного греха</value></data>
+  <data name="Name_BrassHornOfStrife" xml:space="preserve"><value>Медный боевой рог</value></data>
+  <data name="Name_BurningStake" xml:space="preserve"><value>Столб для сожжения</value></data>
+  <data name="Name_CageFight" xml:space="preserve"><value>Схватка узников</value></data>
+  <data name="Name_Cancel" xml:space="preserve"><value>Отмена</value></data>
+  <data name="Name_Cell" xml:space="preserve"><value>Камера</value></data>
+  <data name="Name_ChainConsume" xml:space="preserve"><value>Цепное пожирание</value></data>
+  <data name="Name_ChainReaction" xml:space="preserve"><value>Цепная реакция</value></data>
+  <data name="Name_Chest" xml:space="preserve"><value>Сундук</value></data>
+  <data name="Name_Chromatic" xml:space="preserve"><value>Призматический</value></data>
+  <data name="Name_Consumable" xml:space="preserve"><value>Можно сожрать</value></data>
+  <data name="Name_ConsumableTarget" xml:space="preserve"><value>Цель для пожирания</value></data>
+  <data name="Name_Consume" xml:space="preserve"><value>Пожирание</value></data>
+  <data name="Name_CrimsonVintage" xml:space="preserve"><value>Багряное вино</value></data>
+  <data name="Name_CrowWhispers" xml:space="preserve"><value>Шёпот ворона</value></data>
+  <data name="Name_CrowdedBeastcage" xml:space="preserve"><value>Переполненная клетка зверей</value></data>
+  <data name="Name_Day" xml:space="preserve"><value>День</value></data>
+  <data name="Name_Destination" xml:space="preserve"><value>Пункт назначения</value></data>
+  <data name="Name_Destinations" xml:space="preserve"><value>Пункты назначения</value></data>
+  <data name="Name_ElephantFootMaulMammoth" xml:space="preserve"><value>Молот Слоновья нога: Слон</value></data>
+  <data name="Name_Empty" xml:space="preserve"><value>Пусто</value></data>
+  <data name="Name_End" xml:space="preserve"><value>Завершить</value></data>
+  <data name="Name_ExecutionEfficiency" xml:space="preserve"><value>Эффективность казни</value></data>
+  <data name="Name_ExecutionersBlacklist" xml:space="preserve"><value>Чёрный список экзекутора</value></data>
+  <data name="Name_ExtraPortion" xml:space="preserve"><value>Добавка</value></data>
+  <data name="Name_FangedGuillotineAlphaWolf" xml:space="preserve"><value>Гильотина с волчьими клыками: Вожак</value></data>
+  <data name="Name_FelonsDogTag" xml:space="preserve"><value>Жетон каторжника</value></data>
+  <data name="Name_FerociousBeastsRavenousChains" xml:space="preserve"><value>Голодная удушающая цепь лютого зверя</value></data>
+  <data name="Name_FilthyClawsAlphaWolf" xml:space="preserve"><value>Грязный железный коготь: Вожак</value></data>
+  <data name="Name_ForgedKey" xml:space="preserve"><value>Поддельный ключ</value></data>
+  <data name="Name_GaolersExecutionAxe" xml:space="preserve"><value>Палаческая секира надзирателя</value></data>
+  <data name="Name_HangmansNoose" xml:space="preserve"><value>Висельная петля</value></data>
+  <data name="Name_HighRiskConvict" xml:space="preserve"><value>Каторжник</value></data>
+  <data name="Name_Hunt" xml:space="preserve"><value>Выслеживание</value></data>
+  <data name="Name_Inmate" xml:space="preserve"><value>Узник</value></data>
+  <data name="Name_Inmates" xml:space="preserve"><value>Узники</value></data>
+  <data name="Name_Instigate" xml:space="preserve"><value>Подстрекнуть</value></data>
+  <data name="Name_InterrogationRoom" xml:space="preserve"><value>Допросная</value></data>
+  <data name="Name_IronCrownOfThePrisonKingBerserkLion" xml:space="preserve"><value>Железная корона короля тюрьмы: Яростный лев</value></data>
+  <data name="Name_IronLaw" xml:space="preserve"><value>Железный закон</value></data>
+  <data name="Name_IronLawTheme" xml:space="preserve"><value>Тема «Железный закон»</value></data>
+  <data name="Name_IronPestle" xml:space="preserve"><value>Железный пест</value></data>
+  <data name="Name_IronTongsOfLustMammoth" xml:space="preserve"><value>Клещи порока: Слон</value></data>
+  <data name="Name_KingOfTheCaged" xml:space="preserve"><value>Загнанный зверь-царь</value></data>
+  <data name="Name_KinsCoinOfFate" xml:space="preserve"><value>Монета участи братьев</value></data>
+  <data name="Name_Legendary" xml:space="preserve"><value>Легендарный</value></data>
+  <data name="Name_Lion" xml:space="preserve"><value>Яростный лев</value></data>
+  <data name="Name_LockedCell" xml:space="preserve"><value>Неоткрытая камера</value></data>
+  <data name="Name_LongChainedShackles" xml:space="preserve"><value>Кандалы с длинной цепью</value></data>
+  <data name="Name_LostRingOfKeys" xml:space="preserve"><value>Потерянная связка ключей</value></data>
+  <data name="Name_MaddenedBeastsBarbedCollar" xml:space="preserve"><value>Шипастый ошейник безумного зверя</value></data>
+  <data name="Name_Magic" xml:space="preserve"><value>Магический</value></data>
+  <data name="Name_MakeYourDecision" xml:space="preserve"><value>Примите решение</value></data>
+  <data name="Name_Mammoth" xml:space="preserve"><value>Слон</value></data>
+  <data name="Name_NoTartarusSandboxOnScreen" xml:space="preserve"><value>На экране нет Песочницы Тюрьмы Талоса.</value></data>
+  <data name="Name_Normal" xml:space="preserve"><value>Обычный</value></data>
+  <data name="Name_Objective" xml:space="preserve"><value>Цель</value></data>
+  <data name="Name_Opened" xml:space="preserve"><value>Открытая</value></data>
+  <data name="Name_OpenedEmpty" xml:space="preserve"><value>Открытая, пустая</value></data>
+  <data name="Name_Opulence" xml:space="preserve"><value>Расточительность</value></data>
+  <data name="Name_Prey" xml:space="preserve"><value>Добыча</value></data>
+  <data name="Name_PrisonIncident" xml:space="preserve"><value>Тюремное событие</value></data>
+  <data name="Name_PrisonIncidents" xml:space="preserve"><value>Тюремное событие</value></data>
+  <data name="Name_PrisonWalk" xml:space="preserve"><value>Путь обхода тюрьмы</value></data>
+  <data name="Name_RagingBeastsAgonizingMuzzle" xml:space="preserve"><value>Пыточный намордник бешеного зверя</value></data>
+  <data name="Name_Rare" xml:space="preserve"><value>Редкий</value></data>
+  <data name="Name_Rat" xml:space="preserve"><value>Огромная крыса</value></data>
+  <data name="Name_RatNest" xml:space="preserve"><value>Крысиное гнездо</value></data>
+  <data name="Name_RavenousAppetite" xml:space="preserve"><value>Зверский аппетит</value></data>
+  <data name="Name_ReRoll" xml:space="preserve"><value>Обновить случ.</value></data>
+  <data name="Name_RemainingDays" xml:space="preserve"><value>Осталось дней</value></data>
+  <data name="Name_Replace" xml:space="preserve"><value>Заменить</value></data>
+  <data name="Name_Riot" xml:space="preserve"><value>Бунт</value></data>
+  <data name="Name_RiotChest" xml:space="preserve"><value>Сундук бунта</value></data>
+  <data name="Name_RunTheme" xml:space="preserve"><value>Тема забега</value></data>
+  <data name="Name_RustySaw" xml:space="preserve"><value>Ржавая пила</value></data>
+  <data name="Name_Sandbox" xml:space="preserve"><value>Песочница</value></data>
+  <data name="Name_ScapegoatsGuillotine" xml:space="preserve"><value>Гильотина козла отпущения</value></data>
+  <data name="Name_ScratchMarks" xml:space="preserve"><value>Царапины</value></data>
+  <data name="Name_SearingBrandingIron" xml:space="preserve"><value>Раскалённое клеймо</value></data>
+  <data name="Name_SelectADestination" xml:space="preserve"><value>Выберите пункт назначения</value></data>
+  <data name="Name_SelectAnInmateToConsume" xml:space="preserve"><value>Выберите узника для пожирания</value></data>
+  <data name="Name_SeveredIronMaiden" xml:space="preserve"><value>Рассечённый саркофаг</value></data>
+  <data name="Name_SewerRatway" xml:space="preserve"><value>Крысиный ход в стоках</value></data>
+  <data name="Name_SharedFortune" xml:space="preserve"><value>Делим удачу</value></data>
+  <data name="Name_ShortChainedShackles" xml:space="preserve"><value>Кандалы с короткой цепью</value></data>
+  <data name="Name_SkeweredRatHeadsColossalRat" xml:space="preserve"><value>Шампур крысиных голов: Огромная крыса</value></data>
+  <data name="Name_SortingHook" xml:space="preserve"><value>Крюк отбора</value></data>
+  <data name="Name_SquirmingIronBoxColossalRat" xml:space="preserve"><value>Кишащий железный ящик: Огромная крыса</value></data>
+  <data name="Name_SurvivalOfTheFittest" xml:space="preserve"><value>Закон джунглей</value></data>
+  <data name="Name_Tartarus" xml:space="preserve"><value>Талос</value></data>
+  <data name="Name_TartarusPrison" xml:space="preserve"><value>Тюрьма Талоса</value></data>
+  <data name="Name_TasteOfFreedom" xml:space="preserve"><value>Вкус свободы</value></data>
+  <data name="Name_ThreeHeadedThumbRing" xml:space="preserve"><value>Трёхглавое кольцо</value></data>
+  <data name="Name_TortureInstrument" xml:space="preserve"><value>Орудия пыток</value></data>
+  <data name="Name_TortureInstruments" xml:space="preserve"><value>Орудия пыток</value></data>
+  <data name="Name_TransferOfConvicts" xml:space="preserve"><value>Этапирование сообщников</value></data>
+  <data name="Name_TreasureHunt" xml:space="preserve"><value>Поиск «сокровищ»</value></data>
+  <data name="Name_Tusk" xml:space="preserve"><value>Бивень</value></data>
+  <data name="Name_Tyranny" xml:space="preserve"><value>Злоупотребление властью</value></data>
+  <data name="Name_Ultimate" xml:space="preserve"><value>ULT</value></data>
+  <data name="Name_Undercurrents" xml:space="preserve"><value>Скрытые волнения</value></data>
+  <data name="Name_UnknownTortureInstrument" xml:space="preserve"><value>Неизвестное орудие пыток</value></data>
+  <data name="Name_Unopened" xml:space="preserve"><value>Неоткрытая</value></data>
+  <data name="Name_UsurpationI" xml:space="preserve"><value>Узурпация · I</value></data>
+  <data name="Name_UsurpationII" xml:space="preserve"><value>Узурпация · II</value></data>
+  <data name="Name_UsurpationIII" xml:space="preserve"><value>Узурпация · III</value></data>
+  <data name="Name_UsurpationIV" xml:space="preserve"><value>Узурпация · IV</value></data>
+  <data name="Name_Warden" xml:space="preserve"><value>Начальник тюрьмы</value></data>
+  <data name="Name_WardensCache" xml:space="preserve"><value>Тайник начальника тюрьмы</value></data>
+  <data name="Name_WardensScales" xml:space="preserve"><value>Весы тюремщика</value></data>
+  <data name="Name_WardensTreasure" xml:space="preserve"><value>Сокровище начальника тюрьмы</value></data>
+  <data name="Name_Wolf" xml:space="preserve"><value>Вожак</value></data>
+  <data name="Overlay_Cap" xml:space="preserve"><value> (предел)</value></data>
+  <data name="Overlay_ChromaticCount" xml:space="preserve"><value>Призматические {0}/{1}</value></data>
+  <data name="Overlay_Covered" xml:space="preserve"><value>(закрыто)</value></data>
+  <data name="Overlay_Objective" xml:space="preserve"><value>Цель: {0}</value></data>
+  <data name="Overlay_QualityEstimate" xml:space="preserve"><value>~{0} мс на ход · ≈{1} призматических за забег (симуляций на ход: {2})</value></data>
+  <data name="Overlay_RemainingDays" xml:space="preserve"><value>Осталось дней: {0}</value></data>
+  <data name="Overlay_Remembered" xml:space="preserve"><value> (запомнено)</value></data>
+  <data name="Overlay_Rerolls" xml:space="preserve"><value>Обновить случ.: {0}</value></data>
+  <data name="Overlay_RunTheme" xml:space="preserve"><value>Тема забега: {0} (сохранена на этот забег)</value></data>
+  <data name="Overlay_SandboxReadBackToPick" xml:space="preserve"><value>Песочница прочитана, вернитесь к выбору (кнопка с глазом)</value></data>
+  <data name="Overlay_Title" xml:space="preserve"><value>Оверлей Tartarus</value></data>
+  <data name="Overlay_WantedForData" xml:space="preserve"><value>нужно для данных: сеть ещё не знает этих меток</value></data>
+  <data name="Report_AppError" xml:space="preserve"><value>В приложении произошла ошибка. Что вы делали перед этим?</value></data>
+  <data name="Report_OnlyTartarus" xml:space="preserve"><value>Сообщайте только о проблемах в режиме «Тюрьма Талоса».</value></data>
+  <data name="Report_Privacy" xml:space="preserve"><value>Отправляя этот отчёт, вы передаёте разработчику снимок окна игры, лог приложения и строки текущего забега Тюрьмы Талоса из лога игры. Личные данные не отправляются.</value></data>
+  <data name="Report_Send" xml:space="preserve"><value>Отправить</value></data>
+  <data name="Report_Sending" xml:space="preserve"><value>Отправка…</value></data>
+  <data name="Report_WhatWentWrong" xml:space="preserve"><value>Что пошло не так?</value></data>
+  <data name="Stats_DialogTitle" xml:space="preserve"><value>Tartarus Solver: статистика</value></data>
+  <data name="Stats_NoRuns" xml:space="preserve"><value>Забегов пока нет: забег считается, если лог игры видел его от начала до бунта</value></data>
+  <data name="Stats_Reset" xml:space="preserve"><value>Сбросить</value></data>
+  <data name="Stats_ResetConfirm" xml:space="preserve"><value>Очистить статистику (забегов: {0}, призматических: {1}) и считать заново?</value></data>
+  <data name="Stats_Reset_Tip" xml:space="preserve"><value>Очистить статистику и считать заново</value></data>
+  <data name="Stats_Since" xml:space="preserve"><value>С {0}; забеги, которые лог игры видел от начала до бунта</value></data>
+  <data name="Stats_Summary" xml:space="preserve"><value>Забегов: {0} · Призматических: {1} ({2} за забег)</value></data>
+  <data name="Stats_Title" xml:space="preserve"><value>Статистика</value></data>
+  <data name="Status_CaptureFailed" xml:space="preserve"><value>Нет захвата: Windows не даёт захватить окно игры, пробую снова. Переведите игру в оконный режим или без рамки</value></data>
+  <data name="Status_CaptureRefused" xml:space="preserve"><value>Нет захвата: Windows отказывается захватывать окно игры. Возможно, захват экрана отключён или удалён в этой Windows: проверьте службу CaptureService. Без него приложение не видит игру.</value></data>
+  <data name="Status_Capturing" xml:space="preserve"><value>Захват: {0}</value></data>
+  <data name="Status_GameMinimized" xml:space="preserve"><value>Нет захвата: окно игры свёрнуто, разверните его</value></data>
+  <data name="Status_NoFramesYet" xml:space="preserve"><value>Кадров пока нет (окно свёрнуто?)</value></data>
+  <data name="Status_NoSandbox" xml:space="preserve"><value>Нет Песочницы: {0} · {1} мс</value></data>
+  <data name="Status_NoSandboxFound" xml:space="preserve"><value>Tartarus: Песочница не найдена ({0} мс)</value></data>
+  <data name="Status_NoWindowCaptured" xml:space="preserve"><value>Окно не захвачено</value></data>
+  <data name="Status_NotCapturing" xml:space="preserve"><value>Нет захвата</value></data>
+  <data name="Status_PictureDoesntFill" xml:space="preserve"><value>Картинка игры не заполняет окно: задайте размер окна в настройках игры или дважды нажмите Alt+Enter</value></data>
+  <data name="Status_Presence" xml:space="preserve"><value> · присутствие {0}</value></data>
+  <data name="Status_Sandbox" xml:space="preserve"><value>Песочница · {0} мс</value></data>
+  <data name="Status_ScreenCopyCovered" xml:space="preserve"><value>Подсказки ждут: игру закрывает другое окно. Уберите его.</value></data>
+  <data name="Status_ScreenCopyOn" xml:space="preserve"><value>Копия экрана: Windows не даёт захватить окно. Держите игру на переднем плане, ничем не закрывая.</value></data>
+  <data name="Status_TimingsLower" xml:space="preserve"><value> (ocr {0}, камеры {1})</value></data>
+  <data name="Status_TimingsUpper" xml:space="preserve"><value> (OCR {0}, камеры {1})</value></data>
+  <data name="Status_WaitingForGame" xml:space="preserve"><value>Нет захвата: ожидание окна игры (Torchlight: Infinite)…</value></data>
+  <data name="Status_WindowResized" xml:space="preserve"><value>Tartarus: размер окна изменился, нужно новое сканирование</value></data>
+  <data name="Update_Confirm" xml:space="preserve"><value>Скачать версию {0} ({1} МБ), заменить ею текущую и перезапустить приложение?</value></data>
+  <data name="Update_DialogTitle" xml:space="preserve"><value>Tartarus Solver: обновление</value></data>
+  <data name="Update_Download_Tip" xml:space="preserve"><value>Скачать {0} ({1} МБ), установить и перезапустить</value></data>
+  <data name="Update_Downloading" xml:space="preserve"><value>Загрузка… {0}%</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>Обновление не удалось: {0}</value></data>
+  <data name="Update_Installing" xml:space="preserve"><value>Установка…</value></data>
+  <data name="Update_OpenPage_Tip" xml:space="preserve"><value>Открыть страницу релиза</value></data>
+  <data name="Update_To" xml:space="preserve"><value>Обновить до {0}</value></data>
+</root>

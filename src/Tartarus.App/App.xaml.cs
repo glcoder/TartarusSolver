@@ -8,7 +8,8 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        // The interface is in English (localization comes later): numbers as "12,800" and "6.4" whatever Windows' language.
+        // Numbers as "12,800" and "6.4" whatever Windows' language; the interface's own words come from Loc
+        // (the language of Windows unless the player chose another).
         System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
         System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
         // A new version put in this install's place by itself (Updates.StartInstall), then started there.
@@ -28,6 +29,8 @@ public partial class App : Application
         }
         catch (Exception) { }
         var settings = AppSettings.Load();
+        // The interface's language, before any window is built: XAML reads its text through Loc as it loads.
+        Loc.Init(settings.UiLanguage);
         // --debug: the whole window (overlay views, hint quality, labels, dataset collecting, the log); else the player's.
         settings.Debug = e.Args.Any(a => a.Equals("--debug", StringComparison.OrdinalIgnoreCase) || a.Equals("/debug", StringComparison.OrdinalIgnoreCase));
         settings.Save(); // so settings.json exists to edit (hotkeys etc.)

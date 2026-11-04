@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using Tartarus.Vision;
+using Tartarus.App.Localization;
 
 namespace Tartarus.App;
 
@@ -60,7 +61,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
     private static readonly Brush ButtonBrush = Freeze(new SolidColorBrush(Color.FromRgb(120, 200, 255)));
     private static readonly Pen ButtonPen = FreezePen(new Pen(ButtonBrush, 1.5));
     private static readonly Pen EmptySlotPen = FreezePen(new Pen(Freeze(new SolidColorBrush(Color.FromArgb(150, 200, 200, 210))), 1) { DashStyle = DashStyles.Dash });
-    private static readonly Typeface Face = new(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
+    private static readonly Typeface Face = new(Loc.Font, FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
 
     private static readonly Brush[] RarityBrushes =
     [
@@ -171,7 +172,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
         if (!m.HintsOnly && m.Scan is { Theme: { } runTheme, Layout: { } themeLayout })
         {
             var b = themeLayout.ToPixels(ScreenLayout.ThemeName);
-            Pill(dc, $"Run theme: {RunThemes.NameOf(runTheme)} (kept for this run)", new Point((b.X0 + b.X1) / 2.0 * sx, b.Y1 * sy + 4), InstrumentBrush, Math.Clamp(13 * themeLayout.K * sx, 10, 20), ppd, centerX: true);
+            Pill(dc, Loc.F(Strings.Overlay_RunTheme, Loc.Name(RunThemes.NameOf(runTheme))), new Point((b.X0 + b.X1) / 2.0 * sx, b.Y1 * sy + 4), InstrumentBrush, Math.Clamp(13 * themeLayout.K * sx, 10, 20), ppd, centerX: true);
         }
         if (m.Scan is not { Ok: true, Cells: { } cells } || m.Sandbox is not { } sandbox) return;
         double fontSize = Math.Clamp(11 * sx * (cells.Count > 1 ? cells[1].K : 1) / 0.9, 9, 16);
@@ -206,14 +207,14 @@ public sealed partial class SandboxOverlayView : FrameworkElement
             string? caption = label.Kind switch
             {
                 // Two lines: the cells sit close.
-                CellKind.Inmate => $"{Codes.Name(label.Code)}\n{label.Rarity}" + (label.Tusk ? "\nTusk" : "") + (label.Prey ? "\nPrey" : ""),
-                CellKind.Unopened => "Unopened" + (label.VisibleRarity is { } vr ? $"\n?{vr}" : "") + (label.ScratchMarks ? "\nScratch Marks" : "") + (label.Nest ? "\nRat Nest" : ""),
-                CellKind.InterrogationRoom => "Interrogation Room",
-                _ => m.EditMode ? "Empty" : null,
+                CellKind.Inmate => $"{Loc.Name(Codes.Name(label.Code))}\n{Loc.Name(label.Rarity.ToString())}" + (label.Tusk ? "\n" + Strings.Name_Tusk : "") + (label.Prey ? "\n" + Strings.Name_Prey : ""),
+                CellKind.Unopened => Strings.Name_Unopened + (label.VisibleRarity is { } vr ? $"\n?{Loc.Name(vr.ToString())}" : "") + (label.ScratchMarks ? "\n" + Strings.Name_ScratchMarks : "") + (label.Nest ? "\n" + Strings.Name_RatNest : ""),
+                CellKind.InterrogationRoom => Strings.Name_InterrogationRoom,
+                _ => m.EditMode ? Strings.Name_Empty : null,
             };
             if (caption != null)
             {
-                if (label.Covered) caption += "\n(covered)";
+                if (label.Covered) caption += "\n" + Strings.Overlay_Covered;
                 else if (unsure) caption += " ?";
                 if (label.Edited) caption = "✎ " + caption;
                 Pill(dc, caption, new Point(box.Left + box.Width / 2, box.Top - 2), color, fontSize, ppd, centerX: true, above: true);
@@ -230,11 +231,14 @@ public sealed partial class SandboxOverlayView : FrameworkElement
         // Sandbox-level reads, just above the Interrogation Room.
         var room = cells[0];
         var (ox0, oy0, _, _) = SandboxGeometry.FrameBox(room.X, room.Y, room.K);
-        string header = $"Remaining Days {sandbox.Days?.ToString(CultureInfo.InvariantCulture) ?? "?"}"
-            + (sandbox.Theme is { } theme ? $" · {RunThemes.NameOf(theme)}" : "")
-            + (m.Scan.Text?.Objective is { } objective ? $" · Objective: {objective}" + (m.Scan.Text.Progress is { } p ? $" {p.Done}/{p.Goal}" : "") : "")
-            + (m.Scan.Text?.Title is { } title ? $" · {title}" : "")
-            + $" · {m.Scan.TotalMs:0} ms" + (m.Scan.Timings.TryGetValue("ocr", out var ocrMs) ? $" (ocr {ocrMs:0}, cells {m.Scan.Timings.GetValueOrDefault("cells"):0})" : "");
+        string header = Loc.F(Strings.Overlay_RemainingDays, sandbox.Days?.ToString(CultureInfo.InvariantCulture) ?? "?")
+            + (sandbox.Theme is { } theme ? " · " + Loc.Name(RunThemes.NameOf(theme)) : "")
+            + (m.Scan.Text?.Objective is { } objective ? " · " + Loc.F(Strings.Overlay_Objective, objective) + (m.Scan.Text.Progress is { } p ? $" {p.Done}/{p.Goal}" : "") : "")
+            + (m.Scan.Text?.Title is { } title ? " · " + title : "")
+            + Loc.F(" · {0} ms", m.Scan.TotalMs.ToString("0", CultureInfo.InvariantCulture))
+            + (m.Scan.Timings.TryGetValue("ocr", out var ocrMs)
+                ? Loc.F(Strings.Status_TimingsLower, ocrMs.ToString("0", CultureInfo.InvariantCulture), m.Scan.Timings.GetValueOrDefault("cells").ToString("0", CultureInfo.InvariantCulture))
+                : "");
         // Above the Interrogation Room's caption.
         Pill(dc, header, new Point(ox0 * sx, oy0 * sy - 2 * (1.33 * fontSize + 4) - 4), Brushes.White, fontSize, ppd);
 
@@ -261,7 +265,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
         }
         // Under the last row, from its left slot.
         var last = layout.ToPixels(ScreenLayout.ChromaticSlot(ScreenLayout.ChromaticSlots - 2));
-        string text = $"Chromatic {count}/{ScreenLayout.ChromaticSlots}" + (count >= ScreenLayout.ChromaticSlots ? " (cap)" : "");
+        string text = Loc.F(Strings.Overlay_ChromaticCount, count, ScreenLayout.ChromaticSlots) + (count >= ScreenLayout.ChromaticSlots ? Strings.Overlay_Cap : "");
         Pill(dc, text, new Point(last.X0 * sx, last.Y1 * sy + 6), brush, fontSize, ppd);
     }
 
@@ -294,7 +298,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
         for (int i = 0; i < Math.Min(held.Count, ScreenLayout.InstrumentSlots); i++)
         {
             var instrument = TortureInstruments.Find(held[i]);
-            string text = $"{i + 1}. " + (instrument?.Caption ?? "Unknown Torture Instrument") + (kept.Contains(i) ? " (remembered)" : "");
+            string text = $"{i + 1}. " + (instrument == null ? Strings.Name_UnknownTortureInstrument : Loc.Caption(instrument.Name)) + (kept.Contains(i) ? Strings.Overlay_Remembered : "");
             y += IconPill(dc, text, InstrumentIcon(held[i]), new Point(listLeft, y), InstrumentBrush, fontSize, ppd) + 4;
         }
     }
@@ -316,16 +320,16 @@ public sealed partial class SandboxOverlayView : FrameworkElement
                 if (card.Id == null) pen.DashStyle = DashStyles.Dash;
                 dc.DrawRoundedRectangle(null, pen, box, 6, 6);
             }
-            string text = $"{card.Index + 1}. " + (card.Id is { } id ? SandboxText.PickName(pick, id) : $"? {card.Text}");
+            string text = $"{card.Index + 1}. " + (card.Id is { } id ? Loc.Name(SandboxText.PickName(pick, id)) : $"? {card.Text}");
             var icon = card.Id is { } known ? Icon(treasure ? WardenTreasures.FindIconDir() : TortureInstruments.FindIconDir(), known) : null;
             double h = IconPill(dc, text, icon, new Point(box.Left + box.Width / 2, box.Top - 4), brush, fontSize, ppd, centerX: true, above: true);
             if (!treasure && card.Id is { } wanted && TortureInstruments.WantedForData.Contains(wanted))
-                Pill(dc, "wanted for data: the network doesn't know its marks yet", new Point(box.Left + box.Width / 2, box.Top - h - 8), DataBrush, fontSize * 0.85, ppd, centerX: true, above: true);
+                Pill(dc, Strings.Overlay_WantedForData, new Point(box.Left + box.Width / 2, box.Top - h - 8), DataBrush, fontSize * 0.85, ppd, centerX: true, above: true);
         }
         if (pick.Rerolls is int rerolls)
         {
             var b = layout.ToPixels(ScreenLayout.PickRerolls);
-            Pill(dc, $"Re-roll: {rerolls}", new Point(b.X0 * sx, b.Y0 * sy - 4), InstrumentBrush, fontSize, ppd, above: true);
+            Pill(dc, Loc.F(Strings.Overlay_Rerolls, rerolls), new Point(b.X0 * sx, b.Y0 * sy - 4), InstrumentBrush, fontSize, ppd, above: true);
             if (frames && rerolls > 0)
             {
                 var r = layout.ToPixels(ScreenLayout.PickRerollButton);
@@ -349,7 +353,7 @@ public sealed partial class SandboxOverlayView : FrameworkElement
             var b = layout.ToPixels(ScreenLayout.ConsumeCancel);
             var box = new Rect(b.X0 * sx, b.Y0 * sy, b.Width * sx, b.Height * sy);
             dc.DrawRoundedRectangle(null, ButtonPen, box, 6, 6);
-            Pill(dc, "Cancel", new Point(box.Left + box.Width / 2, box.Bottom + 2), ButtonBrush, fontSize, ppd, centerX: true);
+            Pill(dc, Strings.Name_Cancel, new Point(box.Left + box.Width / 2, box.Bottom + 2), ButtonBrush, fontSize, ppd, centerX: true);
         }
     }
 

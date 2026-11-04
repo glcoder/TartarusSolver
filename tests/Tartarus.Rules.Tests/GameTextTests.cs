@@ -135,25 +135,6 @@ public class GameTextTests
         }
     }
 
-    [Fact]
-    public void A_refused_capture_is_told_in_each_of_the_game_s_languages()
-    {
-        var lines = OcrPacks.GameLanguages.Select(OcrPacks.CaptureRefused).ToList();
-        Assert.All(lines, l => Assert.Contains("CaptureService", l));
-        Assert.Equal(lines.Count, lines.Distinct().Count());
-    }
-
-    [Fact]
-    public void The_screen_copy_statuses_are_told_in_each_of_the_game_s_languages()
-    {
-        foreach (var text in new Func<string?, string>[] { OcrPacks.ScreenCopyOn, OcrPacks.ScreenCopyCovered })
-        {
-            var lines = OcrPacks.GameLanguages.Select(text).ToList();
-            Assert.All(lines, l => Assert.False(string.IsNullOrWhiteSpace(l)));
-            Assert.Equal(lines.Count, lines.Distinct().Count());
-        }
-    }
-
     [Theory]
     [InlineData("zh-CN", "zh")]
     [InlineData("zh-Hans-CN", "zh")]
@@ -165,22 +146,6 @@ public class GameTextTests
     [InlineData("", "en")]
     public void Windows_s_language_gives_the_game_language_nearest_to_it(string culture, string code) =>
         Assert.Equal(code, OcrPacks.FromCulture(culture));
-
-    [Fact]
-    public void The_report_window_says_where_to_report_in_each_of_the_game_s_languages()
-    {
-        var lines = OcrPacks.GameLanguages.Select(OcrPacks.ReportOnlyTartarus).ToList();
-        Assert.All(lines, l => Assert.False(string.IsNullOrWhiteSpace(l)));
-        Assert.Equal(lines.Count, lines.Distinct().Count());
-    }
-
-    [Fact]
-    public void The_language_is_asked_for_in_each_of_the_game_s_languages()
-    {
-        var lines = OcrPacks.GameLanguages.Select(OcrPacks.ChooseLanguage).ToList();
-        Assert.All(lines, l => Assert.False(string.IsNullOrWhiteSpace(l)));
-        Assert.Equal(lines.Count, lines.Distinct().Count());
-    }
 
     [Fact]
     public void End_alone_in_the_middle_is_the_whole_row_and_needs_no_looking()

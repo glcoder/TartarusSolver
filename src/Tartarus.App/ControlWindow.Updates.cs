@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
+using Tartarus.App.Localization;
 
 namespace Tartarus.App;
 
@@ -80,9 +82,11 @@ public partial class ControlWindow
     private void ShowUpdate(Updates.Release release)
     {
         bool install = release.Url != null && Updates.Installed;
-        UpdateButton.Content = $"Update to {release.Version}";
+        UpdateButton.Content = Loc.F(Strings.Update_To, release.Version);
         string notes = release.Notes.Length > 1500 ? release.Notes[..1500] + "…" : release.Notes;
-        UpdateButton.ToolTip = (install ? $"Download {release.Asset} ({release.Size / 1048576.0:0} MB), install it and restart" : "Open the release's page")
+        UpdateButton.ToolTip = (install
+                ? Loc.F(Strings.Update_Download_Tip, release.Asset, (release.Size / 1048576.0).ToString("0", CultureInfo.InvariantCulture))
+                : Strings.Update_OpenPage_Tip)
             + (notes.Length > 0 ? "\n\n" + notes : "");
         UpdateButton.Visibility = Visibility.Visible;
     }
@@ -96,16 +100,17 @@ public partial class ControlWindow
             Process.Start(new ProcessStartInfo(release.Page) { UseShellExecute = true });
             return;
         }
-        if (MessageBox.Show(this, $"Download version {release.Version} ({release.Size / 1048576.0:0} MB), put it in place of this one and restart the app?",
-                "Tartarus Solver: update", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show(this, Loc.F(Strings.Update_Confirm,
+                release.Version, (release.Size / 1048576.0).ToString("0", CultureInfo.InvariantCulture)),
+                Strings.Update_DialogTitle, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         _updating = true;
         UpdateButton.IsEnabled = false;
         try
         {
-            var progress = new Progress<double>(p => UpdateButton.Content = $"Downloading… {p * 100:0}%");
+            var progress = new Progress<double>(p => UpdateButton.Content = Loc.F(Strings.Update_Downloading, (p * 100).ToString("0", CultureInfo.InvariantCulture)));
             string app = await Updates.DownloadAsync(release, progress);
             Log($"Update: {release.Asset} downloaded and checked, installing");
-            UpdateButton.Content = "Installing…";
+            UpdateButton.Content = Strings.Update_Installing;
             // Windows may check the fresh exe for seconds before it starts (2026-10-28, a player's Sentry hang): off the
             // UI thread, so the window keeps answering.
             var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
@@ -115,8 +120,8 @@ public partial class ControlWindow
         catch (Exception ex)
         {
             Log("Update failed: " + ex.Message);
-            MessageBox.Show(this, $"The update failed: {ex.Message}", "Tartarus Solver: update", MessageBoxButton.OK, MessageBoxImage.Warning);
-            UpdateButton.Content = $"Update to {release.Version}";
+            MessageBox.Show(this, Loc.F(Strings.Update_Failed, ex.Message), Strings.Update_DialogTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+            UpdateButton.Content = Loc.F(Strings.Update_To, release.Version);
             UpdateButton.IsEnabled = true;
             _updating = false;
         }

@@ -83,31 +83,6 @@ public static class OcrPacks
         _ => code ?? "?",
     };
 
-    /// <summary>"Choose the game's language" in a game language: the overlay asks in all of them, the text being unread.</summary>
-    public static string ChooseLanguage(string? code) => code?.ToLowerInvariant() switch
-    {
-        "ru" => "Выберите язык игры", "de" => "Spielsprache wählen", "es" => "Elige el idioma del juego",
-        "fr" => "Choisissez la langue du jeu", "pt" => "Escolha o idioma do jogo", "id" => "Pilih bahasa game",
-        "vi" => "Chọn ngôn ngữ trò chơi", "ja" => "ゲームの言語を選択", "ko" => "게임 언어를 선택하세요", "th" => "เลือกภาษาของเกม",
-        "zh" or "zhcn" => "请选择游戏语言", "zhtw" => "請選擇遊戲語言",
-        _ => "Choose the game's language",
-    };
-
-    /// <summary>
-    /// "Report only problems in Tartarus Prison" in a game language, the mode by the game's own name in it (the game's text
-    /// tables, Func_S16GamePlay_Title): most reports came from other modes, the Hideout, or with the game not on screen.
-    /// </summary>
-    public static string ReportOnlyTartarus(string? code) => code?.ToLowerInvariant() switch
-    {
-        "ru" => "Сообщайте только о проблемах в режиме «Тюрьма Талоса».", "de" => "Melden Sie nur Probleme im Modus „Talos-Gefängnis“.",
-        "es" => "Informa solo de problemas en el modo «Prisión de Talos».", "fr" => "Signalez uniquement les problèmes du mode « Prison de Taros ».",
-        "pt" => "Relate apenas problemas no modo “Prisão de Taros”.", "id" => "Laporkan hanya masalah di mode \"Penjara Talos\".",
-        "vi" => "Chỉ báo lỗi trong chế độ \"Nhà Ngục Talos\".", "ja" => "「タロス監獄」モードの問題のみ報告してください。",
-        "ko" => "\"타르타로스 감옥\" 모드의 문제만 신고해 주세요.", "th" => "โปรดแจ้งเฉพาะปัญหาในโหมด \"คุกทาลอส\"",
-        "zh" or "zhcn" => "请仅反馈“塔罗斯监狱”模式中的问题。", "zhtw" => "請僅回報「塔羅斯監獄」模式中的問題。",
-        _ => "Report only problems in the Tartarus Prison mode.",
-    };
-
     /// <summary>The game language nearest to a Windows display language, like "zh-CN" or "pt-BR".</summary>
     public static string FromCulture(string culture)
     {
@@ -117,64 +92,6 @@ public static class OcrPacks
         string language = name.Split('-')[0];
         return GameLanguages.Contains(language) ? language : "en";
     }
-
-    /// <summary>
-    /// "Windows refuses to capture the game's window" in a game language: the status for players whose Windows won't capture
-    /// any window. They restarted the app for hours (2026-11-03), and it's said in Windows's language, as the game's may be
-    /// read wrong (clients with "en" in their settings and the game in Chinese).
-    /// </summary>
-    public static string CaptureRefused(string? code) => code?.ToLowerInvariant() switch
-    {
-        "ru" => "Нет захвата: Windows отказывается захватывать окно игры. Возможно, захват экрана отключён или удалён в этой Windows: проверьте службу CaptureService. Без него приложение не видит игру.",
-        "de" => "Keine Aufnahme: Windows verweigert die Aufnahme des Spielfensters. Die Bildschirmaufnahme ist in diesem Windows vielleicht deaktiviert oder entfernt: Prüfen Sie den Dienst CaptureService. Ohne sie sieht die App das Spiel nicht.",
-        "es" => "Sin captura: Windows se niega a capturar la ventana del juego. Es posible que la captura de pantalla esté desactivada o eliminada en este Windows: comprueba el servicio CaptureService. Sin ella, la aplicación no ve el juego.",
-        "fr" => "Pas de capture : Windows refuse de capturer la fenêtre du jeu. La capture d'écran est peut-être désactivée ou supprimée dans ce Windows : vérifiez le service CaptureService. Sans elle, l'application ne voit pas le jeu.",
-        "pt" => "Sem captura: o Windows recusa capturar a janela do jogo. A captura de tela pode estar desativada ou removida neste Windows: verifique o serviço CaptureService. Sem ela, o aplicativo não vê o jogo.",
-        "id" => "Tidak menangkap: Windows menolak menangkap jendela game. Penangkapan layar mungkin dimatikan atau dihapus di Windows ini: periksa layanan CaptureService. Tanpa itu aplikasi tidak bisa melihat game.",
-        "vi" => "Không chụp được: Windows từ chối chụp cửa sổ trò chơi. Có thể tính năng chụp màn hình đã bị tắt hoặc gỡ bỏ trong Windows này: hãy kiểm tra dịch vụ CaptureService. Nếu không có nó, ứng dụng không thấy được trò chơi.",
-        "ja" => "キャプチャできません: Windows がゲームウィンドウのキャプチャを拒否しています。この Windows では画面キャプチャが無効化または削除されている可能性があります。CaptureService サービスを確認してください。これがないとアプリはゲームを認識できません。",
-        "ko" => "캡처 불가: Windows가 게임 창 캡처를 거부합니다. 이 Windows에서 화면 캡처가 꺼졌거나 제거되었을 수 있습니다. CaptureService 서비스를 확인해 주세요. 이 기능 없이는 앱이 게임을 볼 수 없습니다.",
-        "th" => "จับภาพไม่ได้: Windows ปฏิเสธการจับภาพหน้าต่างเกม การจับภาพหน้าจออาจถูกปิดหรือลบออกจาก Windows นี้ โปรดตรวจสอบบริการ CaptureService หากไม่มีบริการนี้ แอปจะมองไม่เห็นเกม",
-        "zh" or "zhcn" => "未能捕获：Windows 拒绝捕获游戏窗口。此 Windows 中的屏幕捕获可能已被关闭或移除，请检查 CaptureService 服务。没有它，本程序无法看到游戏。",
-        "zhtw" => "未能擷取：Windows 拒絕擷取遊戲視窗。此 Windows 中的螢幕擷取可能已被關閉或移除，請檢查 CaptureService 服務。沒有它，本程式無法看到遊戲。",
-        _ => "Not capturing: Windows refuses to capture the game window. Screen capture may be turned off or removed in this Windows: check the CaptureService service. Without it the app can't see the game.",
-    };
-
-    /// <summary>The status while the game is read by a copy of the screen, in a game language.</summary>
-    public static string ScreenCopyOn(string? code) => code?.ToLowerInvariant() switch
-    {
-        "ru" => "Копия экрана: Windows не даёт захватить окно. Держите игру на переднем плане, ничем не закрывая.",
-        "de" => "Bildschirmkopie: Windows erlaubt keine Fensteraufnahme. Halten Sie das Spiel im Vordergrund und unverdeckt.",
-        "es" => "Copia de pantalla: Windows no permite capturar la ventana. Mantén el juego en primer plano, sin cubrirlo.",
-        "fr" => "Copie d'écran : Windows ne permet pas de capturer la fenêtre. Gardez le jeu au premier plan, sans le couvrir.",
-        "pt" => "Cópia da tela: o Windows não permite capturar a janela. Mantenha o jogo em primeiro plano, sem cobri-lo.",
-        "id" => "Salinan layar: Windows tidak mengizinkan penangkapan jendela. Biarkan game di depan tanpa tertutup.",
-        "vi" => "Sao chép màn hình: Windows không cho chụp cửa sổ. Hãy giữ trò chơi ở trên cùng, không bị che.",
-        "ja" => "画面コピー: Windows がウィンドウのキャプチャを許可していません。ゲームを前面に出し、隠さないでください。",
-        "ko" => "화면 복사: Windows가 창 캡처를 허용하지 않습니다. 게임을 맨 앞에 두고 가리지 마세요.",
-        "th" => "คัดลอกหน้าจอ: Windows ไม่อนุญาตให้จับภาพหน้าต่าง โปรดให้เกมอยู่ด้านหน้าและไม่ถูกบัง",
-        "zh" or "zhcn" => "屏幕复制：Windows 不允许捕获窗口。请让游戏保持在最前面，不要遮挡。",
-        "zhtw" => "螢幕複製：Windows 不允許擷取視窗。請讓遊戲保持在最前面，不要遮擋。",
-        _ => "Screen copy: Windows won't capture the window. Keep the game in front, with nothing over it.",
-    };
-
-    /// <summary>The status while another window stands over the game and no copy of the screen is made, in a game language.</summary>
-    public static string ScreenCopyCovered(string? code) => code?.ToLowerInvariant() switch
-    {
-        "ru" => "Подсказки ждут: игру закрывает другое окно. Уберите его.",
-        "de" => "Hinweise warten: Ein anderes Fenster liegt über dem Spiel. Schieben Sie es weg.",
-        "es" => "Las pistas esperan: otra ventana cubre el juego. Muévela.",
-        "fr" => "Les conseils attendent : une autre fenêtre couvre le jeu. Déplacez-la.",
-        "pt" => "As dicas aguardam: outra janela cobre o jogo. Mova-a.",
-        "id" => "Petunjuk menunggu: jendela lain menutupi game. Pindahkan jendela itu.",
-        "vi" => "Gợi ý đang chờ: một cửa sổ khác đang che trò chơi. Hãy chuyển nó đi.",
-        "ja" => "ヒントは待機中です: 別のウィンドウがゲームを隠しています。移動してください。",
-        "ko" => "힌트 대기 중: 다른 창이 게임을 가리고 있습니다. 옮겨 주세요.",
-        "th" => "คำแนะนำกำลังรอ: มีหน้าต่างอื่นบังเกมอยู่ โปรดย้ายออก",
-        "zh" or "zhcn" => "提示等待中：另一个窗口遮挡了游戏，请将其移开。",
-        "zhtw" => "提示等待中：另一個視窗遮擋了遊戲，請將其移開。",
-        _ => "Hints wait: another window is over the game. Move it away.",
-    };
 
     /// <summary>Where downloaded packs go (the program's own folder may not be writable).</summary>
     public static string DownloadDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TartarusSolver", "models", "ocr");

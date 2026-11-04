@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using Tartarus.Capture;
+using Tartarus.App.Localization;
 
 namespace Tartarus.App;
 
@@ -17,7 +18,7 @@ public sealed class OverlayWindow : Window
 
     public OverlayWindow()
     {
-        Title = "Tartarus overlay";
+        Title = Strings.Overlay_Title;
         WindowStyle = WindowStyle.None;
         AllowsTransparency = true;
         Background = Brushes.Transparent;
