@@ -115,15 +115,13 @@ public partial class ControlWindow : Window
         BoxesCheck.IsChecked = settings.ShowRegions;
         TextCheck.IsChecked = settings.ShowTextBoxes;
         AutoCollectCheck.IsChecked = settings.AutoCollect;
+        GameLanguageCombo.Items.Add(new ComboBoxItem { Content = Strings.Common_Automatic, Tag = "auto" });
         foreach (var code in Tartarus.Vision.Ocr.OcrPacks.GameLanguages)
         {
             string name = Tartarus.Vision.Ocr.OcrPacks.LanguageName(code), native = Tartarus.Vision.Ocr.OcrPacks.NativeName(code);
             GameLanguageCombo.Items.Add(new ComboBoxItem { Content = name == native ? name : $"{name} · {native}", Tag = code });
         }
-        GameLanguageAutoCheck.IsChecked = settings.DetectGameLanguage;
         ShowGameLanguage(ManualLanguage ?? "en");
-        GameLanguageAutoCheck.Checked += GameLanguageAuto_Changed;
-        GameLanguageAutoCheck.Unchecked += GameLanguageAuto_Changed;
         GameLanguageCombo.SelectionChanged += GameLanguageCombo_SelectionChanged;
         // The interface's own language, each by its own name; automatic is Windows's. The XAML's words are swapped when a
         // window is built, so a change takes a restart.
@@ -330,26 +328,24 @@ public partial class ControlWindow : Window
             "Tartarus Solver", MessageBoxButton.OK, MessageBoxImage.Warning), DispatcherPriority.ApplicationIdle);
     }
 
+    /// <summary>
+    /// The list's selection. Automatic: the game's settings file says, and the item shows what it said; else the player's
+    /// choice, which stays in the settings either way (the settings file may not tell what the game shows: 2026-10-31, a
+    /// TapTap client in Chinese with "en" in it).
+    /// </summary>
     private void ShowGameLanguage(string code)
     {
         _showingLanguage = true;
-        GameLanguageCombo.SelectedItem = GameLanguageCombo.Items.OfType<ComboBoxItem>()
-            .FirstOrDefault(i => Tartarus.Vision.Ocr.OcrPacks.LanguageName((string)i.Tag) == Tartarus.Vision.Ocr.OcrPacks.LanguageName(code));
+        var items = GameLanguageCombo.Items.OfType<ComboBoxItem>().ToList();
+        // The closed list keeps the text it had when selected: selected anew below.
+        GameLanguageCombo.SelectedItem = null;
+        items[0].Content = _settings.DetectGameLanguage
+            ? $"{Strings.Common_Automatic} ({Tartarus.Vision.Ocr.OcrPacks.NativeName(code)})"
+            : Strings.Common_Automatic;
+        GameLanguageCombo.SelectedItem = _settings.DetectGameLanguage
+            ? items[0]
+            : items.Skip(1).FirstOrDefault(i => Tartarus.Vision.Ocr.OcrPacks.LanguageName((string)i.Tag) == Tartarus.Vision.Ocr.OcrPacks.LanguageName(code));
         _showingLanguage = false;
-    }
-
-    /// <summary>
-    /// Detected: the game's settings file says (the list shows it); off: the player's choice, which stays in the
-    /// settings either way (the settings file may not tell what the game shows: 2026-10-31, a TapTap client in Chinese with
-    /// "en" in it).
-    /// </summary>
-    private void GameLanguageAuto_Changed(object sender, RoutedEventArgs e)
-    {
-        bool auto = GameLanguageAutoCheck.IsChecked == true;
-        _settings.DetectGameLanguage = auto;
-        if (ManualLanguage is { } chosen) ShowGameLanguage(chosen);
-        _settings.Save();
-        CheckGameLanguage();
     }
 
     /// <summary>The interface's language chosen: every window is built in it, so the app starts again, asked in that language.</summary>
@@ -370,9 +366,17 @@ public partial class ControlWindow : Window
     private void GameLanguageCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_showingLanguage || (GameLanguageCombo.SelectedItem as ComboBoxItem)?.Tag is not string code) return;
+        if (code == "auto")
+        {
+            _settings.DetectGameLanguage = true;
+            _settings.Save();
+            CheckGameLanguage();
+            ShowGameLanguage(_gameLanguage ?? "en");
+            return;
+        }
         _settings.GameLanguage = code;
-        // A language chosen is the one to read: detection goes off, or the choice would do nothing.
-        if (GameLanguageAutoCheck.IsChecked == true) GameLanguageAutoCheck.IsChecked = false;
+        _settings.DetectGameLanguage = false;
+        ShowGameLanguage(code);
         _settings.Save();
         // Chosen by hand: its recognizer is offered again, even if declined before.
         _declinedOcr.Remove(Tartarus.Vision.Ocr.OcrPacks.ForGame(code).Id);
@@ -444,16 +448,16 @@ public partial class ControlWindow : Window
         Log("Game language: the player chose " + chosen);
         _settings.GameLanguage = chosen;
         // The language found, confirmed: detection goes on following the game.
-        if (first && GameLanguageAutoCheck.IsChecked == true && Tartarus.Vision.Ocr.OcrPacks.LanguageName(chosen) == Tartarus.Vision.Ocr.OcrPacks.LanguageName(current))
+        if (first && _settings.DetectGameLanguage && Tartarus.Vision.Ocr.OcrPacks.LanguageName(chosen) == Tartarus.Vision.Ocr.OcrPacks.LanguageName(current))
         {
             _settings.Save();
             CheckGameLanguage();
             return;
         }
-        // Auto detection goes off: its handler shows the choice in the list.
+        // Automatic goes off: the list shows the choice.
+        _settings.DetectGameLanguage = false;
         ShowGameLanguage(chosen);
-        if (GameLanguageAutoCheck.IsChecked == true) GameLanguageAutoCheck.IsChecked = false;
-        else _settings.Save();
+        _settings.Save();
         _declinedOcr.Remove(Tartarus.Vision.Ocr.OcrPacks.ForGame(chosen).Id);
         CheckGameLanguage();
     }

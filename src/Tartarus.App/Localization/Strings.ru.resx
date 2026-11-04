@@ -50,8 +50,6 @@
   <data name="Main_DatasetFolder" xml:space="preserve"><value>Папка датасета</value></data>
   <data name="Main_Debug" xml:space="preserve"><value> (отладка)</value></data>
   <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>Камеры на карточках пунктов назначения, слева направо: 9,11,12</value></data>
-  <data name="Main_DetectAutomatically" xml:space="preserve"><value>Определять автоматически</value></data>
-  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>Брать язык из файла настроек игры; выбор языка в списке отключает это</value></data>
   <data name="Main_EditMode" xml:space="preserve"><value>Режим правки</value></data>
   <data name="Main_EditMode_Tip" xml:space="preserve"><value>В режиме правки нажмите на камеру на оверлее: меню кода, редкости и флагов. Автоскан на это время останавливается.</value></data>
   <data name="Main_Every" xml:space="preserve"><value>, каждые</value></data>
@@ -61,7 +59,7 @@
 Распакуйте весь архив в отдельную папку и запускайте программу оттуда, а не из архива.</value></data>
   <data name="Main_FindLog_Tip" xml:space="preserve"><value>Найти лог автоматически: рядом с запущенной игрой, в библиотеках Steam, в настройках лаунчера</value></data>
   <data name="Main_GameLanguage" xml:space="preserve"><value>Язык игры</value></data>
-  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>Язык, на котором игра показывает текст: он нужен приложению, чтобы читать его. Это не язык этого окна: он выбирается ниже.</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>Язык, на котором игра показывает текст: он нужен приложению, чтобы читать его. Автоматически: из файла настроек игры. Это не язык этого окна: он выбирается ниже.</value></data>
   <data name="Main_GameLog" xml:space="preserve"><value>Лог игры</value></data>
   <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: папка игры\UE_game\TorchLight\Saved\Logs</value></data>
   <data name="Main_GameWindow" xml:space="preserve"><value>Окно игры</value></data>

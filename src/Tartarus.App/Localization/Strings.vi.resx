@@ -50,8 +50,6 @@ Không có nó, chữ trong trò chơi sẽ không được nhận dạng; thẻ
   <data name="Main_DatasetFolder" xml:space="preserve"><value>Thư mục tập dữ liệu</value></data>
   <data name="Main_Debug" xml:space="preserve"><value> (gỡ lỗi)</value></data>
   <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>Phòng giam trên thẻ Điểm đến, từ trái sang phải: 9,11,12</value></data>
-  <data name="Main_DetectAutomatically" xml:space="preserve"><value>Tự động phát hiện</value></data>
-  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>Lấy ngôn ngữ từ tệp cài đặt của trò chơi; chọn một ngôn ngữ trong danh sách sẽ tắt mục này</value></data>
   <data name="Main_EditMode" xml:space="preserve"><value>Chế độ chỉnh sửa</value></data>
   <data name="Main_EditMode_Tip" xml:space="preserve"><value>Trong chế độ chỉnh sửa, bấm vào phòng giam trên lớp phủ: menu Mã, độ hiếm và cờ. Quét tự động tạm dừng khi chỉnh sửa.</value></data>
   <data name="Main_Every" xml:space="preserve"><value>, mỗi</value></data>
@@ -61,7 +59,7 @@ Không có nó, chữ trong trò chơi sẽ không được nhận dạng; thẻ
 Hãy giải nén toàn bộ tệp nén vào một thư mục riêng và chạy chương trình từ đó, không chạy từ trong tệp nén.</value></data>
   <data name="Main_FindLog_Tip" xml:space="preserve"><value>Tự tìm nhật ký: cạnh trò chơi đang chạy, trong thư viện Steam, trong cài đặt của trình khởi chạy</value></data>
   <data name="Main_GameLanguage" xml:space="preserve"><value>Ngôn ngữ trò chơi</value></data>
-  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>Ngôn ngữ trò chơi dùng để hiển thị chữ, để ứng dụng đọc được. Không phải ngôn ngữ của cửa sổ này: mục đó ở bên dưới.</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>Ngôn ngữ trò chơi dùng để hiển thị chữ, để ứng dụng đọc được. Tự động: từ tệp cài đặt của trò chơi. Không phải ngôn ngữ của cửa sổ này: mục đó ở bên dưới.</value></data>
   <data name="Main_GameLog" xml:space="preserve"><value>Nhật ký trò chơi</value></data>
   <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: thư mục trò chơi\UE_game\TorchLight\Saved\Logs</value></data>
   <data name="Main_GameWindow" xml:space="preserve"><value>Cửa sổ trò chơi</value></data>

@@ -50,8 +50,6 @@
   <data name="Main_DatasetFolder" xml:space="preserve"><value>数据集文件夹</value></data>
   <data name="Main_Debug" xml:space="preserve"><value>（调试）</value></data>
   <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>目的地卡上的牢房号，从左到右，如 9,11,12</value></data>
-  <data name="Main_DetectAutomatically" xml:space="preserve"><value>自动检测</value></data>
-  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>从游戏设置文件里读取语言；在列表里选定语言会关掉此项</value></data>
   <data name="Main_EditMode" xml:space="preserve"><value>编辑模式</value></data>
   <data name="Main_EditMode_Tip" xml:space="preserve"><value>编辑模式下点叠加层上的牢房：可选代号、稀有度和各种标记。编辑期间自动扫描暂停。</value></data>
   <data name="Main_Every" xml:space="preserve"><value>，每隔</value></data>
@@ -61,7 +59,7 @@
 请把整个压缩包解压到一个独立的文件夹，再从那里运行程序，不要直接在压缩包里运行。</value></data>
   <data name="Main_FindLog_Tip" xml:space="preserve"><value>自动查找日志：运行中游戏的同级目录、Steam 库、启动器设置</value></data>
   <data name="Main_GameLanguage" xml:space="preserve"><value>游戏语言</value></data>
-  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>游戏内文字所用的语言，程序据此识别。这不是本窗口的语言，本窗口的语言在下面选。</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>游戏内文字所用的语言，程序据此识别。自动：取自游戏的设置文件。这不是本窗口的语言，本窗口的语言在下面选。</value></data>
   <data name="Main_GameLog" xml:space="preserve"><value>游戏日志</value></data>
   <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log：游戏目录\UE_game\TorchLight\Saved\Logs</value></data>
   <data name="Main_GameWindow" xml:space="preserve"><value>游戏窗口</value></data>

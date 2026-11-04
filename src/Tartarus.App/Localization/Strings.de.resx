@@ -50,8 +50,6 @@ Ohne es wird der Text des Spiels nicht erkannt; Karten und Auswahlen werden weit
   <data name="Main_DatasetFolder" xml:space="preserve"><value>Datensatzordner</value></data>
   <data name="Main_Debug" xml:space="preserve"><value> (Debug)</value></data>
   <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>Zellen auf den Zielortkarten, von links nach rechts: 9,11,12</value></data>
-  <data name="Main_DetectAutomatically" xml:space="preserve"><value>Automatisch erkennen</value></data>
-  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>Die Sprache aus der Einstellungsdatei des Spiels nehmen; eine Auswahl in der Liste schaltet dies aus</value></data>
   <data name="Main_EditMode" xml:space="preserve"><value>Bearbeitungsmodus</value></data>
   <data name="Main_EditMode_Tip" xml:space="preserve"><value>Klicken Sie im Bearbeitungsmodus auf eine Zelle im Overlay: ein Menü für Code, Seltenheit und Markierungen. Der Auto-Scan pausiert währenddessen.</value></data>
   <data name="Main_Every" xml:space="preserve"><value>, alle</value></data>
@@ -61,7 +59,7 @@ Ohne es wird der Text des Spiels nicht erkannt; Karten und Auswahlen werden weit
 Entpacken Sie das ganze Archiv in einen eigenen Ordner und starten Sie das Programm von dort, nicht aus dem Archiv.</value></data>
   <data name="Main_FindLog_Tip" xml:space="preserve"><value>Das Protokoll automatisch finden: beim laufenden Spiel, in Steam-Bibliotheken, in den Einstellungen des Launchers</value></data>
   <data name="Main_GameLanguage" xml:space="preserve"><value>Spielsprache</value></data>
-  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>Die Sprache, in der das Spiel seinen Text zeigt, damit die App ihn lesen kann. Nicht die Sprache dieses Fensters: Die steht darunter.</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>Die Sprache, in der das Spiel seinen Text zeigt, damit die App ihn lesen kann. Automatisch: aus der Einstellungsdatei des Spiels. Nicht die Sprache dieses Fensters: Die steht darunter.</value></data>
   <data name="Main_GameLog" xml:space="preserve"><value>Spielprotokoll</value></data>
   <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: Spielordner\UE_game\TorchLight\Saved\Logs</value></data>
   <data name="Main_GameWindow" xml:space="preserve"><value>Spielfenster</value></data>

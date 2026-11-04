@@ -50,8 +50,6 @@
   <data name="Main_DatasetFolder" xml:space="preserve"><value>データセットのフォルダー</value></data>
   <data name="Main_Debug" xml:space="preserve"><value> (デバッグ)</value></data>
   <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>目的地カードの監房 (左から右へ): 9,11,12</value></data>
-  <data name="Main_DetectAutomatically" xml:space="preserve"><value>自動検出</value></data>
-  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>ゲームの設定ファイルから言語を取得します。一覧から選ぶとオフになります</value></data>
   <data name="Main_EditMode" xml:space="preserve"><value>編集モード</value></data>
   <data name="Main_EditMode_Tip" xml:space="preserve"><value>編集モードではオーバーレイの監房をクリックすると、コード、レアリティ、フラグのメニューが開きます。編集中は自動スキャンが止まります。</value></data>
   <data name="Main_Every" xml:space="preserve"><value>、間隔</value></data>
@@ -61,7 +59,7 @@
 アーカイブ全体を専用のフォルダーに展開し、アーカイブ内からではなくそこからプログラムを実行してください。</value></data>
   <data name="Main_FindLog_Tip" xml:space="preserve"><value>ログを自動で探します: 実行中のゲームの隣、Steam ライブラリ、ランチャーの設定</value></data>
   <data name="Main_GameLanguage" xml:space="preserve"><value>ゲームの言語</value></data>
-  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>ゲームがテキストを表示する言語です。アプリが読み取るために使います。このウィンドウの言語ではありません(そちらは下にあります)。</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>ゲームがテキストを表示する言語です。アプリが読み取るために使います。自動: ゲームの設定ファイルから取得します。このウィンドウの言語ではありません(そちらは下にあります)。</value></data>
   <data name="Main_GameLog" xml:space="preserve"><value>ゲームログ</value></data>
   <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: ゲームフォルダー\UE_game\TorchLight\Saved\Logs</value></data>
   <data name="Main_GameWindow" xml:space="preserve"><value>ゲームウィンドウ</value></data>

@@ -50,8 +50,6 @@ Sin él no se reconoce el texto del juego; las cartas y selecciones se siguen di
   <data name="Main_DatasetFolder" xml:space="preserve"><value>Carpeta del conjunto de datos</value></data>
   <data name="Main_Debug" xml:space="preserve"><value> (depuración)</value></data>
   <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>Celdas de las cartas de destino, de izquierda a derecha: 9,11,12</value></data>
-  <data name="Main_DetectAutomatically" xml:space="preserve"><value>Detectar automáticamente</value></data>
-  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>Tomar el idioma del archivo de ajustes del juego; elegir uno en la lista desactiva esto</value></data>
   <data name="Main_EditMode" xml:space="preserve"><value>Modo de edición</value></data>
   <data name="Main_EditMode_Tip" xml:space="preserve"><value>En modo de edición, pulsa una celda en la superposición: un menú de código, rareza y marcas. El escaneo automático se detiene mientras editas.</value></data>
   <data name="Main_Every" xml:space="preserve"><value>, cada</value></data>
@@ -61,7 +59,7 @@ Sin él no se reconoce el texto del juego; las cartas y selecciones se siguen di
 Descomprime todo el archivo en una carpeta propia y ejecuta el programa desde allí, no desde dentro del archivo.</value></data>
   <data name="Main_FindLog_Tip" xml:space="preserve"><value>Buscar el registro automáticamente: junto al juego en marcha, en las bibliotecas de Steam, en los ajustes del lanzador</value></data>
   <data name="Main_GameLanguage" xml:space="preserve"><value>Idioma del juego</value></data>
-  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>El idioma en que el juego muestra su texto, para que la aplicación pueda leerlo. No es el idioma de esta ventana: ese está debajo.</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>El idioma en que el juego muestra su texto, para que la aplicación pueda leerlo. Automático: del archivo de ajustes del juego. No es el idioma de esta ventana: ese está debajo.</value></data>
   <data name="Main_GameLog" xml:space="preserve"><value>Registro del juego</value></data>
   <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: carpeta del juego\UE_game\TorchLight\Saved\Logs</value></data>
   <data name="Main_GameWindow" xml:space="preserve"><value>Ventana del juego</value></data>

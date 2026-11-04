@@ -50,8 +50,6 @@ Sans lui, le texte du jeu ne sera pas reconnu ; les cartes et les choix restent 
   <data name="Main_DatasetFolder" xml:space="preserve"><value>Dossier du jeu de données</value></data>
   <data name="Main_Debug" xml:space="preserve"><value> (débogage)</value></data>
   <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>Cellules des cartes de destination, de gauche à droite : 9,11,12</value></data>
-  <data name="Main_DetectAutomatically" xml:space="preserve"><value>Détecter automatiquement</value></data>
-  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>Prendre la langue dans le fichier de paramètres du jeu ; en choisir une dans la liste désactive ceci</value></data>
   <data name="Main_EditMode" xml:space="preserve"><value>Mode édition</value></data>
   <data name="Main_EditMode_Tip" xml:space="preserve"><value>En mode édition, cliquez sur une cellule de la superposition : un menu de code, de rareté et de marques. L'analyse automatique s'interrompt pendant l'édition.</value></data>
   <data name="Main_Every" xml:space="preserve"><value>, toutes les</value></data>
@@ -61,7 +59,7 @@ Sans lui, le texte du jeu ne sera pas reconnu ; les cartes et les choix restent 
 Décompressez toute l'archive dans un dossier à part et lancez le programme depuis celui-ci, pas depuis l'archive.</value></data>
   <data name="Main_FindLog_Tip" xml:space="preserve"><value>Trouver le journal automatiquement : près du jeu lancé, dans les bibliothèques Steam, dans les paramètres du lanceur</value></data>
   <data name="Main_GameLanguage" xml:space="preserve"><value>Langue du jeu</value></data>
-  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>La langue dans laquelle le jeu affiche son texte, pour que l'application puisse le lire. Ce n'est pas la langue de cette fenêtre : celle-ci est plus bas.</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>La langue dans laquelle le jeu affiche son texte, pour que l'application puisse le lire. Automatique : depuis le fichier de paramètres du jeu. Ce n'est pas la langue de cette fenêtre : celle-ci est plus bas.</value></data>
   <data name="Main_GameLog" xml:space="preserve"><value>Journal du jeu</value></data>
   <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log : dossier du jeu\UE_game\TorchLight\Saved\Logs</value></data>
   <data name="Main_GameWindow" xml:space="preserve"><value>Fenêtre du jeu</value></data>

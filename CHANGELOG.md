@@ -4,6 +4,10 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## Unreleased
+
+- Game language: "Automatic" is now an item of the list, as in Interface language, in place of the separate checkbox.
+
 ## 0.7.43 — 2026-11-04
 
 - The app's window and overlay in all the game's languages, the language of Windows by default, with a list to choose another

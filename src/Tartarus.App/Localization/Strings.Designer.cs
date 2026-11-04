@@ -56,8 +56,6 @@ public static class Strings
     public static string Main_DatasetFolder => Get(nameof(Main_DatasetFolder));
     public static string Main_Debug => Get(nameof(Main_Debug));
     public static string Main_DestinationCells_Tip => Get(nameof(Main_DestinationCells_Tip));
-    public static string Main_DetectAutomatically => Get(nameof(Main_DetectAutomatically));
-    public static string Main_DetectAutomatically_Tip => Get(nameof(Main_DetectAutomatically_Tip));
     public static string Main_EditMode => Get(nameof(Main_EditMode));
     public static string Main_EditMode_Tip => Get(nameof(Main_EditMode_Tip));
     public static string Main_Every => Get(nameof(Main_Every));

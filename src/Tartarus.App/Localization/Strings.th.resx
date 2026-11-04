@@ -50,8 +50,6 @@
   <data name="Main_DatasetFolder" xml:space="preserve"><value>โฟลเดอร์ชุดข้อมูล</value></data>
   <data name="Main_Debug" xml:space="preserve"><value> (ดีบัก)</value></data>
   <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>ห้องขังบนการ์ดจุดหมายปลายทาง จากซ้ายไปขวา: 9,11,12</value></data>
-  <data name="Main_DetectAutomatically" xml:space="preserve"><value>ตรวจหาอัตโนมัติ</value></data>
-  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>ใช้ภาษาจากไฟล์การตั้งค่าของเกม การเลือกภาษาจากรายการจะปิดตัวเลือกนี้</value></data>
   <data name="Main_EditMode" xml:space="preserve"><value>โหมดแก้ไข</value></data>
   <data name="Main_EditMode_Tip" xml:space="preserve"><value>ในโหมดแก้ไข ให้คลิกห้องขังบนโอเวอร์เลย์: เมนูรหัส ความหายาก และแฟล็ก การสแกนอัตโนมัติจะหยุดระหว่างแก้ไข</value></data>
   <data name="Main_Every" xml:space="preserve"><value>, ทุก</value></data>
@@ -61,7 +59,7 @@
 แตกไฟล์ทั้งหมดไปยังโฟลเดอร์ของตัวเอง แล้วเรียกใช้โปรแกรมจากที่นั่น ไม่ใช่จากในไฟล์บีบอัด</value></data>
   <data name="Main_FindLog_Tip" xml:space="preserve"><value>ค้นหาบันทึกโดยอัตโนมัติ: ข้างเกมที่กำลังทำงาน ในคลัง Steam ในการตั้งค่าของตัวเปิดเกม</value></data>
   <data name="Main_GameLanguage" xml:space="preserve"><value>ภาษาของเกม</value></data>
-  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>ภาษาที่เกมใช้แสดงข้อความ เพื่อให้แอปอ่านได้ ไม่ใช่ภาษาของหน้าต่างนี้ ซึ่งอยู่ด้านล่าง</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>ภาษาที่เกมใช้แสดงข้อความ เพื่อให้แอปอ่านได้ อัตโนมัติ: จากไฟล์การตั้งค่าของเกม ไม่ใช่ภาษาของหน้าต่างนี้ ซึ่งอยู่ด้านล่าง</value></data>
   <data name="Main_GameLog" xml:space="preserve"><value>บันทึกของเกม</value></data>
   <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: โฟลเดอร์เกม\UE_game\TorchLight\Saved\Logs</value></data>
   <data name="Main_GameWindow" xml:space="preserve"><value>หน้าต่างเกม</value></data>

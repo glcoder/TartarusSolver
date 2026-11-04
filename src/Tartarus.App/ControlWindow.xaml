@@ -53,9 +53,7 @@
     <StackPanel Orientation="Horizontal" Margin="0,6,0,0"
                 ToolTip="{x:Static res:Strings.Main_GameLanguage_Tip}">
       <TextBlock Text="{x:Static res:Strings.Main_GameLanguage}" Margin="0,0,6,0" />
-      <ComboBox x:Name="GameLanguageCombo" Width="185" />
-      <CheckBox x:Name="GameLanguageAutoCheck" Content="{x:Static res:Strings.Main_DetectAutomatically}" Margin="10,0,0,0"
-                ToolTip="{x:Static res:Strings.Main_DetectAutomatically_Tip}" />
+      <ComboBox x:Name="GameLanguageCombo" Width="230" />
     </StackPanel>
     <StackPanel x:Name="ViewPanel" Orientation="Horizontal" Margin="0,6,0,0">
       <CheckBox x:Name="OverlayCheck" Content="{x:Static res:Strings.Main_Overlay}" Checked="OverlayCheck_Changed" Unchecked="OverlayCheck_Changed" />

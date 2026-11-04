@@ -75,7 +75,7 @@ Settings live in `%LOCALAPPDATA%\TartarusSolver\settings.json`, among them:
 
 - `CacheWorth`: what a Riot chest per Inmate left is worth, in Chromatics, by rarity (Normal … Ultimate); the
   solver weighs a sure chest against a chance at a Chromatic with it.
-- `DetectGameLanguage`: take the game's language from its own settings (Detect automatically in the window; choosing a
+- `DetectGameLanguage`: take the game's language from its own settings ("Automatic" in the window's list; choosing a
   language in the list turns it off).
 - `GameLanguage`: the language chosen for the game (`en`, `ru`, `zh`, …; in the language window or the Game language list),
   read with `DetectGameLanguage` off; empty: asked at the first connection to the game.

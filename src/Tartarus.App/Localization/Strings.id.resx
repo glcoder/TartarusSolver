@@ -50,8 +50,6 @@ Tanpa itu teks game tidak akan dikenali; kartu dan pilihan tetap dibedakan dari 
   <data name="Main_DatasetFolder" xml:space="preserve"><value>Folder dataset</value></data>
   <data name="Main_Debug" xml:space="preserve"><value> (debug)</value></data>
   <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>Sel pada kartu Tujuan, dari kiri ke kanan: 9,11,12</value></data>
-  <data name="Main_DetectAutomatically" xml:space="preserve"><value>Deteksi otomatis</value></data>
-  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>Ambil bahasa dari file pengaturan game; memilih bahasa di daftar mematikan ini</value></data>
   <data name="Main_EditMode" xml:space="preserve"><value>Mode edit</value></data>
   <data name="Main_EditMode_Tip" xml:space="preserve"><value>Dalam mode edit, klik sel di overlay: menu Kode, kelangkaan, dan tanda. Pindai otomatis berhenti selama penyuntingan.</value></data>
   <data name="Main_Every" xml:space="preserve"><value>, setiap</value></data>
@@ -61,7 +59,7 @@ Tanpa itu teks game tidak akan dikenali; kartu dan pilihan tetap dibedakan dari 
 Ekstrak seluruh arsip ke folder tersendiri dan jalankan program dari sana, bukan dari dalam arsip.</value></data>
   <data name="Main_FindLog_Tip" xml:space="preserve"><value>Cari log secara otomatis: di dekat game yang berjalan, di pustaka Steam, di pengaturan peluncur</value></data>
   <data name="Main_GameLanguage" xml:space="preserve"><value>Bahasa game</value></data>
-  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>Bahasa teks yang ditampilkan game, agar aplikasi bisa membacanya. Bukan bahasa jendela ini: itu ada di bawah.</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>Bahasa teks yang ditampilkan game, agar aplikasi bisa membacanya. Otomatis: dari file pengaturan game. Bukan bahasa jendela ini: itu ada di bawah.</value></data>
   <data name="Main_GameLog" xml:space="preserve"><value>Log game</value></data>
   <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log: folder game\UE_game\TorchLight\Saved\Logs</value></data>
   <data name="Main_GameWindow" xml:space="preserve"><value>Jendela game</value></data>

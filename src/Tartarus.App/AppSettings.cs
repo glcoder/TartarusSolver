@@ -49,7 +49,7 @@ public sealed class AppSettings
     /// yet, asked as the app connects to the game. Read only with <see cref="DetectGameLanguage"/> off.
     /// </summary>
     public string? GameLanguage { get; set; }
-    /// <summary>"Detect automatically": the language from the game's GameUserSettings.ini, not <see cref="GameLanguage"/>.</summary>
+    /// <summary>The game language list's "Automatic": the language from the game's GameUserSettings.ini, not <see cref="GameLanguage"/>.</summary>
     public bool DetectGameLanguage { get; set; } = true;
     /// <summary>The game's UE_game.log; null: looked for under the usual Steam libraries.</summary>
     public string? GameLogPath { get; set; }

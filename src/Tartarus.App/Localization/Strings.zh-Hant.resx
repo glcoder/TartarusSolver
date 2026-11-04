@@ -50,8 +50,6 @@
   <data name="Main_DatasetFolder" xml:space="preserve"><value>資料集資料夾</value></data>
   <data name="Main_Debug" xml:space="preserve"><value>（偵錯）</value></data>
   <data name="Main_DestinationCells_Tip" xml:space="preserve"><value>目的地卡片上的牢房，由左至右：9,11,12</value></data>
-  <data name="Main_DetectAutomatically" xml:space="preserve"><value>自動偵測</value></data>
-  <data name="Main_DetectAutomatically_Tip" xml:space="preserve"><value>從遊戲的設定檔取得語言；在清單中選擇語言會關閉此項</value></data>
   <data name="Main_EditMode" xml:space="preserve"><value>編輯模式</value></data>
   <data name="Main_EditMode_Tip" xml:space="preserve"><value>編輯模式下點擊疊加層上的牢房：開啟代碼、稀有度和標記選單。編輯時自動掃描暫停。</value></data>
   <data name="Main_Every" xml:space="preserve"><value>，每</value></data>
@@ -61,7 +59,7 @@
 請將整個壓縮檔解壓到單獨的資料夾，並從那裡執行程式，不要在壓縮檔內執行。</value></data>
   <data name="Main_FindLog_Tip" xml:space="preserve"><value>自動尋找日誌：執行中的遊戲旁、Steam 遊戲庫、啟動器設定</value></data>
   <data name="Main_GameLanguage" xml:space="preserve"><value>遊戲語言</value></data>
-  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>遊戲顯示文字所用的語言，供本程式讀取。這不是本視窗的語言，本視窗的語言在下方。</value></data>
+  <data name="Main_GameLanguage_Tip" xml:space="preserve"><value>遊戲顯示文字所用的語言，供本程式讀取。自動：取自遊戲的設定檔。這不是本視窗的語言，本視窗的語言在下方。</value></data>
   <data name="Main_GameLog" xml:space="preserve"><value>遊戲日誌</value></data>
   <data name="Main_GameLog_Tip" xml:space="preserve"><value>UE_game.log：遊戲資料夾\UE_game\TorchLight\Saved\Logs</value></data>
   <data name="Main_GameWindow" xml:space="preserve"><value>遊戲視窗</value></data>
