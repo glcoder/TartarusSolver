@@ -70,7 +70,11 @@ static int Capture(string[] args)
         return 1;
     }
     Console.WriteLine($"capturing {win} bounds {Win32Windows.VisibleBounds(win.Hwnd)}");
-    using var cap = new WindowCapture(win.Hwnd);
+    using IGameCapture cap = args.Contains("--screen-copy") ? new ScreenCopyCapture(win.Hwnd) : new WindowCapture(win.Hwnd);
+    cap.Note += note => Console.WriteLine(note);
+    // The app itself leaves its windows out of the copies: they don't cover the game here either.
+    if (cap is ScreenCopyCapture copy)
+        foreach (var own in Win32Windows.List().Where(w => w.Process == "TartarusSolver")) copy.Ignore(own.Hwnd);
     Frame? frame = null;
     var sw = Stopwatch.StartNew();
     while (frame == null && sw.ElapsedMilliseconds < 3000)
@@ -84,19 +88,51 @@ static int Capture(string[] args)
         return 1;
     }
     // --watch N: the frames Windows sends in N seconds and the CPU this process spends taking them (no scans).
-    if (int.TryParse(Opt(args, "--watch"), out int watch) && watch > 0)
+    // --bench N: N grabs a tenth of a second apart, like the app's during a run: the time of those that gave a frame (a covered
+    // game's screen copy gives none, at once), the CPU they take; a frame of the last ones goes to --out.
+    if (int.TryParse(Opt(args, "--bench"), out int bench) && bench > 0)
     {
         using var self = Process.GetCurrentProcess();
-        long frames0 = cap.FrameCount;
+        var pool = new PixelPool();
+        var times = new List<double>(bench);
+        var cpu0 = self.TotalProcessorTime;
+        for (int i = 0; i < bench; i++)
+        {
+            var one = Stopwatch.StartNew();
+            var grabbed = cap.Grab(pool);
+            double ms = one.Elapsed.TotalMilliseconds;
+            if (grabbed != null)
+            {
+                times.Add(ms);
+                pool.Return(grabbed);
+            }
+            Thread.Sleep(100);
+        }
+        self.Refresh();
+        double cpuMs = (self.TotalProcessorTime - cpu0).TotalMilliseconds;
+        times.Sort();
+        if (times.Count == 0)
+        {
+            Console.WriteLine($"{cap.GetType().Name}: {bench} grabs, no frame");
+            return 1;
+        }
+        Console.WriteLine($"{cap.GetType().Name} {frame.Width}x{frame.Height}: {times.Count} frames of {bench} grabs, median {times[times.Count / 2]:0.0} ms, p95 {times[times.Count * 95 / 100]:0.0} ms, max {times[^1]:0.0} ms; CPU {cpuMs / bench:0.0} ms a grab");
+        if (cap.Grab() is { } last) ImageIO.SavePng(last, outPath);
+        return 0;
+    }
+    if (int.TryParse(Opt(args, "--watch"), out int watch) && watch > 0 && cap is WindowCapture watched)
+    {
+        using var self = Process.GetCurrentProcess();
+        long frames0 = watched.FrameCount;
         var cpu0 = self.TotalProcessorTime;
         Thread.Sleep(watch * 1000);
         self.Refresh();
         double cpuMs = (self.TotalProcessorTime - cpu0).TotalMilliseconds;
-        Console.WriteLine($"{watch} s: {(cap.FrameCount - frames0) / (double)watch:0.0} frames/s, CPU {cpuMs:0} ms ({cpuMs / (watch * 10.0):0.0}% of one core)");
+        Console.WriteLine($"{watch} s: {(watched.FrameCount - frames0) / (double)watch:0.0} frames/s, CPU {cpuMs:0} ms ({cpuMs / (watch * 10.0):0.0}% of one core)");
     }
     var grabSw = Stopwatch.StartNew();
     frame = cap.Grab()!;
-    Console.WriteLine($"frame {frame.Width}x{frame.Height}, first after {sw.ElapsedMilliseconds - grabSw.ElapsedMilliseconds} ms, grab {grabSw.Elapsed.TotalMilliseconds:0.0} ms, frames so far {cap.FrameCount}");
+    Console.WriteLine($"frame {frame.Width}x{frame.Height}, first after {sw.ElapsedMilliseconds - grabSw.ElapsedMilliseconds} ms, grab {grabSw.Elapsed.TotalMilliseconds:0.0} ms, frames so far {(cap as WindowCapture)?.FrameCount}");
     ImageIO.SavePng(frame, outPath);
     Console.WriteLine($"saved {outPath}");
     using var scanner = MakeScanner(args);

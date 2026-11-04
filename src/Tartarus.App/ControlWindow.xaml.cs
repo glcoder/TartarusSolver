@@ -30,7 +30,7 @@ public partial class ControlWindow : Window
     private HotkeyManager? _hotkeys;
     private Dataset _dataset;
 
-    private WindowCapture? _capture;
+    private IGameCapture? _capture;
     // A capture being set up off the UI thread: no second one meanwhile.
     private bool _startingCapture;
     private bool _findingGame;
@@ -454,12 +454,14 @@ public partial class ControlWindow : Window
         _scans.SetGameLanguage(code);
     }
 
-    // Windows.Graphics.Capture missing on this PC: auto attach stops trying (2026-11-01, Windows 10 1909: tried every
-    // 2 s, 1904 lines of the same failure in the log, nothing on screen to tell the player why).
-    private bool _captureUnsupported;
-    private static string UnsupportedStatus => WindowCapture.WindowsTooOld
-        ? "Not capturing: this Windows is too old, the app needs Windows 10 version 1903 or later"
-        : "Not capturing: Windows can't capture windows on this PC (Windows.Graphics.Capture unsupported)";
+    // Windows won't capture a window on this PC: a copy of the screen instead, for the rest of this session. At once when it
+    // has no such capture (2026-11-04, Windows 10 1809: a player restarted the app for an hour), after a few refusals when
+    // it might have been a moment's (10 of 162 installs in reports never had a frame).
+    private bool _screenCopy;
+    private int _captureRefusals;
+    private const int RefusalsForScreenCopy = 3;
+    private bool _copyCovered;
+    private static string WindowsLanguage => Tartarus.Vision.Ocr.OcrPacks.FromCulture(System.Globalization.CultureInfo.CurrentUICulture.Name);
 
     // A capture that fails is tried again later and later, the failure said when it changes and at each tenth try (2026-11-03:
     // tried every 2 s for hours, 859 lines of the same failure in a log, and a Direct3D device left behind by each).
@@ -478,11 +480,6 @@ public partial class ControlWindow : Window
         if (AutoAttachCheck.IsChecked != true)
         {
             CaptureStatus.Text = "Not capturing";
-            return;
-        }
-        if (_captureUnsupported)
-        {
-            CaptureStatus.Text = UnsupportedStatus;
             return;
         }
         if (DateTime.Now < _captureNextTry) return;
@@ -509,13 +506,15 @@ public partial class ControlWindow : Window
     private async void StartCapture(WindowInfo w, bool keepOverlay = false)
     {
         if (_startingCapture) return;
+        bool useScreenCopy = false;
         StopCapture(hideOverlay: !keepOverlay);
         _startingCapture = true;
         try
         {
             // Off the UI thread: on a Windows Insider build (28000) the capture item's Closed event never got subscribed
             // to from it, and the window stood still at every start (2026-10-30, a player's hang reports).
-            var capture = await Task.Run(() => new WindowCapture(w.Hwnd));
+            bool byScreenCopy = _screenCopy || _settings.ScreenCopy;
+            IGameCapture capture = await Task.Run<IGameCapture>(() => byScreenCopy ? new ScreenCopyCapture(w.Hwnd) : new WindowCapture(w.Hwnd));
             capture.Note += AppLog.Write;
             capture.Closed += () => Dispatcher.BeginInvoke(() =>
             {
@@ -527,24 +526,20 @@ public partial class ControlWindow : Window
             (_captureFails, _captureFailure, _captureNextTry) = (0, null, default);
             _target = w;
             CaptureButton.Content = "Stop ■";
-            CaptureStatus.Text = $"Capturing: {w}";
-            Log($"Capturing window \"{w.Title}\" ({w.Process}), {Win32Windows.VisibleBounds(w.Hwnd)}");
+            _copyCovered = false;
+            CaptureStatus.Text = byScreenCopy ? Tartarus.Vision.Ocr.OcrPacks.ScreenCopyOn(WindowsLanguage) : $"Capturing: {w}";
+            Log($"Capturing window \"{w.Title}\" ({w.Process}){(byScreenCopy ? " by screen copy" : "")}, {Win32Windows.VisibleBounds(w.Hwnd)}");
+            if (capture is ScreenCopyCapture copy) LeaveOutOfCopies(copy);
             // The log of the very install that's running, from its executable's path.
             if (Win32Windows.ImagePath(w.Pid) is { } exe) StartGameLog(exe);
             CheckGameLanguage();
         }
-        catch (Exception ex) when (WindowCapture.IsUnsupported(ex))
+        catch (Exception ex) when (!_screenCopy && (WindowCapture.IsUnsupported(ex) || WindowCapture.IsRefused(ex) && ++_captureRefusals >= RefusalsForScreenCopy))
         {
-            if (!_captureUnsupported)
-            {
-                Log($"Could not start capturing \"{w.Title}\": {ex.Message} Usually Windows 10 older than version 1903, a remote "
-                    + "desktop session, a virtual machine or a display driver without Direct3D 11. Not tried again automatically.");
-                if (WindowCapture.WindowsTooOld)
-                    MessageBox.Show(this, "This version of Windows can't capture the game's window, so the app can't read the game.\n\n"
-                        + "The app needs Windows 10 version 1903 or later.", "Tartarus Solver", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-            _captureUnsupported = true;
-            CaptureStatus.Text = UnsupportedStatus;
+            Log($"Could not start capturing \"{w.Title}\": {ex.Message} A copy of the screen from now on.");
+            _screenCopy = true;
+            _captureNextTry = default;
+            useScreenCopy = true;
         }
         catch (Exception ex)
         {
@@ -562,12 +557,14 @@ public partial class ControlWindow : Window
         {
             _startingCapture = false;
         }
+        if (useScreenCopy) StartCapture(w, keepOverlay);
     }
 
     /// <summary>Stops capturing; <paramref name="hideOverlay"/> false when the same window is captured again at once.</summary>
     private void StopCapture(bool hideOverlay = true)
     {
         // Off the UI thread too: closing the capture once hung in Windows' code (2026-10-30, Sentry, an Insider build).
+        if (_capture is ScreenCopyCapture) BackInCaptures();
         if (_capture is { } old) Task.Run(old.Dispose);
         _capture = null;
         _target = null;
@@ -634,6 +631,25 @@ public partial class ControlWindow : Window
             _stale = stale;
             RefreshOverlay();
         }
+    }
+
+    /// <summary>
+    /// This window and the overlay out of the screen copies where Windows can do that (2004 and later): the game behind them is
+    /// read. Before that the overlay blinks for each copy, and this window has to be off the game.
+    /// </summary>
+    private void LeaveOutOfCopies(ScreenCopyCapture copy)
+    {
+        bool can = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041);
+        IntPtr me = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+        if (can && Native.SetWindowDisplayAffinity(me, Native.WDA_EXCLUDEFROMCAPTURE)) copy.Ignore(me);
+        IntPtr overlay = new System.Windows.Interop.WindowInteropHelper(_overlay).EnsureHandle();
+        if (!can || !Native.SetWindowDisplayAffinity(overlay, Native.WDA_EXCLUDEFROMCAPTURE)) copy.CloakForCopies(overlay);
+    }
+
+    private void BackInCaptures()
+    {
+        Native.SetWindowDisplayAffinity(new System.Windows.Interop.WindowInteropHelper(this).Handle, Native.WDA_NONE);
+        Native.SetWindowDisplayAffinity(new System.Windows.Interop.WindowInteropHelper(_overlay).Handle, Native.WDA_NONE);
     }
 
     private bool _stale;
@@ -740,6 +756,12 @@ public partial class ControlWindow : Window
         var capture = _capture;
         Frame? frame;
         try { frame = await Task.Run(() => capture.Grab(_pixels)); }
+        catch (Exception ex) when (capture is ScreenCopyCapture)
+        {
+            ScanStatus.Text = "Screen copy failed: " + ex.Message;
+            Log("Screen copy failed: " + ex.Message);
+            return false;
+        }
         catch (Exception ex) when (WindowCapture.IsDeviceLost(ex))
         {
             // The graphics card was reset under the capture (2026-10-31, Sentry: auto scan stopped for good): a new
@@ -754,6 +776,11 @@ public partial class ControlWindow : Window
             return false;
         }
         if (capture != _capture) return false;
+        if (capture is ScreenCopyCapture { Covered: var covered } && covered != _copyCovered)
+        {
+            _copyCovered = covered;
+            CaptureStatus.Text = covered ? Tartarus.Vision.Ocr.OcrPacks.ScreenCopyCovered(WindowsLanguage) : Tartarus.Vision.Ocr.OcrPacks.ScreenCopyOn(WindowsLanguage);
+        }
         if (frame == null)
         {
             if (manual) ScanStatus.Text = "No frames yet (is the window minimized?)";

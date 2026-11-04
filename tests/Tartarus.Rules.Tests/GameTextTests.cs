@@ -143,6 +143,17 @@ public class GameTextTests
         Assert.Equal(lines.Count, lines.Distinct().Count());
     }
 
+    [Fact]
+    public void The_screen_copy_statuses_are_told_in_each_of_the_game_s_languages()
+    {
+        foreach (var text in new Func<string?, string>[] { OcrPacks.ScreenCopyOn, OcrPacks.ScreenCopyCovered })
+        {
+            var lines = OcrPacks.GameLanguages.Select(text).ToList();
+            Assert.All(lines, l => Assert.False(string.IsNullOrWhiteSpace(l)));
+            Assert.Equal(lines.Count, lines.Distinct().Count());
+        }
+    }
+
     [Theory]
     [InlineData("zh-CN", "zh")]
     [InlineData("zh-Hans-CN", "zh")]

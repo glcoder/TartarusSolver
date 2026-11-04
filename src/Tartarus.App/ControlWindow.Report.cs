@@ -155,6 +155,7 @@ public partial class ControlWindow
             session = new
             {
                 capturing = _capture != null,
+                captureWay = _capture?.GetType().Name,
                 autoAttach = AutoAttachCheck.IsChecked == true,
                 autoScan = AutoScanCheck.IsChecked == true,
                 overlay = OverlayCheck.IsChecked == true,

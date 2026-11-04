@@ -140,6 +140,42 @@ public static class OcrPacks
         _ => "Not capturing: Windows refuses to capture the game window. Screen capture may be turned off or removed in this Windows: check the CaptureService service. Without it the app can't see the game.",
     };
 
+    /// <summary>The status while the game is read by a copy of the screen, in a game language.</summary>
+    public static string ScreenCopyOn(string? code) => code?.ToLowerInvariant() switch
+    {
+        "ru" => "Копия экрана: Windows не даёт захватить окно. Держите игру на переднем плане, ничем не закрывая.",
+        "de" => "Bildschirmkopie: Windows erlaubt keine Fensteraufnahme. Halten Sie das Spiel im Vordergrund und unverdeckt.",
+        "es" => "Copia de pantalla: Windows no permite capturar la ventana. Mantén el juego en primer plano, sin cubrirlo.",
+        "fr" => "Copie d'écran : Windows ne permet pas de capturer la fenêtre. Gardez le jeu au premier plan, sans le couvrir.",
+        "pt" => "Cópia da tela: o Windows não permite capturar a janela. Mantenha o jogo em primeiro plano, sem cobri-lo.",
+        "id" => "Salinan layar: Windows tidak mengizinkan penangkapan jendela. Biarkan game di depan tanpa tertutup.",
+        "vi" => "Sao chép màn hình: Windows không cho chụp cửa sổ. Hãy giữ trò chơi ở trên cùng, không bị che.",
+        "ja" => "画面コピー: Windows がウィンドウのキャプチャを許可していません。ゲームを前面に出し、隠さないでください。",
+        "ko" => "화면 복사: Windows가 창 캡처를 허용하지 않습니다. 게임을 맨 앞에 두고 가리지 마세요.",
+        "th" => "คัดลอกหน้าจอ: Windows ไม่อนุญาตให้จับภาพหน้าต่าง โปรดให้เกมอยู่ด้านหน้าและไม่ถูกบัง",
+        "zh" or "zhcn" => "屏幕复制：Windows 不允许捕获窗口。请让游戏保持在最前面，不要遮挡。",
+        "zhtw" => "螢幕複製：Windows 不允許擷取視窗。請讓遊戲保持在最前面，不要遮擋。",
+        _ => "Screen copy: Windows won't capture the window. Keep the game in front, with nothing over it.",
+    };
+
+    /// <summary>The status while another window stands over the game and no copy of the screen is made, in a game language.</summary>
+    public static string ScreenCopyCovered(string? code) => code?.ToLowerInvariant() switch
+    {
+        "ru" => "Подсказки ждут: игру закрывает другое окно. Уберите его.",
+        "de" => "Hinweise warten: Ein anderes Fenster liegt über dem Spiel. Schieben Sie es weg.",
+        "es" => "Las pistas esperan: otra ventana cubre el juego. Muévela.",
+        "fr" => "Les conseils attendent : une autre fenêtre couvre le jeu. Déplacez-la.",
+        "pt" => "As dicas aguardam: outra janela cobre o jogo. Mova-a.",
+        "id" => "Petunjuk menunggu: jendela lain menutupi game. Pindahkan jendela itu.",
+        "vi" => "Gợi ý đang chờ: một cửa sổ khác đang che trò chơi. Hãy chuyển nó đi.",
+        "ja" => "ヒントは待機中です: 別のウィンドウがゲームを隠しています。移動してください。",
+        "ko" => "힌트 대기 중: 다른 창이 게임을 가리고 있습니다. 옮겨 주세요.",
+        "th" => "คำแนะนำกำลังรอ: มีหน้าต่างอื่นบังเกมอยู่ โปรดย้ายออก",
+        "zh" or "zhcn" => "提示等待中：另一个窗口遮挡了游戏，请将其移开。",
+        "zhtw" => "提示等待中：另一個視窗遮擋了遊戲，請將其移開。",
+        _ => "Hints wait: another window is over the game. Move it away.",
+    };
+
     /// <summary>Where downloaded packs go (the program's own folder may not be writable).</summary>
     public static string DownloadDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TartarusSolver", "models", "ocr");
 

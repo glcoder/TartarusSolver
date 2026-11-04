@@ -141,6 +141,29 @@ public static partial class Win32Windows
         return new PixelRect(origin.X, origin.Y, origin.X + c.Right, origin.Y + c.Bottom);
     }
 
+    /// <summary>
+    /// The nearest window above <paramref name="window"/> in the desktop's order that shows over <paramref name="area"/>, zero if none.
+    /// Layered ones are left out: they are drawn over the desktop, mostly see-through (recording tools' and games' overlays).
+    /// </summary>
+    public static IntPtr WindowOver(IntPtr window, PixelRect area, IReadOnlySet<IntPtr> ignored)
+    {
+        for (IntPtr h = GetWindow(window, GW_HWNDPREV); h != IntPtr.Zero; h = GetWindow(h, GW_HWNDPREV))
+        {
+            if (ignored.Contains(h) || !IsWindowVisible(h) || IsIconic(h) || IsCloaked(h)) continue;
+            if ((GetWindowLongPtr(h, GWL_EXSTYLE) & WS_EX_LAYERED) != 0) continue;
+            var r = VisibleBounds(h);
+            if (r.Left < area.Right && area.Left < r.Right && r.Top < area.Bottom && area.Top < r.Bottom) return h;
+        }
+        return IntPtr.Zero;
+    }
+
+    /// <summary>A window's class name; unlike its title it tells nothing private.</summary>
+    public static string ClassName(IntPtr h)
+    {
+        var name = new StringBuilder(128);
+        return GetClassName(h, name, name.Capacity) > 0 ? name.ToString() : "";
+    }
+
     /// <summary>The monitor the window is mostly on, in screen pixels.</summary>
     public static PixelRect MonitorBounds(IntPtr h)
     {
@@ -163,7 +186,7 @@ public static partial class Win32Windows
     /// list: Process.GetProcessById waits on the process's handle, and on a busy PC that stood the UI thread still for
     /// 5–16 s at a time with every window listed (2026-10-31, a player's hang reports).
     /// </summary>
-    private static string ProcessName(int pid) =>
+    public static string ProcessName(int pid) =>
         DevicePath(pid) is { Length: > 0 } path ? Path.GetFileNameWithoutExtension(path) : "?";
 
     private delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr lParam);
@@ -176,6 +199,8 @@ public static partial class Win32Windows
 
     private const int GWL_EXSTYLE = -20;
     private const long WS_EX_TOOLWINDOW = 0x80;
+    private const long WS_EX_LAYERED = 0x80000;
+    private const uint GW_HWNDPREV = 3;
     private const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
     private const int DWMWA_CLOAKED = 14;
     private const uint MONITOR_DEFAULTTONEAREST = 2;
@@ -196,6 +221,8 @@ public static partial class Win32Windows
     [DllImport("user32.dll")] private static extern bool IsWindow(IntPtr h);
     [DllImport("user32.dll")] private static extern bool IsIconic(IntPtr h);
     [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] private static extern IntPtr GetWindow(IntPtr h, uint cmd);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassName(IntPtr h, StringBuilder name, int max);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetWindowText(IntPtr h, StringBuilder s, int max);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetWindowTextLength(IntPtr h);
     [DllImport("user32.dll")] private static extern int GetWindowThreadProcessId(IntPtr h, out int pid);

@@ -71,6 +71,8 @@ public sealed class AppSettings
     private const int CurrentVersion = 3;
     /// <summary>Where bug reports go (a Sentry DSN); empty: the app's own (BugReports.DefaultDsn).</summary>
     public string? ReportDsn { get; set; }
+    /// <summary>A copy of the screen instead of window capture from the start; only in this file, the app turns to it by itself where it must.</summary>
+    public bool ScreenCopy { get; set; }
     /// <summary>A random id of this install: tells one tester's reports from another's, and nothing else about them.</summary>
     public string InstallId { get; set; } = Guid.NewGuid().ToString("N")[..12];
     /// <summary>Ask GitHub for a new version (the player's window; never with --debug).</summary>
