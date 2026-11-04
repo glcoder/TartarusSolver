@@ -4,7 +4,7 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
-## Unreleased
+## 0.7.42 — 2026-11-04
 
 - Where Windows won't capture a window (older than Windows 10 1903, or its capture service off or removed), the game is read by a
   copy of the screen. Keep the game in front: nothing is read while another window is over it. Before Windows 10 2004 the overlay

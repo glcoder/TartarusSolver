@@ -8,8 +8,9 @@ game's rules, and frames the move that ends the run with the most Chromatic Inma
 chests).
 
 > **What it does not do:** it never reads or writes the game's memory, never injects anything into the game, and never
-> presses keys or clicks in it. It only captures the game's window (the Windows screen-capture API) and reads the log
-> file the game writes to disk. Every move is yours.
+> presses keys or clicks in it. It only captures the game's window (the Windows screen-capture API; where Windows won't
+> do that, a copy of the part of the screen where the game is) and reads the log file the game writes to disk. Every move
+> is yours.
 
 ## Features
 
@@ -38,7 +39,8 @@ chests).
 
 ## Requirements
 
-- Windows 10 (2004) or 11, x64.
+- Windows 10 (2004) or 11, x64. Older Windows 10 should work too, not tested on a real one: the game is read by a copy of
+  the screen, so keep it in front; the overlay blinks.
 - [.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0) and
   [Microsoft Visual C++ Redistributable (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe) (neither needed with the
   `-full` release).
@@ -108,7 +110,7 @@ Bug reports go to Sentry when the build is given a DSN: set `TARTARUS_SENTRY_DSN
 | `src/Tartarus.Rules` | the game's rules: state, legal moves, every instrument and incident, scoring |
 | `src/Tartarus.Solver` | the Monte Carlo search, the heuristic policy, the value and policy networks |
 | `src/Tartarus.Vision` | screen layout, OCR, the cell and slot networks, card and pick pictures, the game's log, the dataset |
-| `src/Tartarus.Capture` | window capture (Windows.Graphics.Capture) |
+| `src/Tartarus.Capture` | window capture (Windows.Graphics.Capture), a copy of the screen where Windows won't do that |
 | `src/Tartarus.App` | the WPF overlay and control window, hints, bug reports |
 | `tests/Tartarus.Rules.Tests` | rules, solver and screen-text tests |
 | `tools/Tartarus.ScanCli` | `tartarus-scan`: scan frames, export training crops, label review pages, log analysis |
