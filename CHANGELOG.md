@@ -4,6 +4,10 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## Unreleased
+
+- A Re-roll that brings the same three cards back no longer leaves the pick without a hint.
+
 ## 0.7.44 — 2026-11-04
 
 - Updates: a download cut off goes on from where it stopped, by itself while tries bring bytes, and at the next press of Update or after a restart; a stalled connection is given up after 30 s.
