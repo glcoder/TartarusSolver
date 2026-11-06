@@ -131,6 +131,7 @@ public partial class ControlWindow
             models = AppVersion.Models.Select(m => new { m.Name, m.Hash, m.Trained }),
             scanner = _scans.ScannerInfo,
             os = Environment.OSVersion.VersionString,
+            hardware = BugReports.Machine,
             at = DateTimeOffset.Now,
             crash = crash?.Message,
             window = _target is { } t ? new { t.Title, frame = _frame is { } f ? $"{f.Width}x{f.Height}" : null, dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip } : null,

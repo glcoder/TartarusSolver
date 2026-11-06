@@ -58,10 +58,17 @@ public static partial class BugReports
 
     public static bool Enabled { get; private set; }
 
+    /// <summary>The PC's processor and graphics cards, once read (off the UI thread at start): in report.json and the log.</summary>
+    public static Tartarus.Capture.Hardware.Info? Machine { get; private set; }
+
     public static void Init(AppSettings settings)
     {
         string dsn = string.IsNullOrWhiteSpace(settings.ReportDsn) ? DefaultDsn : settings.ReportDsn;
-        if (string.IsNullOrWhiteSpace(dsn)) return;
+        if (string.IsNullOrWhiteSpace(dsn))
+        {
+            Task.Run(() => ReadMachine(sentry: false));
+            return;
+        }
         try
         {
             SentrySdk.Init(o =>
@@ -88,7 +95,44 @@ public static partial class BugReports
             Enabled = true;
         }
         catch (Exception) { }
+        // After Init: a scope set up before it goes nowhere.
+        Task.Run(() => ReadMachine(Enabled));
     }
+
+    /// <summary>
+    /// Every event after this carries them: Sentry's device and gpu contexts (the event page shows them) and the cpu / gpu
+    /// tags (to count and search by). An event sent before it's read (a crash in the first moment) goes without.
+    /// </summary>
+    private static void ReadMachine(bool sentry)
+    {
+        var machine = Tartarus.Capture.Hardware.Read();
+        Machine = machine;
+        AppLog.Write("Hardware: " + machine);
+        if (!sentry) return;
+        try
+        {
+            SentrySdk.ConfigureScope(scope =>
+            {
+                scope.Contexts.Device.CpuDescription = machine.Cpu;
+                scope.Contexts.Device.ProcessorCount = machine.LogicalCores;
+                if (machine.Gpus.Count > 0)
+                {
+                    // Sentry's gpu context holds one card: the one with the most memory, most likely the one games run on (the tag lists all).
+                    var gpu = machine.Gpus[0];
+                    scope.Contexts.Gpu.Name = gpu.Name;
+                    scope.Contexts.Gpu.VendorName = gpu.Vendor;
+                    scope.Contexts.Gpu.MemorySize = (int)Math.Min(gpu.MemoryMb, int.MaxValue);
+                    scope.Contexts.Gpu.Version = gpu.Driver;
+                }
+                if (machine.Cpu != null) scope.SetTag("cpu", Cut(machine.Cpu));
+                if (machine.Gpus.Count > 0) scope.SetTag("gpu", Cut(string.Join(" + ", machine.Gpus.Select(g => g.Name))));
+            });
+        }
+        catch (Exception) { }
+    }
+
+    // Sentry's tag values end at 200 characters.
+    private static string Cut(string s) => s.Length <= 200 ? s : s[..200];
 
     /// <summary>Sends the report (when Sentry is set up) and keeps its zip; returns what to tell the player.</summary>
     public static async Task<string> SendAsync(BugReport report, string comment)

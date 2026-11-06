@@ -7,6 +7,7 @@ things.
 ## Unreleased
 
 - No error report when Windows's capture service is already gone as the capture closes.
+- Bug reports name the processor and the graphics cards (model, memory, driver), to see what PCs the app has to run on.
 
 ## 0.7.45 — 2026-11-06
 
