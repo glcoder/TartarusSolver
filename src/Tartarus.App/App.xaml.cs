@@ -19,6 +19,19 @@ public partial class App : Application
             Shutdown();
             return;
         }
+        // One app at a time: a second start shows the running one at once; with no window of it to show (one going down, or
+        // starting) it waits a moment.
+        bool shown = false;
+        if (!SingleInstance.Take(TimeSpan.Zero) && !(shown = SingleInstance.ShowRunning()) && !SingleInstance.Take(TimeSpan.FromSeconds(3)))
+            shown = SingleInstance.ShowRunning();
+        if (shown || !SingleInstance.Taken)
+        {
+            AppLog.Write(shown ? "Started again: the running app's window brought to the front, this one goes"
+                : "Started again while another one is starting: this one goes");
+            AppLog.Flush();
+            Shutdown();
+            return;
+        }
         DispatcherUnhandledException += OnUnhandled;
         // The game first: scans and hints take the CPU it leaves (2026-11-01: on a slow PC the game stalled opening a
         // window while a scan ran every moment).
@@ -57,6 +70,8 @@ public partial class App : Application
     {
         _watchdog?.Dispose();
         AppLog.Flush(2000);
+        // Before Exit's handlers: a restart (the interface's language) starts the next app from one of them.
+        SingleInstance.Release();
         base.OnExit(e);
     }
 

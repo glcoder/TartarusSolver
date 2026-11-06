@@ -7,6 +7,7 @@ things.
 ## Unreleased
 
 - A Re-roll that brings the same three cards back no longer leaves the pick without a hint.
+- One app at a time: starting it again brings the running one's window to the front (two or three running at once fought over the hotkeys and the overlay).
 - "Choose the game's language" (on the overlay and in the Game language window) is asked in the interface's language alone, no longer in all 13 (the window lists each language by its own name): loading them all stood the app still for 30 s on some PCs, at start.
 
 ## 0.7.44 — 2026-11-04

@@ -127,6 +127,9 @@ public static class Updates
                 old.WaitForExit(30_000);
             }
             catch (ArgumentException) { } // gone already
+            // The installer is the one app while it copies: a start meanwhile would run half-copied files. Free again as the
+            // old one exits (or it would be gone already).
+            SingleInstance.Take(TimeSpan.FromSeconds(30));
             foreach (var file in Directory.EnumerateFiles(AppDir, "*", SearchOption.AllDirectories))
             {
                 string to = Path.Combine(target, Path.GetRelativePath(AppDir, file));
@@ -148,10 +151,12 @@ public static class Updates
             Write($"Updated to {AppVersion.Number} in {target}");
             var start = new ProcessStartInfo(Path.Combine(target, "TartarusSolver.exe")) { UseShellExecute = false, WorkingDirectory = target };
             foreach (var a in args.Skip(2)) start.ArgumentList.Add(a);
+            SingleInstance.Release();
             Process.Start(start);
         }
         catch (Exception ex)
         {
+            SingleInstance.Release();
             Write($"Update to {AppVersion.Number} not installed: {ex.Message}");
             System.Windows.MessageBox.Show($"Couldn't put version {AppVersion.Number} into {target}:\n{ex.Message}\n\nIt is unpacked in {AppDir}: copy it over by hand or run it from there.",
                 "Tartarus Solver: update", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
