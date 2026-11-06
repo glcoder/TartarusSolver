@@ -249,7 +249,7 @@ public sealed unsafe class WindowCapture : IGameCapture
         {
             _disposed = true;
             _pool.FrameArrived -= OnFrameArrived;
-            _session.Dispose();
+            Quietly(_session.Dispose);
             return;
         }
         try
@@ -264,12 +264,22 @@ public sealed unsafe class WindowCapture : IGameCapture
             Monitor.Exit(_lock);
         }
         _pool.FrameArrived -= OnFrameArrived;
-        _session.Dispose();
-        _pool.Dispose();
+        Quietly(_session.Dispose);
+        Quietly(_pool.Dispose);
         _staging?.Dispose();
-        _winrtDevice.Dispose();
+        Quietly(_winrtDevice.Dispose);
         _context.Dispose();
         _device.Dispose();
+    }
+
+    /// <summary>
+    /// Windows's capture objects, closed through the capture service: gone already (RPC_S_SERVER_UNAVAILABLE, 2026-11-06,
+    /// 0.7.31-0.7.44 in reports), there is nothing left to close, and the throw went to Sentry from the pool thread.
+    /// </summary>
+    private static void Quietly(Action dispose)
+    {
+        try { dispose(); }
+        catch (COMException) { }
     }
 
     private static void TryHideCursor(GraphicsCaptureSession session)
