@@ -19,18 +19,20 @@ public partial class GameLanguageWindow : Window
     public GameLanguageWindow(string current, bool first = false)
     {
         InitializeComponent();
+        // The whole window in the interface's language (Windows's by default): the player who most needs it may read no English
+        // (2026-11-02: a third of those asked said "Not now", and played on hints that couldn't see the cards). The question was
+        // once in each row in its own language, which loaded all 13 as the window opened. A language is named by its own name, as
+        // in the interface's list: no English beside it.
+        Question.Text = Strings.Language_Choose;
         Message.Text = first
             ? Strings.Language_FoundMarked
             : Loc.F(Strings.Language_Unreadable,
-                OcrPacks.LanguageName(current));
+                OcrPacks.NativeName(current));
         foreach (var code in OcrPacks.GameLanguages)
         {
-            string name = OcrPacks.LanguageName(code), native = OcrPacks.NativeName(code);
-            // The question in each language beside it: the player who most needs this window may read no English
-            // (2026-11-02: a third of those asked said "Not now", and played on hints that couldn't see the cards).
-            var item = new ListBoxItem { Content = $"{(name == native ? name : $"{name} · {native}")} — {Loc.In(code, nameof(Strings.Language_Choose))}", Tag = code };
+            var item = new ListBoxItem { Content = OcrPacks.NativeName(code), Tag = code };
             LanguageList.Items.Add(item);
-            if (first && name == OcrPacks.LanguageName(current)) LanguageList.SelectedItem = item;
+            if (first && OcrPacks.LanguageName(code) == OcrPacks.LanguageName(current)) LanguageList.SelectedItem = item;
         }
         Loc.Apply(this);
     }

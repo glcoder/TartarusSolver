@@ -6,6 +6,7 @@
         Topmost="True" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI" FontSize="12" Background="#1E1F24" Foreground="#E8E8EC">
   <StackPanel Margin="12">
+    <TextBlock x:Name="Question" TextWrapping="Wrap" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,8" />
     <TextBlock x:Name="Message" TextWrapping="Wrap" Margin="0,0,0,10" />
     <ListBox x:Name="LanguageList" Background="#15161A" Foreground="#E8E8EC" BorderThickness="0" SelectionChanged="LanguageList_SelectionChanged" MouseDoubleClick="LanguageList_MouseDoubleClick">
       <ListBox.ItemContainerStyle>

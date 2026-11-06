@@ -389,9 +389,9 @@ public partial class ControlWindow : Window
     private string? _unreadLanguage;
     // The game's text doesn't read in the language taken, until a frame's does: the overlay says so.
     private bool _textUnread;
-    // In every language of the game: which one the player reads is what isn't known.
-    private static readonly string LanguageAsk = Strings.Language_Title + "\n"
-        + string.Join("\n", Tartarus.Vision.Ocr.OcrPacks.GameLanguages.Select(code => Loc.In(code, nameof(Strings.Language_Choose))));
+    // In the interface's language alone (the player's choice, else Windows's). Once in all 13: each a satellite assembly, loaded
+    // at start (2026-11-06: start hangs of 31 s loading the 12 others, Windows 11 26200/26300).
+    private static string LanguageAsk => Strings.Language_Title + "\n" + Strings.Language_Choose;
     // Languages the player was asked about this session: not asked again until the next start.
     private readonly HashSet<string> _askedLanguage = [];
     // No language chosen and asked this session: "Not now" asks again at the next start.
