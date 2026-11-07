@@ -4,7 +4,7 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
-## Unreleased
+## 0.8.0 — 2026-11-07
 
 - The update check and the OCR download no longer hold the window while Windows looks up the proxy (seconds on some PCs).
 
