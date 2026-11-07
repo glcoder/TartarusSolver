@@ -135,6 +135,31 @@ public class GameTextTests
         }
     }
 
+    [Fact]
+    public void A_log_past_its_limit_keeps_its_last_quarter_from_a_line_start()
+    {
+        string path = Path.Combine(Path.GetTempPath(), "tartarus-log-" + Guid.NewGuid().ToString("N") + ".txt");
+        try
+        {
+            File.WriteAllLines(path, Enumerable.Range(0, 1000).Select(i => $"old line {i:0000}"));
+            long before = new FileInfo(path).Length;
+            using (var log = new BackgroundLog(path, maxBytes: 4000))
+            {
+                log.Write("new");
+                Assert.True(log.Flush(5000));
+            }
+            var lines = File.ReadAllLines(path);
+            Assert.True(new FileInfo(path).Length < 1100, $"{new FileInfo(path).Length} of {before} bytes");
+            Assert.Matches(@"^old line \d{4}$", lines[0]);
+            Assert.Equal("old line 0999", lines[^2]);
+            Assert.Equal("new", lines[^1]);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
     [Theory]
     [InlineData("zh-CN", "zh")]
     [InlineData("zh-Hans-CN", "zh")]

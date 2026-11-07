@@ -30,6 +30,15 @@ internal static class AppFiles
     public static string? Find(params string[] relative) =>
         Folders.Select(f => Path.Combine([f, .. relative])).FirstOrDefault(p => File.Exists(p) || Directory.Exists(p));
 
+    /// <summary>Writes the file whole or not at all: write-then-rename, so a crash or power cut never leaves it half written.</summary>
+    public static void WriteText(string path, string text)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        string tmp = path + ".tmp";
+        File.WriteAllText(tmp, text);
+        File.Move(tmp, path, overwrite: true);
+    }
+
     private static string? FindRoot()
     {
         // Only the path's own names are walked: the root is three above the project's bin folder.

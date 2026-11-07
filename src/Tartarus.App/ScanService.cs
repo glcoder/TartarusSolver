@@ -124,7 +124,7 @@ public sealed class ScanService : IDisposable
     public void Dispose()
     {
         _queue.CompleteAdding();
-        _thread.Join(2000);
-        _scanner?.Dispose();
+        // Still scanning after that (a slow PC): its models are left to the process's end, not freed under the scan.
+        if (_thread.Join(2000)) _scanner?.Dispose();
     }
 }

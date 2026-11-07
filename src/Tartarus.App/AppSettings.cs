@@ -150,7 +150,8 @@ public sealed class AppSettings
                 (saved.AutoScan, saved.OverlayVisible, saved.ShowRegions, saved.ShowTextBoxes, saved.Hints, saved.HintsOnly, saved.AutoCollect) =
                     (file.AutoScan, file.OverlayVisible, file.ShowRegions, file.ShowTextBoxes, file.Hints, file.HintsOnly, file.AutoCollect);
             }
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(saved, Options));
+            // Whole or not at all: a half-written file read back as the defaults, a new install id among them.
+            AppFiles.WriteText(FilePath, JsonSerializer.Serialize(saved, Options));
         }
         catch { }
     }

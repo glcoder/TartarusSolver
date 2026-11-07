@@ -1,13 +1,11 @@
-using System.IO;
 using System.Text.Json;
-using Tartarus.Vision;
 
-namespace Tartarus.App;
+namespace Tartarus.Vision;
 
 /// <summary>
 /// The player's runs since the statistics were last reset: how many, the Chromatic Inmates they ended with, the time
 /// they took. A run counts once the game's log has seen it whole, from its Start to the Riot's result; kept in
-/// %LOCALAPPDATA%\TartarusSolver\statistic.json beside the settings.
+/// statistic.json in the folder given (the app's: %LOCALAPPDATA%\TartarusSolver, beside the settings).
 /// </summary>
 public sealed class RunStatistics
 {
@@ -30,18 +28,23 @@ public sealed class RunStatistics
     [System.Text.Json.Serialization.JsonIgnore]
     public TimeSpan TimePerRun => Runs > 0 ? TimeSpan.FromSeconds(Seconds / Runs) : TimeSpan.Zero;
 
-    private static string FilePath => Path.Combine(AppSettings.Folder, "statistic.json");
+    private string _path = "";
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
 
-    public static RunStatistics Load()
+    public static RunStatistics Load(string folder)
     {
+        string path = Path.Combine(folder, "statistic.json");
         try
         {
-            if (File.Exists(FilePath) && JsonSerializer.Deserialize<RunStatistics>(File.ReadAllText(FilePath), Options) is { } stats) return stats;
+            if (File.Exists(path) && JsonSerializer.Deserialize<RunStatistics>(File.ReadAllText(path), Options) is { } stats)
+            {
+                stats._path = path;
+                return stats;
+            }
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException) { }
         // The first start: counting from now on (the runs already in the game's log were played before it).
-        var fresh = new RunStatistics();
+        var fresh = new RunStatistics { _path = path };
         fresh.Save();
         return fresh;
     }
@@ -71,8 +74,8 @@ public sealed class RunStatistics
     {
         try
         {
-            Directory.CreateDirectory(AppSettings.Folder);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(this, Options));
+            // Whole or not at all: a half-written file was read as none and the statistics started over.
+            AppFiles.WriteText(_path, JsonSerializer.Serialize(this, Options));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
     }

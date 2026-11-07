@@ -61,6 +61,7 @@ public partial class ControlWindow : Window
         _scans = new ScanService(Math.Clamp(Environment.ProcessorCount / 4, 1, Math.Max(1, settings.OcrThreads)));
         _hints = new HintService(settings.HintPlayouts, settings.HintSeconds);
         _hints.Log += line => Dispatcher.BeginInvoke(() => Log("Hint: " + line));
+        ContentRendered += (_, _) => _hints.WarmUp(error => AppLog.Write("Hint warm-up failed: " + error));
         _hints.Ready += hint => Dispatcher.BeginInvoke(() =>
         {
             // As the overlay ranks them (on the Consume target pick, Cancel with the targets).
@@ -652,8 +653,12 @@ public partial class ControlWindow : Window
         // Frames are the client area (see WindowCapture.CropToClient); the overlay covers exactly that.
         var bounds = Win32Windows.ClientBounds(hwnd);
         if (bounds.IsEmpty || _capture.CropToClient == false) bounds = Win32Windows.VisibleBounds(hwnd);
+        long placing = Environment.TickCount64;
         if (!_overlay.IsVisible) _overlay.Show();
         _overlay.PlaceOver(bounds, hwnd);
+        // The UI waits on WPF's render thread here (2026-11-07: 4 of 6 hang reports of 0.7.46, at the first placement over the
+        // game); how long it takes when it's under the watchdog's 5 s, said.
+        if (Environment.TickCount64 - placing is >= 200 and var took) Log($"Overlay placed over the game in {took} ms ({bounds.Width}x{bounds.Height})");
 
         // A scan of a differently sized frame no longer lines up with the window.
         bool stale = _frame != null && (_frame.Width != bounds.Width || _frame.Height != bounds.Height);

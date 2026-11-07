@@ -12,6 +12,7 @@ public sealed class BackgroundLog : IDisposable
     private const int MaxWaiting = 10_000, RetryMs = 500;
 
     private readonly string _path;
+    private readonly long _maxBytes;
     private readonly Queue<string> _waiting = new();
     private readonly object _lock = new();
     private readonly AutoResetEvent _wake = new(false);
@@ -19,9 +20,11 @@ public sealed class BackgroundLog : IDisposable
     private long _added, _done;
     private volatile bool _stop;
 
-    public BackgroundLog(string path)
+    /// <param name="maxBytes">A file grown past this is cut to its last quarter as the writer starts (0: never).</param>
+    public BackgroundLog(string path, long maxBytes = 0)
     {
         _path = path;
+        _maxBytes = maxBytes;
         _thread = new Thread(Run) { IsBackground = true, Name = "log writer" };
         _thread.Start();
     }
@@ -61,6 +64,7 @@ public sealed class BackgroundLog : IDisposable
 
     private void Run()
     {
+        Trim();
         var batch = new StringBuilder();
         while (!_stop)
         {
@@ -97,6 +101,27 @@ public sealed class BackgroundLog : IDisposable
                 }
             }
         }
+    }
+
+    /// <summary>Only the file's last quarter kept, from a line's start, once it's past the limit (2026-11-07: players' logs grew 0.1-0.2 MB a run, never cut).</summary>
+    private void Trim()
+    {
+        try
+        {
+            var info = new FileInfo(_path);
+            if (_maxBytes <= 0 || !info.Exists || info.Length <= _maxBytes) return;
+            var tail = new byte[_maxBytes / 4];
+            using (var stream = new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            {
+                stream.Seek(-tail.Length, SeekOrigin.End);
+                stream.ReadExactly(tail);
+            }
+            int start = Array.IndexOf(tail, (byte)'\n') + 1;
+            string tmp = _path + ".tmp";
+            using (var file = File.Create(tmp)) file.Write(tail, start, tail.Length - start);
+            File.Move(tmp, _path, overwrite: true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
     }
 
     public void Dispose()

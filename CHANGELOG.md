@@ -4,6 +4,14 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## Unreleased
+
+- Settings and statistics are saved whole or not at all: a crash or power cut while saving no longer resets them.
+- The app's log is cut to its last 5 MB once it passes 20 MB (it grew without end, 0.1-0.2 MB a run).
+- Closing the app during a slow scan no longer frees the recognizer under it.
+- The hint search's warm-up waits until the window shows, so the start is quicker on slow PCs; its errors are logged, not reported.
+- The log tells how long the overlay took to settle over the game when it was slow (200 ms or more).
+
 ## 0.8.0 — 2026-11-07
 
 - The update check and the OCR download no longer hold the window while Windows looks up the proxy (seconds on some PCs).

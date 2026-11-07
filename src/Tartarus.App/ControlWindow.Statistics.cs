@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using Tartarus.App.Localization;
+using Tartarus.Vision;
 
 namespace Tartarus.App;
 
@@ -10,7 +11,7 @@ namespace Tartarus.App;
 /// </summary>
 public partial class ControlWindow
 {
-    private readonly RunStatistics _stats = RunStatistics.Load();
+    private readonly RunStatistics _stats = RunStatistics.Load(AppSettings.Folder);
 
     /// <summary>Counts the runs of the log that ended since: the current one, or ones played while the app was closed.</summary>
     private void CountRuns()

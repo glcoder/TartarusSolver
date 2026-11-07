@@ -90,13 +90,22 @@ public sealed class HintService : IDisposable
         // The chests shown as runs end with them, not as the playouts got them (models/solver/chests.txt).
         Chests = ChestCalibration.Load();
         _search = new MonteCarloSearch(_engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = Net, Policy = Policy, InstrumentPolicy = Picks };
-        // Warm up (the JIT's optimized code, the thread pool) so the first real hint is as quick as the rest.
-        _ = Task.Run(() =>
+    }
+
+    /// <summary>
+    /// Warms up (the JIT's optimized code, the thread pool) so the first real hint is as quick as the rest. Called once the
+    /// window shows: during the start it took the cores the window's own start needed (start hangs of 30 s on slow PCs).
+    /// </summary>
+    public void WarmUp(Action<string> failed) => _ = Task.Run(() =>
+    {
+        try
         {
             var s = _engine.NewRun(12345);
             _search.Search(s, 20000, TimeSpan.FromSeconds(1.5));
-        });
-    }
+        }
+        // Nothing hangs on it: said in the log, not sent as a crash (2026-11-04: the only solver exceptions seen came from here).
+        catch (Exception ex) { failed(ex.ToString()); }
+    });
 
     /// <summary>Playouts per action: the hint's quality.</summary>
     public int Playouts { get; set; }

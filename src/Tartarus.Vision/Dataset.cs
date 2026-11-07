@@ -164,12 +164,5 @@ public sealed class Dataset(string root)
         return truth.Count(kv => !kv.Key.StartsWith('_'));
     }
 
-    private static void WriteText(string path, string text)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        // Write-then-rename so a crash never leaves a half-written truth.json.
-        string tmp = path + ".tmp";
-        File.WriteAllText(tmp, text);
-        File.Move(tmp, path, overwrite: true);
-    }
+    private static void WriteText(string path, string text) => AppFiles.WriteText(path, text);
 }
