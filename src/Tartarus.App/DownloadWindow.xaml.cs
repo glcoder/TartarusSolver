@@ -53,7 +53,9 @@ public partial class DownloadWindow : Window
         });
         try
         {
-            await OcrDownload.RunAsync(_pack, progress, _cancel.Token, host);
+            // Off the UI thread: a request's first step looks the proxy up (WPAD), seconds on some PCs (2026-11-07, update check).
+            var cancel = _cancel.Token;
+            await Task.Run(() => OcrDownload.RunAsync(_pack, progress, cancel, host), cancel);
             _cancel = null;
             Result = $"OCR: {_pack.Id} recognizer downloaded from {from} to {OcrPacks.DownloadDir}";
             DialogResult = true;

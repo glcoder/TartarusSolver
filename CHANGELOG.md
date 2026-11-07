@@ -4,6 +4,10 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## Unreleased
+
+- The update check and the OCR download no longer hold the window while Windows looks up the proxy (seconds on some PCs).
+
 ## 0.7.46 — 2026-11-06
 
 - No error report when Windows's capture service is already gone as the capture closes.

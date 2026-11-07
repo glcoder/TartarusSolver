@@ -53,7 +53,9 @@ public partial class ControlWindow
             {
                 try
                 {
-                    var latest = await Updates.LatestAsync(ct);
+                    // Off the UI thread: HttpClient looks the proxy up (WinHttpGetProxyForUrl, WPAD) before its first await,
+                    // and that held the window over 5 s (2026-11-07, Sentry f27275b3).
+                    var latest = await Task.Run(() => Updates.LatestAsync(ct), ct);
                     if (latest != null && latest.Version > Updates.Current && latest.Version != _update?.Version)
                     {
                         _update = latest;
