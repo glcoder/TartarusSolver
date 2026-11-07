@@ -840,7 +840,7 @@ public partial class ControlWindow : Window
         // good one would be held to it.
         RememberFrame(frame);
         var previous = r.Ok && _scan?.Ok == true && _frame is { } last && last.Width == frame.Width && last.Height == frame.Height
-            && _scannedSandbox is { } before && WholeBoard(before) ? before : null;
+            && _scannedSandbox is { } before && HintRules.WholeBoard(before) ? before : null;
         _frame = frame;
         _stale = false;
         _scan = r;
@@ -852,7 +852,7 @@ public partial class ControlWindow : Window
         _settleRead = _scannedSandbox.Clone();
         if (previous != null && _lastRead != null) _scannedSandbox.Steady(previous, _lastRead);
         _lastRead = read;
-        if (r.Ok && WholeBoard(_scannedSandbox)) _lastBoardAt = frame.Timestamp.LocalDateTime;
+        if (r.Ok && HintRules.WholeBoard(_scannedSandbox)) _lastBoardAt = frame.Timestamp.LocalDateTime;
         // The Consume target pick: the Sandbox stands still under the flickering red, so each Inmate shows its most
         // frequent reading over the pick's frames.
         bool targetPick = r.Ok && (r.Text?.ConsumePick == true || LiveLogRun is { ConsumePick: true } && r.Text?.Cards.Count == 0);
@@ -865,7 +865,7 @@ public partial class ControlWindow : Window
         else
         {
             _pickVotes.Clear();
-            if (r.Ok && WholeBoard(_scannedSandbox)) _pickVotes.Before(_scannedSandbox);
+            if (r.Ok && HintRules.WholeBoard(_scannedSandbox)) _pickVotes.Before(_scannedSandbox);
         }
         // Instruments and Chromatic: what this run has gathered, not just this frame's panels (a tooltip, a fade or
         // an animation may spoil them).
@@ -1152,20 +1152,6 @@ public partial class ControlWindow : Window
         Dispatcher.BeginInvoke(RefreshOverlay);
     }
 
-    /// <summary>A Sandbox read whole: the Warden found and no more than a couple of cells under the interface.</summary>
-    private static bool WholeBoard(EditableSandbox b) => b.Warden > 0 && b.Cells.Count(c => c.Covered) < 3;
-
-    /// <summary>Another decision than the one hinted on <paramref name="was"/>: the Warden, the Destinations or the Warden's Inmate.</summary>
-    /// <remarks>
-    /// Only what the new reading shows: Destination cards not read on one frame are no move, nor the phase that goes to
-    /// Make Your Decision without them (2026-11-01: a card under the mouse grew and went unread, and the Destination
-    /// hint went away before it was clicked). A day's End brings new cards, a move another Warden.
-    /// </remarks>
-    private static bool MovedOn(EditableSandbox was, EditableSandbox now) =>
-        was.Warden != now.Warden
-        || now.Destinations.Count > 0 && !was.Destinations.SequenceEqual(now.Destinations)
-        || now.Warden > 1 && !now[now.Warden].Covered && SandboxText.CellShort(was[now.Warden]) != SandboxText.CellShort(now[now.Warden]);
-
     private void RequestHint(ScanResult r)
     {
         _confirmSoon = false;
@@ -1180,7 +1166,7 @@ public partial class ControlWindow : Window
             // a moment after the screen (2026-10-31: "back to the pick" flashed over the Sandbox as a Warden's Treasure
             // came up and as it was taken).
             bool viewing = LiveLogRun is { PickOpen: true } open && (open.Paged || open.Looking);
-            if (r.Ok && _sandbox != null && !WholeBoard(_sandbox))
+            if (r.Ok && _sandbox != null && !HintRules.WholeBoard(_sandbox))
             {
                 if (viewing) ShowEye(false);
                 return;
@@ -1241,7 +1227,7 @@ public partial class ControlWindow : Window
                 switch (settle)
                 {
                     case BoardSettle.Verdict.Unsettled:
-                        if (_hinted is { } was && _settleRead is { } now && MovedOn(was, now))
+                        if (_hinted is { } was && _settleRead is { } now && HintRules.MovedOn(was, now))
                         {
                             _hints.Clear();
                             ClearHint();
@@ -1255,18 +1241,11 @@ public partial class ControlWindow : Window
                 // Only a screen that says what it asks: the Consume target pick's banner, Destination cards read, or a
                 // decision card. Frames in between (cards sliding in, a day's banner) would be taken for the wrong phase.
                 bool destinations = _sandbox.Phase == Phases.Destination && _sandbox.Destinations.Count > 0;
-                // The day's move clicked (the log tells): Destination cards still on screen are going away, and two quick
-                // readings alike took one left for the only Destination (2026-11-01: "Cell 16" flashed twice after Cell
-                // 2 was clicked). Not for long: cards still there 2 s after the click weren't left (2026-11-01: a click the
-                // game logged but didn't take, and the Destination hint stayed away the rest of the day).
-                if (destinations && live is { Moved: true } moved && _lastBoardAt > moved.MovedAt
-                    && _lastBoardAt - moved.MovedAt < TimeSpan.FromSeconds(2)) destinations = false;
-                bool decision = r.Text?.Cards.Any(c => c.Meaning is var t
-                    && (t.Contains("consume") || t.Contains("replace") || t.Contains("hunt") || t.Contains("instigate") || t.Contains("bestow") || t == "end" || t.EndsWith(" end"))) == true;
-                // A day begins with its move: decision cards on a new day the log saw no move of yet are the last day's
-                // going away (2026-11-01: End hinted for half a second on 11 of 231 new days).
-                if (decision && live is { Paged: false, Moved: false } today && today.DayStartedAt > today.MovedAt
-                    && _lastBoardAt > today.DayStartedAt && _lastBoardAt - today.DayStartedAt < TimeSpan.FromSeconds(2)) decision = false;
+                // The day's move clicked: Destination cards still on screen are going away.
+                if (destinations && HintRules.DestinationsGoing(live, _lastBoardAt)) destinations = false;
+                bool decision = r.Text != null && HintRules.DecisionCard(r.Text.Cards.Select(c => c.Meaning));
+                // A new day the log saw no move of yet: decision cards are the last day's going away.
+                if (decision && HintRules.LastDaysCards(live, _lastBoardAt)) decision = false;
                 // The target pick: its banner read, or the log's red-screen sound with nothing else on screen (the
                 // banner's text doesn't always read).
                 bool consumeOnly = r.Text?.ConsumePick == true || live is { ConsumePick: true } && !destinations && !decision;
