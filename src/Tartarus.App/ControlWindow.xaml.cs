@@ -493,6 +493,10 @@ public partial class ControlWindow : Window
     private bool _screenCopy;
     private int _captureRefusals;
     private const int RefusalsForScreenCopy = 3;
+    // Device lost again and again with no frame between (2026-11-07, an Arc B580: 884 new captures in 14 min, none gave a frame):
+    // no use trying that way. A card's reset is over after one (7 of 7 in reports).
+    private int _lostWithoutFrame;
+    private const int LossesForScreenCopy = 3;
     private bool _copyCovered;
 
     // A capture that fails is tried again later and later, the failure said when it changes and at each tenth try (2026-11-03:
@@ -803,7 +807,12 @@ public partial class ControlWindow : Window
             // The graphics card was reset under the capture (2026-10-31, Sentry: auto scan stopped for good): a new
             // capture of the same window.
             if (capture != _capture) return false;
-            Log("Capture: the graphics device was lost, capturing again (" + ex.Message.Trim() + ")");
+            Log($"Capture: the graphics device was lost (reason {(capture as WindowCapture)?.RemovedReason}), capturing again ({ex.Message.Trim()})");
+            if (++_lostWithoutFrame >= LossesForScreenCopy && !_screenCopy)
+            {
+                Log($"Capture: {_lostWithoutFrame} times lost with no frame between. A copy of the screen from now on.");
+                _screenCopy = true;
+            }
             var target = _target;
             // The overlay stays: hiding a window while the graphics card resets waits on the desktop compositor (2026-11-01,
             // Sentry: the UI thread stood 10 s in ShowWindow).
@@ -822,6 +831,7 @@ public partial class ControlWindow : Window
             if (manual) ScanStatus.Text = Strings.Status_NoFramesYet;
             return false;
         }
+        _lostWithoutFrame = 0;
         ScanResult r;
         try
         {

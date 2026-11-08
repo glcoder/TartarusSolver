@@ -169,6 +169,16 @@ public sealed unsafe class WindowCapture : IGameCapture
         (ex is SharpGen.Runtime.SharpGenException sharp ? sharp.ResultCode.Code : ex.HResult) is
             unchecked((int)0x887A0005) or unchecked((int)0x887A0006) or unchecked((int)0x887A0007) or unchecked((int)0x887A0020);
 
+    /// <summary>Why the device was lost, as the driver tells (0x887A0006 hung, 0x887A0007 reset, 0x887A0020 internal error...), for the log.</summary>
+    public string RemovedReason
+    {
+        get
+        {
+            try { return $"0x{_device.DeviceRemovedReason.Code:X8}"; }
+            catch (Exception ex) { return ex.GetType().Name; }
+        }
+    }
+
     /// <summary>
     /// Copies the latest frame to a CPU buffer (BGRA), from <paramref name="pool"/> if given. Null until the first frame
     /// arrives.

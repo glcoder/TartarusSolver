@@ -11,6 +11,7 @@ things.
 - Closing the app during a slow scan no longer frees the recognizer under it.
 - The hint search's warm-up waits until the window shows, so the start is quicker on slow PCs; its errors are logged, not reported.
 - The log tells how long the overlay took to settle over the game when it was slow (200 ms or more).
+- Graphics cards that keep losing the capture before a single frame (seen on an Intel Arc B580): after 3 tries the app reads a copy of the screen instead, and hints work; the log tells the driver's reason.
 
 ## 0.8.0 — 2026-11-07
 
