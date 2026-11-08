@@ -4,7 +4,7 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
-## Unreleased
+## 0.8.1 — 2026-11-08
 
 - Settings and statistics are saved whole or not at all: a crash or power cut while saving no longer resets them.
 - The app's log is cut to its last 5 MB once it passes 20 MB (it grew without end, 0.1-0.2 MB a run).
