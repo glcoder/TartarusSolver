@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using Tartarus.Vision;
 
 namespace Tartarus.Capture;
 
@@ -37,6 +38,20 @@ public static partial class Win32Windows
             GetWindowThreadProcessId(h, out int pid);
             if (!includeOwnProcess && pid == self) return true;
             list.Add(new WindowInfo(h, title, ProcessName(pid), pid));
+            return true;
+        }, IntPtr.Zero);
+        return list;
+    }
+
+    /// <summary>Every top-level window, also those <see cref="List"/> leaves out.</summary>
+    public static List<WindowSeen> AllTopLevel()
+    {
+        var list = new List<WindowSeen>();
+        EnumWindows((h, _) =>
+        {
+            GetWindowThreadProcessId(h, out int pid);
+            list.Add(new WindowSeen(ProcessName(pid), GetTitle(h), IsWindowVisible(h), IsCloaked(h),
+                (GetWindowLongPtr(h, GWL_EXSTYLE) & WS_EX_TOOLWINDOW) != 0, IsIconic(h)));
             return true;
         }, IntPtr.Zero);
         return list;

@@ -4,6 +4,12 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.8.2 — 2026-11-09
+
+- When WPF's render thread dies (seen once, in a map, on an RTX 4060) the app sends the error and starts again by itself, instead of opening report windows over the game one after another.
+- Holding the mouse button on the app's title bar no longer sends a hang report (Windows stops the window meanwhile; about 8 such reports).
+- A bug report sent with no game attached tells which windows Windows lists: the game's in full, of the others only the process names; and what the status line said.
+
 ## 0.8.1 — 2026-11-08
 
 - Settings and statistics are saved whole or not at all: a crash or power cut while saving no longer resets them.

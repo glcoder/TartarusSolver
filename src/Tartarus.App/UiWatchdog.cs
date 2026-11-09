@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Threading;
 using Microsoft.Diagnostics.Runtime;
 using Tartarus.Capture;
+using Tartarus.Vision;
 
 namespace Tartarus.App;
 
@@ -67,7 +68,7 @@ public sealed class UiWatchdog : IDisposable
 
     private void Report(TimeSpan hung)
     {
-        string gui = GuiState();
+        string gui = GuiState(out bool mouseOurs);
         string stacks;
         try { stacks = Stacks(); }
         catch (Exception ex) { stacks = "stack not read: " + ex.Message; }
@@ -82,6 +83,11 @@ public sealed class UiWatchdog : IDisposable
         if (_answered || idle)
         {
             Write($"UI thread late by {hung.TotalSeconds:0} s, idle by the time its stack was read (not reported); {gui}");
+            return;
+        }
+        if (UiHangs.HeldOnOurWindow(ui, mouseOurs))
+        {
+            Write($"UI thread late by {hung.TotalSeconds:0} s, the mouse held on our window (not reported); {gui}");
             return;
         }
         stacks += gui + Environment.NewLine;
@@ -106,8 +112,9 @@ public sealed class UiWatchdog : IDisposable
     /// nothing of ours on the stack (2026-11-03: 95 such hangs, all in DefWindowProc); and whose window is in front. No
     /// window's title: another's may be anything, and asking our own for it would wait for the UI thread.
     /// </summary>
-    private string GuiState()
+    private string GuiState(out bool mouseOurs)
     {
+        mouseOurs = false;
         var info = new Native.GUITHREADINFO { cbSize = Marshal.SizeOf<Native.GUITHREADINFO>() };
         if (!Native.GetGUIThreadInfo(_uiNativeThread, ref info)) return $"GUI state not read: {Marshal.GetLastWin32Error()}";
         var state = new List<string>();
@@ -115,7 +122,12 @@ public sealed class UiWatchdog : IDisposable
         if ((info.flags & Native.GUI_INMENUMODE) != 0) state.Add("in a menu");
         if ((info.flags & Native.GUI_SYSTEMMENUMODE) != 0) state.Add("in a system menu");
         if ((info.flags & Native.GUI_POPUPMENUMODE) != 0) state.Add("in a popup menu");
-        if (info.hwndCapture != IntPtr.Zero) state.Add("mouse captured by " + Whose(info.hwndCapture));
+        if (info.hwndCapture != IntPtr.Zero)
+        {
+            string whose = Whose(info.hwndCapture);
+            mouseOurs = whose == "ours";
+            state.Add("mouse captured by " + whose);
+        }
         if (info.hwndMoveSize != IntPtr.Zero) state.Add("moved window " + Whose(info.hwndMoveSize));
         if (info.hwndMenuOwner != IntPtr.Zero) state.Add("menu of " + Whose(info.hwndMenuOwner));
         var front = Win32Windows.Foreground;

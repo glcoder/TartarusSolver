@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -65,6 +66,11 @@ public partial class App : Application
     }
 
     private UiWatchdog? _watchdog;
+    private readonly long _startedAt = Environment.TickCount64;
+    private bool _renderDead;
+
+    /// <summary>UCEERR_RENDERTHREADFAILURE: WPF's render thread is gone, and every window message says so until the process ends.</summary>
+    private const int RenderThreadFailed = unchecked((int)0x88980406);
 
     protected override void OnExit(ExitEventArgs e)
     {
@@ -78,9 +84,32 @@ public partial class App : Application
     private void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         e.Handled = true;
+        if (_renderDead) return;
         AppLog.Write($"Error: {e.Exception}");
+        if (e.Exception is COMException { HResult: RenderThreadFailed })
+        {
+            _renderDead = true;
+            RestartAfterRenderFailure(e.Exception);
+            return;
+        }
         // The app goes on: the player may send a report of it, with what was on screen.
         if (MainWindow is ControlWindow control && BugReports.Enabled) control.Report(e.Exception);
         else MessageBox.Show(e.Exception.ToString(), "Tartarus Solver: error", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    /// <summary>
+    /// No window can draw any more (2026-11-08, a player in a map: 195 of these in 38 s, a report window over the game after
+    /// each): the stack goes without asking and a new process takes over. Not when this one just started: a render thread
+    /// that dies at every start must not restart for ever.
+    /// </summary>
+    private void RestartAfterRenderFailure(Exception ex)
+    {
+        _watchdog?.Dispose();
+        BugReports.Crash(ex, fatal: true);
+        bool restart = Environment.TickCount64 - _startedAt >= 60_000 && Environment.ProcessPath != null;
+        AppLog.Write(restart ? "Render thread failed: starting again" : "Render thread failed soon after the start: closing");
+        // Once this one is down: the new one takes the hotkeys.
+        if (restart) Exit += (_, _) => System.Diagnostics.Process.Start(Environment.ProcessPath!, Environment.GetCommandLineArgs().Skip(1));
+        Shutdown();
     }
 }

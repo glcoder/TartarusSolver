@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Tartarus.Capture;
 using Tartarus.Vision;
 using Frame = Tartarus.Vision.Frame;
 
@@ -62,7 +63,8 @@ public partial class ControlWindow
                 report = Gather(crash);
                 // The logs off the UI thread: a game's log may be hundreds of MB (2026-11-03: a hang in it).
                 string? gameLog = _gameLogPath;
-                await Task.Run(() => AddLogs(report, gameLog));
+                bool noGame = _target == null;
+                await Task.Run(() => AddLogs(report, gameLog, noGame));
             }
             catch (Exception ex)
             {
@@ -111,13 +113,25 @@ public partial class ControlWindow
         return report;
     }
 
-    private static void AddLogs(BugReport report, string? gameLog)
+    private static void AddLogs(BugReport report, string? gameLog, bool noGame)
     {
         AppLog.Flush();
         report.AddText("app.log", BugReports.Tail(AppSettings.LogPath, 3000));
+        if (noGame) report.AddText("windows.txt", WindowsNow());
         if (gameLog == null) return;
         try { report.AddText("game_s16.log", BugReports.GameLogRun(gameLog)); }
         catch (IOException ex) { report.AddText("game_s16.log", "unreadable: " + ex.Message); }
+    }
+
+    /// <summary>
+    /// The desktop as the search for the game sees it (2026-11-08: 26 starts with the game running, none attached, the log
+    /// silent on why). The search may be what hangs: the report doesn't wait for this one.
+    /// </summary>
+    private static string WindowsNow()
+    {
+        var listing = Task.Run(() => WindowsSeen.Describe(Win32Windows.AllTopLevel()));
+        try { return listing.Wait(2000) ? listing.Result : "Still listing after 2 s"; }
+        catch (AggregateException ex) { return ex.InnerException?.ToString() ?? ex.ToString(); }
     }
 
     /// <summary>What the app knew: version, window, what it read, the run's memory and the log's, the hint and its ranking.</summary>
@@ -164,6 +178,8 @@ public partial class ControlWindow
             session = new
             {
                 capturing = _capture != null,
+                status = CaptureStatus.Text,
+                findingGame = _findingGame,
                 captureWay = _capture?.GetType().Name,
                 autoAttach = AutoAttachCheck.IsChecked == true,
                 autoScan = AutoScanCheck.IsChecked == true,
