@@ -34,6 +34,11 @@ public partial class App : Application
             return;
         }
         DispatcherUnhandledException += OnUnhandled;
+        if (e.Args.Contains(SoftwareRender))
+        {
+            System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
+            AppLog.Write("Software rendering: the graphics card's failed in the last process");
+        }
         // The game first: scans and hints take the CPU it leaves (2026-11-01: on a slow PC the game stalled opening a
         // window while a scan ran every moment).
         try
@@ -72,6 +77,9 @@ public partial class App : Application
     /// <summary>UCEERR_RENDERTHREADFAILURE: WPF's render thread is gone, and every window message says so until the process ends.</summary>
     private const int RenderThreadFailed = unchecked((int)0x88980406);
 
+    /// <summary>The restart after it draws without the graphics card: the new process's first overlay placement hung in it too (2026-11-10).</summary>
+    private const string SoftwareRender = "--software-render";
+
     protected override void OnExit(ExitEventArgs e)
     {
         _watchdog?.Dispose();
@@ -109,7 +117,8 @@ public partial class App : Application
         bool restart = Environment.TickCount64 - _startedAt >= 60_000 && Environment.ProcessPath != null;
         AppLog.Write(restart ? "Render thread failed: starting again" : "Render thread failed soon after the start: closing");
         // Once this one is down: the new one takes the hotkeys.
-        if (restart) Exit += (_, _) => System.Diagnostics.Process.Start(Environment.ProcessPath!, Environment.GetCommandLineArgs().Skip(1));
+        if (restart) Exit += (_, _) => System.Diagnostics.Process.Start(Environment.ProcessPath!,
+            Environment.GetCommandLineArgs().Skip(1).Where(a => a != SoftwareRender).Append(SoftwareRender));
         Shutdown();
     }
 }

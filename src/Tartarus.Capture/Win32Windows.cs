@@ -60,9 +60,23 @@ public static partial class Win32Windows
     /// <summary>The launcher's window has the same title as the game's; it is never the game.</summary>
     public static bool IsLauncher(WindowInfo w) => w.Process.Contains("Launcher", StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>The window whose title matches <paramref name="title"/> (the game's by default), leaving out the launcher.</summary>
-    public static WindowInfo? FindGame(Regex? title = null) =>
-        List().FirstOrDefault(w => (title ?? GameTitle).IsMatch(w.Title) && !IsLauncher(w)) is { Hwnd: not 0 } w ? w : null;
+    /// <summary>The game's executable, whatever its window is titled.</summary>
+    public const string GameProcess = "torchlight_infinite";
+
+    /// <summary>
+    /// The game's window: its title matches <paramref name="title"/> (the game's by default), or its process is the game's
+    /// (2026-11-10: a client titles it "火炬之光：无限", and the app never found it); never the launcher.
+    /// </summary>
+    public static bool IsGame(WindowInfo w, Regex? title = null) =>
+        !IsLauncher(w) && ((title ?? GameTitle).IsMatch(w.Title) || w.Process.Equals(GameProcess, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>The game's window among <paramref name="windows"/>: by its title first, else by its process.</summary>
+    public static WindowInfo? FindGame(IReadOnlyList<WindowInfo> windows, Regex? title = null) =>
+        windows.FirstOrDefault(w => !IsLauncher(w) && (title ?? GameTitle).IsMatch(w.Title)) is { Hwnd: not 0 } byTitle ? byTitle
+        : windows.FirstOrDefault(w => IsGame(w, title)) is { Hwnd: not 0 } byProcess ? byProcess
+        : null;
+
+    public static WindowInfo? FindGame(Regex? title = null) => FindGame(List(), title);
 
     public static string GetTitle(IntPtr h)
     {

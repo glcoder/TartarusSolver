@@ -85,7 +85,10 @@ public partial class ControlWindow : Window
         InitializeComponent();
         StartGameLog();
         SetupHintSlider();
-        if (settings.ControlLeft is { } left && settings.ControlTop is { } top)
+        // Only where some screen shows its title bar (2026-11-10: saved 657 px above the screen, a monitor gone: the window never seen).
+        if (settings.ControlLeft is { } left && settings.ControlTop is { } top
+            && new Rect(SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop, SystemParameters.VirtualScreenWidth,
+                SystemParameters.VirtualScreenHeight).Contains(left + 100, top + 15))
         {
             Left = left;
             Top = top;
@@ -218,8 +221,7 @@ public partial class ControlWindow : Window
         WindowCombo.ItemsSource = windows;
         var pattern = new Regex(_settings.WindowTitle);
         WindowCombo.SelectedItem = windows.FirstOrDefault(w => previous is { } p && w.Hwnd == p.Hwnd) is { Hwnd: not 0 } same ? same
-            : windows.FirstOrDefault(w => pattern.IsMatch(w.Title) && !Win32Windows.IsLauncher(w)) is { Hwnd: not 0 } game ? game
-            : null;
+            : Win32Windows.FindGame(windows, pattern);
     }
 
     private string? _gameLanguage;
@@ -289,7 +291,7 @@ public partial class ControlWindow : Window
         // No language chosen yet: asked as the game connects, the one found marked (2026-11-02: many reports came from
         // clients whose settings file says "en" with the game in Chinese, and the text-unread prompt came late or never).
         if (string.IsNullOrEmpty(_settings.GameLanguage) && !_askedFirstLanguage && _capture != null && _target is { } target
-            && new Regex(_settings.WindowTitle).IsMatch(target.Title) && !Win32Windows.IsLauncher(target))
+            && Win32Windows.IsGame(target, new Regex(_settings.WindowTitle)))
         {
             _askedFirstLanguage = true;
             _askingOcr = true;

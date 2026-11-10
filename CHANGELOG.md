@@ -4,6 +4,12 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.8.3 — 2026-11-10
+
+- The game is found by its program too, not only by its window's title: clients that title it "火炬之光：无限" were never captured.
+- The app's window opens on the screen when the place it was left at is on no screen any more (a monitor gone).
+- After WPF's render thread dies the app starts again drawing without the graphics card (the new process had hung on it too).
+
 ## 0.8.2 — 2026-11-09
 
 - When WPF's render thread dies (seen once, in a map, on an RTX 4060) the app sends the error and starts again by itself, instead of opening report windows over the game one after another.
