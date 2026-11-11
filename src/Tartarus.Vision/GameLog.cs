@@ -20,6 +20,14 @@ public sealed class LoggedRun
     public bool ConsumedToday => Consumes > DayStartConsumes;
     public int InstrumentPicks { get; set; }
     public int Treasures { get; set; }
+    /// <summary><see cref="Treasures"/> when the current day began.</summary>
+    public int DayStartTreasures { get; set; }
+    /// <summary>
+    /// Picks left of the Warden's Treasure on screen in an Opulence run, which gives three of each: three less those taken
+    /// today that make no whole three (a day's Treasures are all taken before it ends).
+    /// shortcut: a pick the server didn't answer comes up again and its second Confirm counts as a pick, off by one for the rest of the day; count the server's answers if that shows.
+    /// </summary>
+    public int OpulencePicksLeft => 3 - Math.Max(0, Treasures - DayStartTreasures) % 3;
     public bool ObjectiveDone { get; set; }
     /// <summary>The Riot's result screen came up.</summary>
     public bool Finished { get; set; }
@@ -230,6 +238,7 @@ public sealed partial class GameLog
             if (day > Current!.Day)
             {
                 (Current.DayStartConsumes, Current.ConsumePick, Current.PickOpen, Current.TreasureOpen, Current.Looking) = (Current.Consumes, false, false, false, false);
+                Current.DayStartTreasures = Current.Treasures;
                 // No new day's banner seen since the move: the day starts with its counter.
                 if (Current.DayStartedAt <= Current.MovedAt) Current.DayStartedAt = LocalTime(line);
             }

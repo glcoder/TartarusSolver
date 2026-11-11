@@ -81,7 +81,6 @@
   <data name="Main_MoveHints" xml:space="preserve"><value>수 힌트</value></data>
   <data name="Main_NoValueNet" xml:space="preserve"><value> · 가치망 없음</value></data>
   <data name="Main_Overlay" xml:space="preserve"><value>오버레이</value></data>
-  <data name="Main_PicksNet" xml:space="preserve"><value> · 선택망</value></data>
   <data name="Main_PolicyNet" xml:space="preserve"><value> · 정책망</value></data>
   <data name="Main_Recognition" xml:space="preserve"><value>인식</value></data>
   <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>창 목록 새로 고침</value></data>

@@ -153,7 +153,7 @@ public partial class ControlWindow
             sandbox = _sandbox is { } s ? SandboxText.Describe(s) : null,
             read = _scannedSandbox is { } r ? SandboxText.Describe(r) : null,
             scan = _scan is { } scan ? SandboxText.Describe(scan) : null,
-            run = new { theme = _run.Theme, held = _run.Held, kept = _run.Kept, chromatic = _run.Chromatic, rerolls = _rerolls },
+            run = new { theme = _run.Theme, held = _run.Held, kept = _run.Kept, chromatic = _run.Chromatic, rerolls = _flow.Rerolls },
             gameLog = _gameLogPath,
             logRun = _logRun,
             hint = hint == null ? null : new
@@ -173,7 +173,7 @@ public partial class ControlWindow
                     a.Playouts,
                 }),
             },
-            eyeHint = _eyeHint,
+            eyeHint = _flow.EyeHint,
             // What settings.json doesn't hold: the window's state as it is now.
             session = new
             {
@@ -194,7 +194,6 @@ public partial class ControlWindow
                 hintPlayouts = _hints.Playouts,
                 valueNet = _hints.Net != null,
                 policyNet = _hints.Policy != null,
-                picksNet = _hints.Picks != null,
             },
         };
     }

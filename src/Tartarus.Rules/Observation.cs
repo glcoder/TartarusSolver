@@ -69,6 +69,16 @@ public sealed class Observation
 public sealed partial class Engine
 {
     /// <summary>A state for what the screen shows; what it can't show (behind doors, under markers, the dice) is drawn from <paramref name="seed"/>.</summary>
+    /// <remarks>
+    /// What the screen doesn't tell and no draw can settle is assumed, each a small error in a state's worth:
+    /// - Usurpation is at its first stage (the stage reached isn't shown anywhere);
+    /// - a Prey mark belongs to the first Lion that can consume its Inmate, with 2 mornings left of its 3;
+    /// - a Rat Nest opens tomorrow (it shows no count);
+    /// - Re-rolls not given (<see cref="Observation.Rerolls"/> null) are the rules' own (<see cref="RuleOptions.Rerolls"/>): the app
+    ///   gives the count it read in this run, or none;
+    /// - an Opened cell with nobody in it is Unopened (the rules seal a cell its Inmate leaves);
+    /// - Scratch Marks count only on a cell whose rarity shows.
+    /// </remarks>
     public GameState FromObservation(Observation o, ulong seed)
     {
         if (o.StartOfRun) return StartOfRun(o, seed);

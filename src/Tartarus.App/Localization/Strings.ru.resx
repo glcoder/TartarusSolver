@@ -81,7 +81,6 @@
   <data name="Main_MoveHints" xml:space="preserve"><value>Подсказки ходов</value></data>
   <data name="Main_NoValueNet" xml:space="preserve"><value> · без сети оценки</value></data>
   <data name="Main_Overlay" xml:space="preserve"><value>Оверлей</value></data>
-  <data name="Main_PicksNet" xml:space="preserve"><value> · сеть выбора</value></data>
   <data name="Main_PolicyNet" xml:space="preserve"><value> · сеть политики</value></data>
   <data name="Main_Recognition" xml:space="preserve"><value>Распознавание</value></data>
   <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>Обновить список окон</value></data>

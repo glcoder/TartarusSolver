@@ -113,7 +113,7 @@ public static class Updates
 
     /// <summary>
     /// "--install-update target pid args...", run by the new version from where it was unpacked: waits for the old one
-    /// to exit, copies itself over the target folder (files the new version doesn't have stay), starts it there with the
+    /// to exit, copies itself over the target folder (<see cref="FolderCopy"/>: all of it or nothing; files the new version doesn't have stay), starts it there with the
     /// old one's arguments. On a failure the player is told and shown the unpacked folder.
     /// </summary>
     public static void InstallHere(string[] args)
@@ -130,24 +130,8 @@ public static class Updates
             // The installer is the one app while it copies: a start meanwhile would run half-copied files. Free again as the
             // old one exits (or it would be gone already).
             SingleInstance.Take(TimeSpan.FromSeconds(30));
-            foreach (var file in Directory.EnumerateFiles(AppDir, "*", SearchOption.AllDirectories))
-            {
-                string to = Path.Combine(target, Path.GetRelativePath(AppDir, file));
-                Directory.CreateDirectory(Path.GetDirectoryName(to)!);
-                // An antivirus may hold a fresh file a moment.
-                for (int attempt = 0; ; attempt++)
-                {
-                    try
-                    {
-                        File.Copy(file, to, overwrite: true);
-                        break;
-                    }
-                    catch (IOException) when (attempt < 20)
-                    {
-                        Thread.Sleep(500);
-                    }
-                }
-            }
+            // Beside their places first, then into them: a copy that fails leaves the old version whole.
+            FolderCopy.Over(AppDir, target);
             Write($"Updated to {AppVersion.Number} in {target}");
             var start = new ProcessStartInfo(Path.Combine(target, "TartarusSolver.exe")) { UseShellExecute = false, WorkingDirectory = target };
             foreach (var a in args.Skip(2)) start.ArgumentList.Add(a);

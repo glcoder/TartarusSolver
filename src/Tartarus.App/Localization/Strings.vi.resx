@@ -81,7 +81,6 @@ Hãy giải nén toàn bộ tệp nén vào một thư mục riêng và chạy c
   <data name="Main_MoveHints" xml:space="preserve"><value>Gợi ý nước đi</value></data>
   <data name="Main_NoValueNet" xml:space="preserve"><value> · không có mạng giá trị</value></data>
   <data name="Main_Overlay" xml:space="preserve"><value>Lớp phủ</value></data>
-  <data name="Main_PicksNet" xml:space="preserve"><value> · mạng lựa chọn</value></data>
   <data name="Main_PolicyNet" xml:space="preserve"><value> · mạng chính sách</value></data>
   <data name="Main_Recognition" xml:space="preserve"><value>Nhận dạng</value></data>
   <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>Làm mới danh sách cửa sổ</value></data>

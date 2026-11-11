@@ -4,6 +4,18 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.8.4 — 2026-11-11
+
+- Lighter on the PC off the board: on a pick screen, in the lobby or in a map the app no longer reads the cells and the Sandbox's text it then threw away (such a scan took 264 ms, now 115, on 94 saved frames).
+- A finished Objective is read in every game language, not only by English's "Completed": other clients' hints could count on an instrument pick already taken.
+- The app started in the middle of a run no longer counts on a Re-roll it never saw.
+- An update is copied beside the install first and put in place only when all of it is there: a copy that fails leaves the old version whole.
+- The game's log is looked for off the window's thread (a slow drive held the start for 30 s).
+- An error while working out a hint is logged with its stack and reported once, not just named in the log.
+- The window reads the game log's run whole: no more values from two different moments in one hint.
+- Opulence: each of a Warden's Treasure's three screens is hinted for the picks it really has left (every screen was taken for the first, with three picks to come), and a reward may be taken again on the next screen, as the game lets. Its second and third screen ask for a look at the Sandbox first (the eye button): the game shows them at once, before what the last pick did can be read.
+- Inside: the hint flow moved out of the main window into a class of its own with tests (HintFlow); the search and the playout policy without the experiments that didn't help; a playout no longer lists the legal actions twice a step.
+
 ## 0.8.3 — 2026-11-10
 
 - The game is found by its program too, not only by its window's title: clients that title it "火炬之光：无限" were never captured.

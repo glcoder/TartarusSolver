@@ -112,16 +112,17 @@ public class ConsumeTests
     }
 
     [Fact]
-    public void Opulence_gives_three_picks_of_one_Treasure()
+    public void Opulence_gives_three_picks_of_one_Treasure_each_of_all_four_rewards()
     {
         var s = Empty(warden: 3, theme: Theme.Opulence);
         Put(ref s, 3, Code.Wolf, Rarity.Ultimate);
         Put(ref s, 9, Code.Rat, Rarity.Ultimate);
         Do(Manual, ref s, new GameAction(ActionKind.Consume, 9));
         Do(Manual, ref s, new GameAction(ActionKind.PickTreasure, (byte)Treasure.ThumbRing));
-        Assert.Equal(3, Legal(Manual, s).Count);
-        Do(Manual, ref s, new GameAction(ActionKind.PickTreasure, (byte)Treasure.BrandOfSin));
-        Assert.Equal(2, Legal(Manual, s).Count);
+        Assert.Equal(4, Legal(Manual, s).Count);
+        // The same reward again.
+        Do(Manual, ref s, new GameAction(ActionKind.PickTreasure, (byte)Treasure.ThumbRing));
+        Assert.Equal(4, Legal(Manual, s).Count);
         Do(Manual, ref s, new GameAction(ActionKind.PickTreasure, (byte)Treasure.BrassHorn));
         Assert.Equal(0, s.PendingCount);
     }

@@ -6,7 +6,7 @@
 Input: Tartarus.Solver.Features of the state after the action (the same dice for all of a decision's actions). The
 network scores each after-state; over a decision's actions the scores' softmax is fitted to the softmax of the
 search's means over a temperature (in Chromatic units). Instrument picks are left out (the playouts take those by
-the measured instrument values) unless --instruments: then the network takes them too (the search's "pi").
+the measured instrument values) unless --instruments (an experiment that didn't help: the search has no use for such a network any more).
 Reported per decision kind: how often the network's choice is the search's, and its regret (the search's best mean
 minus the mean of the action taken), against the heuristic policy's.
 Exported for Tartarus.Solver.ValueNet with one output: "TVNT", layer count, then per layer outputs, inputs, weights

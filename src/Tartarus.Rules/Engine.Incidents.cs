@@ -296,10 +296,11 @@ public sealed partial class Engine
 
     private void TakeTreasure(ref GameState s, Treasure t)
     {
+        // Opulence's further picks offer every reward again, the one just taken too (the user, 2026-11-11: the Thumb Ring
+        // taken several times in a row; the rules had taken each reward off the offer).
         ref var p = ref s.Pending[0];
-        p.A = (byte)(p.A & ~(1 << (int)t));
         p.Picks--;
-        if (p.Picks == 0 || p.A == 0) PopPending(ref s);
+        if (p.Picks == 0) PopPending(ref s);
         switch (t)
         {
             case Treasure.ThumbRing:

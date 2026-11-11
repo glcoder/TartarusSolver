@@ -95,6 +95,28 @@ public class GameLogTests
     }
 
     [Fact]
+    public void Opulence_s_picks_left_are_three_less_those_taken_of_this_Treasure()
+    {
+        var log = new GameLog();
+        log.Feed("[2026.11.11-00.57.10:000][845]TLGame: Display: [Game] UIButton@ normal-click Btn_S16GamePlay_Start");
+        log.Feed("[2026.11.11-00.57.11:000][  1]TLLua: Display: [Game] [S16LastDay] check cur=0 max=20");
+        var run = Assert.Single(log.Runs);
+        var left = new List<int> { run.OpulencePicksLeft };
+        // Two Chromatics on one day: six picks, three of each.
+        for (int i = 0; i < 6; i++)
+        {
+            log.Feed($"[2026.11.11-00.57.{20 + 2 * i}:593][253]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_ColoredPop_Confirm");
+            left.Add(run.OpulencePicksLeft);
+        }
+        Assert.Equal([3, 2, 1, 3, 2, 1, 3], left);
+        // A day begun with a pick miscounted starts over.
+        log.Feed("[2026.11.11-00.57.40:593][253]TLGame: Display: [Game] UIButton@ normal-click Btn_S16Board_ColoredPop_Confirm");
+        Assert.Equal(2, run.OpulencePicksLeft);
+        log.Feed("[2026.11.11-00.57.45:000][  1]TLLua: Display: [Game] [S16LastDay] check cur=1 max=20");
+        Assert.Equal(3, run.OpulencePicksLeft);
+    }
+
+    [Fact]
     public void Opulence_s_three_picks_of_one_Warden_s_Treasure_are_one_Chromatic()
     {
         // 2026-10-30, a report: Opulence, and the server slow to answer (picks came up again); 12 Confirms for 4

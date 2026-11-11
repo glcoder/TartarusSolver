@@ -81,7 +81,6 @@ Unpack the whole archive into a folder of its own and run the program from there
   <data name="Main_MoveHints" xml:space="preserve"><value>Move hints</value></data>
   <data name="Main_NoValueNet" xml:space="preserve"><value> · no value net</value></data>
   <data name="Main_Overlay" xml:space="preserve"><value>Overlay</value></data>
-  <data name="Main_PicksNet" xml:space="preserve"><value> · picks net</value></data>
   <data name="Main_PolicyNet" xml:space="preserve"><value> · policy net</value></data>
   <data name="Main_Recognition" xml:space="preserve"><value>Recognition</value></data>
   <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>Refresh the window list</value></data>

@@ -40,11 +40,6 @@ var weights = LoadWeights();
 var globalWeights = weights;
 var valueNet = Opt("--net") is { } netPath ? ValueNet.Load(netPath) : ValueNet.Find() is { } found ? ValueNet.Load(found) : null;
 var policyNet = Opt("--policy-net") is { } policyPath ? ValueNet.Load(policyPath) : ValueNet.FindPolicy() is { } foundPolicy ? ValueNet.Load(foundPolicy) : null;
-// --policy-instruments: the policy network takes the playouts' instrument picks too (levels, latency; "pi" in a policy spec).
-bool policyInstruments = args.Contains("--policy-instruments");
-// --instrument-net file: a network of its own for the playouts' instrument picks (every search policy, levels, latency;
-// by default models/solver/picks.bin when there is one).
-var instrumentNet = Opt("--instrument-net") is { } instrumentPath ? ValueNet.Load(instrumentPath) : ValueNet.FindPicks() is { } foundPicks ? ValueNet.Load(foundPicks) : null;
 return args[0] switch
 {
     "trace" => Trace(),
@@ -96,26 +91,24 @@ RuleOptions Rules(string? spec, RuleOptions over)
 }
 int IntOpt(string name, int fallback) => int.TryParse(Opt(name), out int v) ? v : fallback;
 
-IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWeights? w = null, ValueNet? policy = null, ValueNet? instruments = null, Engine? rules = null)
+IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWeights? w = null, ValueNet? policy = null, Engine? rules = null)
 {
     var searchEngine = rules ?? engine;
     string p = spec ?? Opt("--policy") ?? "random";
     // A last ":nolog": the game read as a log of pages only was before 0.7.33, a Warden's Inmate with no target taken for a used Consume.
-    if (p.EndsWith(":nolog", StringComparison.Ordinal)) return new NoTargetIsUsed(MakePolicy(seed, p[..^6], net, w, policy, instruments, rules));
+    // A last ":picks3": Opulence's Warden's Treasure read as before 0.8.4, every one of its three screens as the first (all four cards, three picks).
+    if (p.EndsWith(":picks3", StringComparison.Ordinal)) return new EveryTreasureScreenIsTheFirst(MakePolicy(seed, p[..^7], net, w, policy, rules));
+    if (p.EndsWith(":nolog", StringComparison.Ordinal)) return new NoTargetIsUsed(MakePolicy(seed, p[..^6], net, w, policy, rules));
     net ??= valueNet;
     var weights = w ?? globalWeights;
     if (p.StartsWith("mc:", StringComparison.Ordinal)) return new SearchPolicy(searchEngine, int.Parse(p[3..]), weights, threads: 1);
-    // vn:N[:D[:R]]: the search with the value network at the leaves, D days on (default 3, the best of 1-6); R the
-    // playouts' own moves by the network too (0 never, 1 the morning's Destination, 2 every decision), or p: by the
-    // policy network (--policy-net). A last ":peek": the playouts' moves see the doors their world has drawn (before 0.7.10).
-    // tp:N[:D[:R]]: the same with the decision after each action searched too (MonteCarloSearch.TwoPly, a probe).
-    if (p.StartsWith("vn:", StringComparison.Ordinal) || p.StartsWith("tp:", StringComparison.Ordinal))
+    // vn:N[:D[:p]]: the search with the value network at the leaves, D days on (default 3, the best of 1-6); p: the
+    // playouts' moves by the policy network (--policy-net), else by the static evaluation.
+    if (p.StartsWith("vn:", StringComparison.Ordinal))
     {
         var parts = p.Split(':');
-        bool byPolicy = parts.Length > 3 && parts[3] is "p" or "pi";
         return new SearchPolicy(searchEngine, int.Parse(parts[1]), weights, threads: 1, net: net ?? throw new InvalidOperationException("no value network (models/solver/value.bin, --net)"),
-            leafDays: parts.Length > 2 ? int.Parse(parts[2]) : 3, rolloutNet: parts.Length > 3 && !byPolicy && parts[3] != "peek" ? int.Parse(parts[3]) : 0,
-            policy: byPolicy ? PolicyNet(policy) : null, policyInstruments: parts.Length > 3 && parts[3] == "pi", instrumentPolicy: instruments ?? instrumentNet, peek: parts[^1] == "peek", twoPly: parts[0] == "tp");
+            leafDays: parts.Length > 2 ? int.Parse(parts[2]) : 3, policy: parts.Length > 3 && parts[3] == "p" ? PolicyNet(policy) : null);
     }
     return p switch
     {
@@ -123,7 +116,6 @@ IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWe
         "heuristic" => new HeuristicPolicy(engine, weights, seed),
         // pn: the playouts' policy network alone, no search.
         "pn" => new HeuristicPolicy(engine, weights, seed, PolicyNet(policy)),
-        "pni" => new HeuristicPolicy(engine, weights, seed, PolicyNet(policy), instrumentsByNet: true),
         _ => new RandomPolicy(seed),
     };
 }
@@ -151,7 +143,7 @@ int Levels()
     int runs = IntOpt("--runs", 400), threads = Math.Max(2, Environment.ProcessorCount / 2);
     var net = valueNet ?? throw new InvalidOperationException("no value network (models/solver/value.bin)");
     var states = SampleStates(120);
-    var search = new MonteCarloSearch(engine, weights) { Threads = threads, Net = net, Policy = policyNet, PolicyInstruments = policyInstruments, InstrumentPolicy = instrumentNet };
+    var search = new MonteCarloSearch(engine, weights) { Threads = threads, Net = net, Policy = policyNet };
     search.Search(states[0], 256, seed: 1);
     var levels = new List<HintLevel>();
     foreach (int n in new[] { 32, 64, 128, 256, 512, 1024, 2048 })
@@ -162,7 +154,7 @@ int Levels()
         {
             ulong seed = 9 * 1_000_003UL + (ulong)r;
             var s = engine.NewRun(seed);
-            Runs.PlayOut(engine, ref s, new SearchPolicy(engine, n, weights, threads: 1, net: net, policy: policyNet, policyInstruments: policyInstruments, instrumentPolicy: instrumentNet));
+            Runs.PlayOut(engine, ref s, new SearchPolicy(engine, n, weights, threads: 1, net: net, policy: policyNet));
             chroma[r] = RunScore.Of(s).Chromatic;
         });
         var level = new HintLevel(n, ms[ms.Length / 2], chroma.Average());
@@ -212,7 +204,7 @@ int Latency()
             engine.Apply(ref s, policy.Choose(engine, s, legal[..k]));
         }
     }
-    var search = new MonteCarloSearch(engine, weights) { Threads = threads, Net = valueNet, Policy = policyNet, PolicyInstruments = policyInstruments, InstrumentPolicy = instrumentNet, LeafDays = IntOpt("--leaf-days", 3) };
+    var search = new MonteCarloSearch(engine, weights) { Threads = threads, Net = valueNet, Policy = policyNet, LeafDays = IntOpt("--leaf-days", 3) };
     search.Search(states[0], 256, seed: 1); // warm up
     Console.WriteLine($"{states.Count} positions, {threads} threads, value network {(valueNet != null ? "on" : "off")}, policy network {(policyNet != null ? "on" : "off")}");
     foreach (int n in new[] { 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 })
@@ -225,7 +217,7 @@ int Latency()
 
 int Compare()
 {
-    // compare --a P --b P [--net-a f] [--net-b f] [--policy-net-a f] [--policy-net-b f] [--instrument-net-a f] [--instrument-net-b f] [--weights-a f] [--weights-b f] [--runs N] [--seed S]: both
+    // compare --a P --b P [--net-a f] [--net-b f] [--policy-net-a f] [--policy-net-b f] [--weights-a f] [--weights-b f] [--runs N] [--seed S]: both
     // policies play the same seeds; the paired difference.
     int runs = IntOpt("--runs", 400);
     ulong seed0 = (ulong)IntOpt("--seed", 9);
@@ -234,8 +226,6 @@ int Compare()
     var netB = Opt("--net-b") is { } fb ? ValueNet.Load(fb) : valueNet;
     var policyA = Opt("--policy-net-a") is { } pa ? ValueNet.Load(pa) : null;
     var policyB = Opt("--policy-net-b") is { } pb ? ValueNet.Load(pb) : null;
-    var instrumentsA = Opt("--instrument-net-a") is { } ia ? ValueNet.Load(ia) : null;
-    var instrumentsB = Opt("--instrument-net-b") is { } ib ? ValueNet.Load(ib) : null;
     var wA = Opt("--weights-a") is { } wa ? WeightsFile.Read(File.ReadAllText(wa)) : weights;
     var wB = Opt("--weights-b") is { } wb ? WeightsFile.Read(File.ReadAllText(wb)) : weights;
     // A side's search may play its playouts by other rules than the runs' (--rules-a, --rules-b over --reroll-percent alone).
@@ -250,10 +240,10 @@ int Compare()
     {
         ulong seed = seed0 * 1_000_003 + (ulong)r;
         var s = engine.NewRun(seed);
-        Runs.PlayOut(engine, ref s, MakePolicy(seed, a, netA, wA, policyA, instrumentsA, rulesA));
+        Runs.PlayOut(engine, ref s, MakePolicy(seed, a, netA, wA, policyA, rulesA));
         (ua[r], ca[r]) = (RunScore.Of(s).Utility, RunScore.Of(s).Chromatic);
         s = engine.NewRun(seed);
-        Runs.PlayOut(engine, ref s, MakePolicy(seed, b, netB, wB, policyB, instrumentsB, rulesB));
+        Runs.PlayOut(engine, ref s, MakePolicy(seed, b, netB, wB, policyB, rulesB));
         (ub[r], cb[r]) = (RunScore.Of(s).Utility, RunScore.Of(s).Chromatic);
     });
     var (mean, se) = Tuning.Paired(ub, ua);
@@ -478,5 +468,28 @@ sealed class NoTargetIsUsed(IPolicy inner) : IPolicy
         var told = s;
         told.Used = DayAction.Consume;
         return inner.Choose(engine, told, legal);
+    }
+}
+
+/// <summary>
+/// The search told, at Opulence's second and third pick of a Warden's Treasure, what the app told it up to 0.8.3: all four
+/// rewards on offer and three picks to come. A reward it then chooses that is gone: the best one left by its ranking.
+/// </summary>
+sealed class EveryTreasureScreenIsTheFirst(IPolicy inner) : IPolicy
+{
+    public GameAction Choose(Engine engine, in GameState s, ReadOnlySpan<GameAction> legal)
+    {
+        if (s.Theme != Theme.Opulence || s.PendingCount == 0 || s.Pending[0].Kind != PendingKind.Treasure || s.Pending[0].Picks >= 3) return inner.Choose(engine, s, legal);
+        var told = s;
+        told.Pending[0].Picks = 3;
+        told.Pending[0].A = 0b1111;
+        Span<GameAction> toldLegal = stackalloc GameAction[Engine.MaxActions];
+        int k = engine.Legal(told, toldLegal);
+        var chosen = inner.Choose(engine, told, toldLegal[..k]);
+        if (legal.Contains(chosen)) return chosen;
+        if (inner is SearchPolicy { LastResult: { } result })
+            foreach (var a in result.Actions)
+                if (legal.Contains(a.Action)) return a.Action;
+        return legal[0];
     }
 }

@@ -119,6 +119,16 @@ public sealed partial class Engine(RuleOptions? options = null)
     public bool Apply(ref GameState s, GameAction a)
     {
         if (!IsLegal(s, a)) return false;
+        ApplyLegal(ref s, a);
+        return true;
+    }
+
+    /// <summary>
+    /// Plays an action taken from <see cref="Legal"/> for this very state, unchecked: a search's playouts choose only
+    /// among those, and <see cref="Apply"/> listed them all over again at every step.
+    /// </summary>
+    public void ApplyLegal(ref GameState s, GameAction a)
+    {
         switch (a.Kind)
         {
             case ActionKind.PickInstrument: TakeInstrument(ref s, (Instrument)a.Arg); break;
@@ -149,7 +159,6 @@ public sealed partial class Engine(RuleOptions? options = null)
             && !HasPending(s, PendingKind.Chain) && s.Rng.Chance(Options.IncidentActionPercent))
             AddMarkers(ref s, 1, unopenedOnly: false, avoidWarden: true);
         Settle(ref s);
-        return true;
     }
 
     private static bool HasPending(in GameState s, PendingKind kind)

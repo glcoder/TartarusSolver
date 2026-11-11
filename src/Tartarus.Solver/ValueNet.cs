@@ -63,8 +63,6 @@ public sealed class ValueNet
     /// <summary>The playouts' policy network, models/solver/policy.bin (tools/train/policynet.py); null if there is none.</summary>
     public static string? FindPolicy() => AppFiles.Find("models", "solver", "policy.bin");
 
-    /// <summary>The playouts' instrument picks' own network, models/solver/picks.bin (policynet.py --instruments); null if there is none.</summary>
-    public static string? FindPicks() => AppFiles.Find("models", "solver", "picks.bin");
 
     // No zeroing of the scratch below: Encode clears the features itself, Forward writes every value before reading it.
     // The zeroing took two thirds of the network's time (12% of the app's CPU, 2026-11-01's player trace): the

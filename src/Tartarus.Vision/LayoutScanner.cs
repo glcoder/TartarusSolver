@@ -165,29 +165,39 @@ public sealed class LayoutScanner : ISandboxScanner
         var sw = Stopwatch.StartNew();
         _ocr.ApplyLanguage();
 
-        var reading = Task.Run(() => ReadText(frame, layout));
-        ScanResult r;
-        var cellsSw = Stopwatch.StartNew();
-        try { r = _cells.Read(frame, layout); }
-        catch (Exception ex) { r = ScanJson.Failure($"{_cells.Name} failed: {ex.Message}", Name); }
-        double cellsMs = cellsSw.Elapsed.TotalMilliseconds;
+        // Whether the Sandbox is on screen at all, first: it takes a millisecond or three, and without it the cells and
+        // the Sandbox's text are read for nothing (2026-11-11: on a pick's frame 157 of a scan's 211 ms, their result
+        // thrown away; a pick, the lobby and a map are most of what the app looks at).
+        var presenceSw = Stopwatch.StartNew();
+        float? presence = Presence?.Score(frame, layout);
+        double presenceMs = presenceSw.Elapsed.TotalMilliseconds;
+        bool board = presence is not float seen || seen >= Presence!.Threshold;
 
+        ScanResult r;
         ScreenText? text = null;
-        try { text = reading.GetAwaiter().GetResult(); }
-        catch (Exception ex) { (r.Notes ??= []).Add("OCR failed: " + ex.Message); }
+        double cellsMs = 0;
+        if (board)
+        {
+            var reading = Task.Run(() => ReadText(frame, layout));
+            var cellsSw = Stopwatch.StartNew();
+            try { r = _cells.Read(frame, layout); }
+            catch (Exception ex) { r = ScanJson.Failure($"{_cells.Name} failed: {ex.Message}", Name); }
+            cellsMs = cellsSw.Elapsed.TotalMilliseconds;
+            try { text = reading.GetAwaiter().GetResult(); }
+            catch (Exception ex) { (r.Notes ??= []).Add("OCR failed: " + ex.Message); }
+        }
+        else r = new ScanResult();
 
         r.Source = Name;
         r.Layout = layout;
         r.Loc = layout.Sandbox;
-        var presenceSw = Stopwatch.StartNew();
-        float? presence = Presence?.Score(frame, layout);
         if (presence is float score)
         {
             r.Loc = new SandboxLoc { S = layout.Sandbox.S, Tx = layout.Sandbox.Tx, Ty = layout.Sandbox.Ty, Score = score };
-            r.Timings["presence"] = presenceSw.Elapsed.TotalMilliseconds;
+            r.Timings["presence"] = presenceMs;
         }
         r.Text = text;
-        r.Timings["cells"] = cellsMs;
+        if (board) r.Timings["cells"] = cellsMs;
         if (text != null) r.Timings["ocr"] = text.OcrMs;
         if (text != null)
         {
@@ -200,7 +210,7 @@ public sealed class LayoutScanner : ISandboxScanner
 
         // The layout always "finds" a Sandbox; whether it is on screen is the presence check's (the cell reader
         // finds "inmates" in a pick screen's art). Without a template: the day counter reads.
-        r.Ok = r.Cells is { Count: 16 } && (presence is float p ? p >= Presence!.Threshold : text?.Days != null);
+        r.Ok = r.Cells is { Count: 16 } && (presence is float ? board : text?.Days != null);
         if (r.Ok && _themeIcons != null) r.ThemeIcon = _themeIcons.Classify(frame, layout).Id;
         if (!r.Ok)
         {

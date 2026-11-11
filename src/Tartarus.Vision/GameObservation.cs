@@ -63,7 +63,7 @@ public static class GameObservation
         if (text != null && Objective(text) is { } objective)
         {
             o.Objective = objective;
-            o.ObjectiveDone = text.ObjectiveProgress?.Contains("Complete", StringComparison.OrdinalIgnoreCase) == true;
+            o.ObjectiveDone = Done(text.ObjectiveProgress);
             if (text.Progress is { } p) o.ObjectiveProgress = p.Done;
         }
         return o;
@@ -97,6 +97,15 @@ public static class GameObservation
         o.StartOfRun = !o.OfferForObjective;
         return o;
     }
+
+    /// <summary>
+    /// The Objective panel's second line says it's done, in the game's language (2026-11-11: only English's "Complete"
+    /// was looked for, and other clients' searches counted on an Objective pick already taken unless the log or the
+    /// pick itself had told).
+    /// </summary>
+    public static bool Done(string? progress) => progress != null
+        && (progress.Contains("Complete", StringComparison.OrdinalIgnoreCase)
+            || GameText.Interface("Func_S16GamePlay_AlreadyFinish").Any(t => t.Length >= 2 && progress.Contains(t, StringComparison.OrdinalIgnoreCase)));
 
     public static R.Treasure? Treasure(string? id) => id switch
     {

@@ -57,6 +57,15 @@ public class GameTextTests
         Assert.Equal([3, 1], text.Destinations.Select(d => d ?? 0));
     }
 
+    [Theory]
+    [InlineData("Завершено", true)]
+    [InlineData("Completed", true)]
+    [InlineData("已完成", true)]
+    [InlineData("Пожирание2/4", false)]
+    [InlineData(null, false)]
+    public void The_Objective_reads_done_in_the_game_s_language(string? line, bool done) =>
+        Assert.Equal(done, GameObservation.Done(line));
+
     [Fact]
     public void ConsumeBanner() => Assert.True(Parse(("banner", "Выберите узника для пожирания")).ConsumePick);
 

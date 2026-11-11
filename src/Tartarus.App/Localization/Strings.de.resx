@@ -81,7 +81,6 @@ Entpacken Sie das ganze Archiv in einen eigenen Ordner und starten Sie das Progr
   <data name="Main_MoveHints" xml:space="preserve"><value>Zughinweise</value></data>
   <data name="Main_NoValueNet" xml:space="preserve"><value> · ohne Bewertungsnetz</value></data>
   <data name="Main_Overlay" xml:space="preserve"><value>Overlay</value></data>
-  <data name="Main_PicksNet" xml:space="preserve"><value> · Auswahlnetz</value></data>
   <data name="Main_PolicyNet" xml:space="preserve"><value> · Strategienetz</value></data>
   <data name="Main_Recognition" xml:space="preserve"><value>Erkennung</value></data>
   <data name="Main_RefreshWindows_Tip" xml:space="preserve"><value>Fensterliste aktualisieren</value></data>

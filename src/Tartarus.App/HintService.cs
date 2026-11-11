@@ -85,11 +85,9 @@ public sealed class HintService : IDisposable
         Net = ValueNet.Find() is { } net ? ValueNet.Load(net) : null;
         // The playouts' policy network when trained (models/solver/policy.bin): their moves as the search would make them.
         Policy = ValueNet.FindPolicy() is { } policy ? ValueNet.Load(policy) : null;
-        // The playouts' instrument picks by a network of their own when there is one (models/solver/picks.bin).
-        Picks = ValueNet.FindPicks() is { } picks ? ValueNet.Load(picks) : null;
         // The chests shown as runs end with them, not as the playouts got them (models/solver/chests.txt).
         Chests = ChestCalibration.Load();
-        _search = new MonteCarloSearch(_engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = Net, Policy = Policy, InstrumentPolicy = Picks };
+        _search = new MonteCarloSearch(_engine, weights) { Threads = Math.Max(2, Environment.ProcessorCount / 2), Net = Net, Policy = Policy };
     }
 
     /// <summary>
@@ -114,7 +112,6 @@ public sealed class HintService : IDisposable
     public string? WeightsPath { get; }
     public ValueNet? Net { get; }
     public ValueNet? Policy { get; }
-    public ValueNet? Picks { get; }
     public ChestCalibration? Chests { get; }
 
     /// <summary>Raised on a thread-pool thread with the final ranking of a position.</summary>

@@ -85,7 +85,6 @@ public static class Strings
     public static string Main_MoveHints => Get(nameof(Main_MoveHints));
     public static string Main_NoValueNet => Get(nameof(Main_NoValueNet));
     public static string Main_Overlay => Get(nameof(Main_Overlay));
-    public static string Main_PicksNet => Get(nameof(Main_PicksNet));
     public static string Main_PolicyNet => Get(nameof(Main_PolicyNet));
     public static string Main_Recognition => Get(nameof(Main_Recognition));
     public static string Main_RefreshWindows_Tip => Get(nameof(Main_RefreshWindows_Tip));
