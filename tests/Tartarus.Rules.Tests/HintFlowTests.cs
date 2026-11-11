@@ -153,6 +153,33 @@ public sealed class HintFlowTests
     }
 
     [Fact]
+    public void A_Re_roll_told_by_the_cards_of_a_page_only_log_stays_spent_on_the_run_s_next_pick()
+    {
+        var sink = new Sink();
+        var flow = new HintFlow(sink);
+        var run = new LoggedRun { MaxDays = 20, Paged = true, FromStart = true, PickOpen = true };
+        ScanResult Offer(int? rerolls, params string[] ids) => new()
+        {
+            Pick = new PickRead { Kind = PickRead.Instrument, Rerolls = rerolls, Cards = [.. ids.Select((id, k) => new PickCardRead { Index = k, Id = id })] },
+        };
+        HintInput At(int seconds) => Seen(Board(5, 7, 9, 11), seconds) with { Sandbox = null, Live = run, LogRun = run };
+        // The run's first pick with its Re-roll, then other cards on the same pick and no counter: the Re-roll made.
+        flow.Take(Offer(1, "shortchain", "scales", "stake"), At(0));
+        Assert.Equal(1, sink.Asked[^1].O.Rerolls);
+        flow.Take(Offer(null, "casket", "axe", "dogtag"), At(3));
+        Assert.Equal(0, sink.Asked[^1].O.Rerolls);
+        // The Objective's pick, days later: still none.
+        run.InstrumentPicks = 1;
+        var board = Board(5, 7, 9, 11);
+        board.Instruments = ["casket"];
+        flow.Take(Sandbox(), Seen(board, 30) with { Live = run, LogRun = run });
+        flow.Take(Sandbox(), Seen(board, 31) with { Live = run, LogRun = run });
+        flow.Take(Offer(null, "forged", "scales", "chains"), Seen(board, 33) with { Live = run, LogRun = run });
+        Assert.Equal(0, sink.Asked[^1].O.Rerolls);
+        Assert.Equal(0, flow.Rerolls);
+    }
+
+    [Fact]
     public void A_Warden_s_Treasure_plays_on_the_last_Sandbox_read()
     {
         var sink = new Sink();

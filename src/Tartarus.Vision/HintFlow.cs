@@ -307,15 +307,21 @@ public sealed class HintFlow(IHintSink sink)
                 string cards = string.Join(",", pick.Cards.Select(c => c.Id));
                 // The last Re-roll takes its counter away, and a log of pages has no clicks: other cards on the same
                 // pick are a Re-roll made (2026-10-30, a player's report: Re-roll hinted with none left).
+                // Only such a log: one with clicks tells every Re-roll, and its old cards stay a moment after the click.
                 int Used((LoggedRun Run, int Left, int Used, int Pick, string Cards) seen) =>
                     Math.Max(seen.Run.RerollsUsed - seen.Used,
-                        seen.Run.InstrumentPicks == seen.Pick && pick.Cards.Count == 3 && pick.Cards.All(c => c.Id != null) && cards != seen.Cards ? 1 : 0);
+                        seen.Run.Paged && seen.Run.InstrumentPicks == seen.Pick && pick.Cards.Count == 3 && pick.Cards.All(c => c.Id != null) && cards != seen.Cards ? 1 : 0);
                 int? left = _rerollsRead is { } seen && seen.Run == i.LogRun ? Math.Max(0, seen.Left - Used(seen)) : null;
                 // A counter read after its Re-roll was clicked (the old cards still fading) gives no Re-roll back: a
                 // run's only go down (2026-11-01: "Re-roll 1" read again after the click, and the Objective's pick
                 // hinted a Re-roll the run no longer had).
                 int? read = pick.Rerolls is int counter && left is int leftNow ? Math.Min(counter, leftNow) : pick.Rerolls;
                 if (read is int now && i.LogRun != null) _rerollsRead = (i.LogRun, now, i.LogRun.RerollsUsed, i.LogRun.InstrumentPicks, cards);
+                // A Re-roll told by the cards alone is told on that pick only: kept, or the run's next pick has it back
+                // (2026-11-11, a player's report, a log of pages: Re-roll hinted on the Objective's pick after the run's
+                // one was spent on its first).
+                else if (left is int fewer && _rerollsRead is { } had && fewer < had.Left && i.LogRun != null)
+                    _rerollsRead = (i.LogRun, fewer, i.LogRun.RerollsUsed, i.LogRun.InstrumentPicks, cards);
                 Rerolls = read ?? left ?? 0;
             }
             // The Sandbox changed under the pick since it was last seen (a chain, Chromatics leaving it): the hint is

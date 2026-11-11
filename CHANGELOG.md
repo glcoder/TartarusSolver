@@ -4,6 +4,11 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.8.5 — 2026-11-11
+
+- Game logs without clicks: a Re-roll spent on the run's first pick is no longer hinted again on the Objective's pick.
+- An update unpacks even where Windows won't let the Visual C++ runtime files be written (seen on two PCs: no update ever installed there): they are left out, the install keeps its own. It helps from the update after this one: the version already installed does the unpacking.
+
 ## 0.8.4 — 2026-11-11
 
 - Lighter on the PC off the board: on a pick screen, in the lobby or in a map the app no longer reads the cells and the Sandbox's text it then threw away (such a scan took 264 ms, now 115, on 94 saved frames).

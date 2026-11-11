@@ -92,7 +92,9 @@ public static class Updates
             },
             ex => AppLog.Write($"Update: download cut off at {shown}%, trying again: {ex.GetBaseException().Message}"), ct), ct);
         string unpacked = Path.Combine(Staging, release.Version.ToString());
-        await Task.Run(() => ZipFile.ExtractToDirectory(zip, unpacked), ct);
+        // Without the Visual C++ runtime files where Windows won't let them be written: the install has them and keeps them.
+        await Task.Run(() => FolderCopy.Unzip(zip, unpacked, FolderCopy.IsVcRuntime,
+            (name, ex) => AppLog.Write($"Update: {name} left out, the install keeps its own: {ex.Message}")), ct);
         File.Delete(zip);
         // The zip holds one folder, TartarusSolver.
         string app = Path.Combine(unpacked, "TartarusSolver");
