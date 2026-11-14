@@ -37,7 +37,7 @@ public sealed unsafe class WindowCapture : IGameCapture
     {
         if (!GraphicsCaptureSession.IsSupported()) throw new PlatformNotSupportedException("Windows.Graphics.Capture is not supported on this system.");
         Hwnd = hwnd;
-        string step = "Direct3D device";
+        string step = DeviceStep;
         try
         {
             D3D11.D3D11CreateDevice(null, DriverType.Hardware, DeviceCreationFlags.BgraSupport,
@@ -83,7 +83,7 @@ public sealed unsafe class WindowCapture : IGameCapture
         public string Step { get; }
     }
 
-    private const string ItemStep = "capture item";
+    private const string DeviceStep = "Direct3D device", ItemStep = "capture item";
     private const int E_INVALIDARG = unchecked((int)0x80070057), REGDB_E_CLASSNOTREG = unchecked((int)0x80040154), ERROR_SERVICE_DISABLED = unchecked((int)0x80070422);
 
     /// <summary>
@@ -96,8 +96,11 @@ public sealed unsafe class WindowCapture : IGameCapture
     /// <summary>
     /// The capture can't work on this system, so trying again won't help. CLASS_E_CLASSNOTAVAILABLE: Windows 10 1809 has
     /// no capture of a window by its handle (that takes 1903; 2026-11-02, a player's log of the same error every second).
+    /// DXGI_ERROR_UNSUPPORTED at the device: no Direct3D 11 device to capture with (2026-11-12, a GTX 1060 + Intel UHD
+    /// laptop: the same answer 110 times in 40 min, never a frame).
     /// </summary>
-    public static bool IsUnsupported(Exception ex) => ex is PlatformNotSupportedException || ex.HResult == unchecked((int)0x80040111);
+    public static bool IsUnsupported(Exception ex) => ex is PlatformNotSupportedException || ex.HResult == unchecked((int)0x80040111)
+        || ex is CaptureStartException { Step: DeviceStep } && ex.HResult == unchecked((int)0x887A0004);
 
     public IntPtr Hwnd { get; }
     public string DisplayName => _item.DisplayName;

@@ -1272,6 +1272,8 @@ public partial class ControlWindow : Window, IHintSink
     private static readonly TimeSpan QuickScan = TimeSpan.FromSeconds(0.1);
     /// <summary>A scan (with its hint) longer than this rests as long again before the next: a slow PC's.</summary>
     private const double SlowScan = 0.25;
+    // The last scan went without its rest, to confirm a reading.
+    private bool _restSkipped;
     private static readonly TimeSpan BurstFor = TimeSpan.FromSeconds(1.5);
     private DateTime _burstUntil;
     /// <summary>
@@ -1330,8 +1332,13 @@ public partial class ControlWindow : Window, IHintSink
             // A slow scan and its hint rest at least as long as they took: on a slow PC (a Sandbox read in 1.3 s) they ran
             // back to back, and the game had what was left. Not a quick one: the rest held every confirming reading back
             // ~0.1 s on a fast PC (2026-11-01: a new day's hint 0.27 s after its first reading with cards, 0.17 before).
+            // Nor before the reading that confirms a Sandbox, every other scan at most: the rest stood between a slow PC's
+            // first reading and its hint (2026-11-13, an i5-8300H laptop: readings 2 s apart, 47 of 82 moves made before
+            // any hint), while a Sandbox that won't settle still leaves the game half the time.
             double busy = started.Elapsed.TotalSeconds;
-            double wait = Math.Max(Math.Max(period, scanned ? 0 : 0.2) - busy, scanned && busy > SlowScan ? busy : 0);
+            bool noRest = confirm && !_restSkipped;
+            _restSkipped = noRest;
+            double wait = Math.Max(Math.Max(period, scanned ? 0 : 0.2) - busy, scanned && busy > SlowScan && !noRest ? busy : 0);
             // The log's activity cuts the wait short (only a scan's own time apart: not when nothing was scanned).
             var delay = Task.Delay(TimeSpan.FromSeconds(Math.Max(wait, 0.001)));
             await (scanned ? Task.WhenAny(delay, _wake.Task) : delay);

@@ -4,6 +4,11 @@ The version is in `Directory.Build.props` (`<Version>`), shown in the app's wind
 number goes up with every build handed out with fixes or changed behaviour, the middle one with a bigger set of new
 things.
 
+## 0.8.6 — 2026-11-14
+
+- Slow PCs: the reading that confirms a Sandbox comes right after the first, without the rest a slow scan takes (a hint waited about twice a scan's time longer: on a player's laptop most moves were made before it showed). Every other scan still rests, so the game keeps its share.
+- A PC where Windows gives no Direct3D 11 device for the window capture (DXGI_ERROR_UNSUPPORTED, seen on a laptop with two video cards: the capture was tried again for 40 minutes, no hints) goes to the copy of the screen at once.
+
 ## 0.8.5 — 2026-11-11
 
 - Game logs without clicks: a Re-roll spent on the run's first pick is no longer hinted again on the Objective's pick.

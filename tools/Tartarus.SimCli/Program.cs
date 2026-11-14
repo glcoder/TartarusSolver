@@ -97,6 +97,8 @@ IPolicy MakePolicy(ulong seed, string? spec = null, ValueNet? net = null, EvalWe
     string p = spec ?? Opt("--policy") ?? "random";
     // A last ":nolog": the game read as a log of pages only was before 0.7.33, a Warden's Inmate with no target taken for a used Consume.
     // A last ":picks3": Opulence's Warden's Treasure read as before 0.8.4, every one of its three screens as the first (all four cards, three picks).
+    // A last ":stale": as ":picks3", and on those screens the Sandbox as it was at the Treasure's first screen (up to 0.8.3 the app had no fresh reading under the second and third).
+    if (p.EndsWith(":stale", StringComparison.Ordinal)) return new StaleTreasureScreens(MakePolicy(seed, p[..^6], net, w, policy, rules));
     if (p.EndsWith(":picks3", StringComparison.Ordinal)) return new EveryTreasureScreenIsTheFirst(MakePolicy(seed, p[..^7], net, w, policy, rules));
     if (p.EndsWith(":nolog", StringComparison.Ordinal)) return new NoTargetIsUsed(MakePolicy(seed, p[..^6], net, w, policy, rules));
     net ??= valueNet;
@@ -491,5 +493,28 @@ sealed class EveryTreasureScreenIsTheFirst(IPolicy inner) : IPolicy
             foreach (var a in result.Actions)
                 if (legal.Contains(a.Action)) return a.Action;
         return legal[0];
+    }
+}
+
+/// <summary>
+/// Opulence's second and third pick of a Warden's Treasure chosen on the Sandbox of its first screen, three picks to come:
+/// what the app did up to 0.8.3 when no reading came between the screens.
+/// </summary>
+sealed class StaleTreasureScreens(IPolicy inner) : IPolicy
+{
+    private GameState _first;
+
+    public GameAction Choose(Engine engine, in GameState s, ReadOnlySpan<GameAction> legal)
+    {
+        if (s.Theme != Theme.Opulence || s.PendingCount == 0 || s.Pending[0].Kind != PendingKind.Treasure) return inner.Choose(engine, s, legal);
+        if (s.Pending[0].Picks >= 3)
+        {
+            _first = s;
+            return inner.Choose(engine, s, legal);
+        }
+        Span<GameAction> toldLegal = stackalloc GameAction[Engine.MaxActions];
+        int k = engine.Legal(_first, toldLegal);
+        var chosen = inner.Choose(engine, _first, toldLegal[..k]);
+        return legal.Contains(chosen) ? chosen : legal[0];
     }
 }
